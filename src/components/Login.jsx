@@ -138,9 +138,9 @@ const Login = () => {
             Forgot Password
           </Link>
           <span className="mx-2 text-gray-300">/</span>
-          <Link className="text-[#17026b] font-bold" to="/sign-up">
+          {/* <Link className="text-[#17026b] font-bold" to="/sign-up">
             Sign Up
-          </Link>
+          </Link> */}
         </div>
       </form>
     </div>

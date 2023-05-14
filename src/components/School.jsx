@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { CustomLoader } from "../components/Loader";
 
 const ChildNames = ["Ali", "Usama", "Omair", "Talha", "Agha", "Hassan"];
 const data = [
@@ -163,6 +164,8 @@ const School = () => {
   // const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const dropdownRef = useRef(null);
+  const dropdownRef1 = useRef(null);
+
   // Calculate the averages
   const numColumns = Object.keys(data[0]).length - 2;
 
@@ -184,13 +187,14 @@ const School = () => {
   const [yearFilter, setYearFilter] = useState([])
   const [teacherFilter, setTeacherFilter] = useState([])
   const [users, setUsers] = useState([])
-
-
   const [totalQuizCount, setTotalQuizCount] = useState(0)
+  const [selectedTeacher, setSelectedTeacher] = useState('')
+  const [selectedYear, setSelectedYear] = useState('')
+  const [dataLoadin, setDataLoadin] = useState(true)
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
-    fetch(API_URL + '/api/teacher_dashboard', {
+    try{fetch(API_URL + '/api/teacher_dashboard', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -203,6 +207,7 @@ const School = () => {
     })
       .then(response => response.json())
       .then(response => {
+        setDataLoadin(false)
         setTableHeaders(response?.quizes?.headers)
         setTableData(response?.quizes?.users)
         let avgArray = Array(response?.quizes?.headers.length).fill(0)
@@ -214,7 +219,9 @@ const School = () => {
         if (response?.quizes?.users != null) {
           setSchoolNama(Object.values(response?.quizes?.users)[0]?.attributes_properties)
         }
-      })
+      })}catch(e){
+        setDataLoadin(false)
+      }
 
   }, [])
 
@@ -247,28 +254,44 @@ const School = () => {
   }
 
   const handleTeacherSelect = (childName) => {
+    setSelectedTeacher(childName)
     let _filterObj = {}
     Object.keys(users).forEach((key) => {
-      if (users[key]?.email_address === childName) {
-        _filterObj = { ..._filterObj, [`${key}`]: users[key] }
+      if(selectedTeacher != ''){
+        if (users[key]?.email_address === childName && users[key]?.year_name === selectedYear ) {
+          _filterObj = { ..._filterObj, [`${key}`]: users[key] }
+        }
+      }else{
+        if (users[key]?.email_address === childName) {
+          _filterObj = { ..._filterObj, [`${key}`]: users[key] }
+        }
       }
+      
     });
 
     let avgArray = Array(tableHeaders.length).fill(0)
-    setAverage(avgArray, _filterObj)
+    // setAverage(avgArray, _filterObj)
     setTableData(_filterObj)
   }
 
   const handleYearSelect = (childName) => {
+    setSelectedYear(childName)
     let _filterObj = {}
     Object.keys(users).forEach((key) => {
-      if (users[key]?.year_name === childName) {
-        _filterObj = { ..._filterObj, [`${key}`]: users[key] }
-      }
+      if(selectedTeacher != ''){
+        if (users[key]?.year_name === childName && users[key]?.email_address === selectedTeacher) {
+          _filterObj = { ..._filterObj, [`${key}`]: users[key] }
+        }
+      }  
+      else{
+        if (users[key]?.year_name === childName ) {
+          _filterObj = { ..._filterObj, [`${key}`]: users[key] }
+        }
+      }    
     });
 
     let avgArray = Array(tableHeaders.length).fill(0)
-    setAverage(avgArray, _filterObj)
+    // setAverage(avgArray, _filterObj)
     setTableData(_filterObj)
   }
 
@@ -296,14 +319,30 @@ const School = () => {
       window.removeEventListener("click", handleClickOutside);
     };
   }, [dropdownRef]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef1.current && !dropdownRef1.current.contains(event.target)) {
+        setIsChildOpen(false);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [dropdownRef1]);
+  
+
   const handleToDateChange = (event) => {
     setToDate(event.target.value);
   };
   let backGroundColor = {
-    red: '#98485C',
-    green: '#649345',
-    yellow: '#A76C4F',
-    blue: '#35705B',
+    red: '#f44236',
+    green: '#7ec883',
+    yellow: '#ffb101',
+    blue: '#63b5f4',
     draft: 'white',
 
   }
@@ -323,6 +362,8 @@ const School = () => {
 
   return (
     <div className="md:mx-20 my-6">
+      {dataLoadin && <CustomLoader />}
+
       {/* main bar starts */}
       <div className="sticky w-ful h-auto gap-4 flex justify-between items-center flex-col md:flex-row ">
         {/* logo */}
@@ -365,14 +406,14 @@ const School = () => {
               </button>
               {isUserOpen && (
                 <ul className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-slate-800 shadow-md">
-                  <li className="border-b border-slate-400">
+                  {/* <li className="border-b border-slate-400">
                     <Link
                       to="/settings"
                       className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
                     >
                       Settings
                     </Link>
-                  </li>
+                  </li> */}
                   {/* <li className="border-b border-slate-400"> */}
                   <li>
                     <a
@@ -403,12 +444,12 @@ const School = () => {
         {/* choose teacher dropdown */}
         <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
-              <div className="inline-block relative">
+              <div className="inline-block relative" ref={dropdownRef1}>
                 <button
                   onClick={() => setIsChildOpen(!isChildOpen)}
                   className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                 >
-                  Choose Teacher
+                  {selectedTeacher ? selectedTeacher : "Choose Teacher"}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
@@ -457,7 +498,9 @@ const School = () => {
 
                             }
                             key={index}
-                            onClick={() => handleTeacherSelect(childName)}
+                            onClick={() => {
+                              setIsChildOpen(!isChildOpen)
+                              handleTeacherSelect(childName)}}
                           >
                             <span
                               className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
@@ -481,7 +524,7 @@ const School = () => {
                 onClick={() => setIsTimeFrameOpen(!isTimeFrameOpen)}
                 className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
               >
-                Choose Year
+                {selectedYear ? selectedYear : "Choose Year"}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
@@ -510,7 +553,10 @@ const School = () => {
 
                             }
                             key={index}
-                            onClick={() => handleYearSelect(childName)}
+                            onClick={() => {
+                              setIsTimeFrameOpen(!isTimeFrameOpen)
+                              handleYearSelect(childName)
+                            }}
                           >
                             <span
                               className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
@@ -581,13 +627,13 @@ quiz5: 35,
               <tr className="items-center">
                 <th
                   scope="col"
-                  className="sticky left-0 z-10 px-6 py-3 bg-[#17026b] text-white w-40"
+                  className="sticky left-0 z-10 px-6 py-3 bg-[#17026b] text-white w-40 fixed"
                 >
                   User Name
                 </th>
                 <th
                   scope="col"
-                  className="sticky left-0 z-10 px-6 py-3 bg-[#17026b] text-white w-96"
+                  className="sticky left-0 z-10 px-6 py-3 bg-[#17026b] text-white w-96 fixed"
                 >
                   Email
                 </th>

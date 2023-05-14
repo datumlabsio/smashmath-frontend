@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { CustomLoader } from "../components/Loader";
 
 const ChildNames = ["Ali", "Usama", "Omair", "Talha", "Agha", "Hassan"];
 const data = [
@@ -183,32 +184,41 @@ const Parent = () => {
   const [tableData, setTableData] = useState([])
   const [tableAverage, setTableAverage] = useState([])
   const [totalQuizCount, setTotalQuizCount] = useState(0)
+  const [dataLoadin, setDataLoadin] = useState(true)
+
 
   useEffect(() => {
     // caitlinhblack@gmail.com
     const email = localStorage.getItem('userEmail')
-    fetch(API_URL + '/api/parent_dashboard', {
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: JSON.stringify({
-        email
+    try{
+      fetch(API_URL + '/api/parent_dashboard', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: JSON.stringify({
+          email
+        })
       })
-    })
-      .then(response => response.json())
-      .then(response => {
-        if (!response.quizes.length) {
-          return
-        }
+        .then(response => response.json())
+        .then(response => {
+          setDataLoadin(false)
 
-        setTableHeaders(Object.keys(response.quizes[0]))
-        let avgArray = Array(Object.keys(response.quizes[0]).length).fill(0)
-        setTableData(response.quizes)
-        setSchools(response.quizes)
-        setAverage(avgArray, Object.values(response.quizes))
-      })
+          if (!response.quizes.length) {
+            return
+          }
+  
+          setTableHeaders(Object.keys(response.quizes[0]))
+          let avgArray = Array(Object.keys(response.quizes[0]).length).fill(0)
+          setTableData(response.quizes)
+          setSchools(response.quizes)
+          setAverage(avgArray, Object.values(response.quizes))
+        })
+    }catch(e){
+      setDataLoadin(false)
+    }
+
   }, [])
 
   const setAverage = (avgArr, dataSet) => {
@@ -255,10 +265,10 @@ const Parent = () => {
 
 
   let backGroundColor = {
-    red: '#98485C',
-    green: '#649345',
-    yellow: '#A76C4F',
-    blue: '#35705B',
+    red: '#f44236',
+    green: '#7ec883',
+    yellow: '#ffb101',
+    blue: '#63b5f4',
     draft: 'white',
   }
 
@@ -279,6 +289,7 @@ const Parent = () => {
 
   return (
     <div className="md:mx-20 my-6">
+      {dataLoadin && <CustomLoader />}
       {/* main bar starts */}
       <div className="sticky w-ful h-auto gap-4 md:h-[20vh] flex justify-between items-center flex-col md:flex-row ">
         {/* logo */}
@@ -294,7 +305,7 @@ const Parent = () => {
         </Link>
         {/* name */}
         <h2 className="font-bold visible lg:text-4xl sm:text-xl md:text-2xl text-[#17026b] sm:my-6 cursor-pointer hidden md:block">
-          Parent Name
+        Results Analysis
         </h2>
 
         {/* username dropdown */}
@@ -321,14 +332,14 @@ const Parent = () => {
               </button>
               {isUserOpen && (
                 <ul className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-slate-800 shadow-md">
-                  <li className="border-b border-slate-400">
+                  {/* <li className="border-b border-slate-400">
                     <Link
                       to="/settings"
                       className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
                     >
                       Settings
                     </Link>
-                  </li>
+                  </li> */}
                   {/* <li className="border-b border-slate-400"> */}
                   <li>
                     <a
