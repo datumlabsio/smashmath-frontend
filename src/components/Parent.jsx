@@ -181,6 +181,8 @@ const Parent = () => {
   const [schools, setSchools] = useState([])
   const [tableHeaders, setTableHeaders] = useState([])
   const [tableData, setTableData] = useState([])
+  const [tableAverage, setTableAverage] = useState([])
+  const [totalQuizCount, setTotalQuizCount] = useState(0)
 
   useEffect(() => {
     // caitlinhblack@gmail.com
@@ -197,13 +199,36 @@ const Parent = () => {
     })
       .then(response => response.json())
       .then(response => {
+        if (!response.quizes.length) {
+          return
+        }
+
         setTableHeaders(Object.keys(response.quizes[0]))
+        let avgArray = Array(Object.keys(response.quizes[0]).length).fill(0)
         setTableData(response.quizes)
-
         setSchools(response.quizes)
+        setAverage(avgArray, Object.values(response.quizes))
       })
-
   }, [])
+
+  const setAverage = (avgArr, dataSet) => {
+    let _marksArr = []
+    if (dataSet.length > 0) {
+      dataSet.map((item) => {
+        _marksArr.push(Object.values(item))
+      })
+    }
+
+    _marksArr.map(item => {
+      for(let i = 0; i< item.length; i++){
+        avgArr[i] = avgArr[i] + (item[i] === null ? 0 : item[i])
+      }
+    })
+
+    setTableAverage(avgArr)
+    setTotalQuizCount(dataSet.length)
+
+  }
 
   const handleChildSelect = (childName) => {
     setSelectedChild(childName);
@@ -339,7 +364,7 @@ const Parent = () => {
                 onClick={() => setIsChildOpen(!isChildOpen)}
                 className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
               >
-                Choose Teacher
+                Time Interval
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
@@ -355,7 +380,7 @@ const Parent = () => {
               </button>
               {isChildOpen && (
                 <ul className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-slate-800 shadow-md">
-                  {ChildNames.map((childName, index) => {
+                  {/* {ChildNames.map((childName, index) => {
                     return (
                       <>
                         <li
@@ -376,6 +401,28 @@ const Parent = () => {
                         </li>
                       </>
                     );
+                  })} */}
+                  {['52 weeks data', 'All data since September'].map((childName, index) => {
+                    return (
+                      <>
+                        <li
+                          className={
+                            index !== childName.length - 1
+                              ? "border-b border-slate-400 cursor-pointer"
+                              : "cursor-pointer"
+
+                          }
+                          key={index}
+                          // onClick={() => handleChildSelect(childName)}
+                        >
+                          <span
+                            className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
+                          >
+                            {childName}
+                          </span>
+                        </li>
+                      </>
+                    );
                   })}
                 </ul>
               )}
@@ -383,7 +430,7 @@ const Parent = () => {
           </li>
         </ul>
         {/* choose Time Frame dropdown */}
-        <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+        {false && <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
           <li className="mr-3">
             <div className="inline-block relative" ref={dropdownRef}>
               <button
@@ -430,7 +477,7 @@ const Parent = () => {
               )}
             </div>
           </li>
-        </ul>
+        </ul>}
       </div>
       {/* filter bar ends here */}
       {/* ----------------------------------------------------------- */}
@@ -483,16 +530,24 @@ quiz5: 35,
               ))}
               <tr class="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
                 <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold">Average</td>
-                <td class="sticky left-40 z-10 px-6 py-3 w-40"></td>
+                {/* <td class="sticky left-40 z-10 px-6 py-3 w-40"></td> */}
                 {selectedChild === "" ? (
                   <>
-                    {averages.map(
+                  {/* tableAverage */}
+                    {/* {averages.map(
                       (average, index) =>
                         data.some((student) => student[`quiz${index + 1}`]) && (
                           <td class="px-6 py-4 text-center">
                             0.00
                           </td>
                         )
+                    )} */}
+                    {tableAverage.map((average, index) =>
+                        // data.some((student) => student[`quiz${index + 1}`]) && (
+                          <td class="px-6 py-4 text-center">
+                            {(average/totalQuizCount).toFixed(2)}
+                          </td>
+                        // )
                     )}
                   </>
                 ) : (
