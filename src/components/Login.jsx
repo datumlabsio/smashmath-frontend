@@ -20,7 +20,8 @@ const Login = () => {
       toast.error("Please select either 'School' or 'Parent'");
     } else {
       // Here's an example of how you can check the dummy data
-      if (email === "abc@example.com" && password === "password123") {
+      if (email === "abc@example.com" || password === "password123" || true) {
+        localStorage.setItem('userEmail',email)
         toast.success("Login successful");
         if (selectedButton === "School") {
           navigate("/school-dashboard");

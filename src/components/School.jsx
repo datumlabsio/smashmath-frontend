@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const ChildNames = ["Ali", "Usama", "Omair", "Talha", "Agha", "Hassan"];
 const data = [
@@ -12,6 +12,11 @@ const data = [
     quiz3: 25,
     quiz4: 30,
     quiz5: 35,
+    quiz6: 36,
+    quiz7: 37,
+    quiz8: 38,
+    quiz9: 39,
+    quiz10: 310,
   },
   {
     id: 2,
@@ -22,6 +27,11 @@ const data = [
     quiz3: 25,
     quiz4: 30,
     quiz5: 35,
+    quiz6: 36,
+    quiz7: 37,
+    quiz8: 38,
+    quiz9: 39,
+    quiz10: 310,
   },
   {
     id: 3,
@@ -32,6 +42,11 @@ const data = [
     quiz3: 25,
     quiz4: 30,
     quiz5: 35,
+    quiz6: 36,
+    quiz7: 37,
+    quiz8: 38,
+    quiz9: 39,
+    quiz10: 310,
   },
   {
     id: 4,
@@ -42,6 +57,11 @@ const data = [
     quiz3: 25,
     quiz4: 30,
     quiz5: 35,
+    quiz6: 36,
+    quiz7: 37,
+    quiz8: 38,
+    quiz9: 39,
+    quiz10: 310,
   },
   {
     id: 5,
@@ -52,6 +72,11 @@ const data = [
     quiz3: 25,
     quiz4: 30,
     quiz5: 35,
+    quiz6: 36,
+    quiz7: 37,
+    quiz8: 38,
+    quiz9: 39,
+    quiz10: 310,
   },
   {
     id: 6,
@@ -62,6 +87,11 @@ const data = [
     quiz3: 25,
     quiz4: 30,
     quiz5: 35,
+    quiz6: 36,
+    quiz7: 37,
+    quiz8: 38,
+    quiz9: 39,
+    quiz10: 310,
   },
   {
     id: 7,
@@ -72,6 +102,11 @@ const data = [
     quiz3: 25,
     quiz4: 30,
     quiz5: 35,
+    quiz6: 36,
+    quiz7: 37,
+    quiz8: 38,
+    quiz9: 39,
+    quiz10: 310,
   },
   {
     id: 8,
@@ -82,6 +117,11 @@ const data = [
     quiz3: 25,
     quiz4: 30,
     quiz5: 35,
+    quiz6: 36,
+    quiz7: 37,
+    quiz8: 38,
+    quiz9: 39,
+    quiz10: 310,
   },
   {
     id: 9,
@@ -92,6 +132,11 @@ const data = [
     quiz3: 25,
     quiz4: 30,
     quiz5: 35,
+    quiz6: 36,
+    quiz7: 37,
+    quiz8: 38,
+    quiz9: 39,
+    quiz10: 310,
   },
   {
     id: 10,
@@ -102,12 +147,17 @@ const data = [
     quiz3: 25,
     quiz4: 30,
     quiz5: 35,
+    quiz6: 36,
+    quiz7: 37,
   },
 ];
 const School = () => {
+
+  const navigate = useNavigate()
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isChildOpen, setIsChildOpen] = useState(false);
   const [selectedChild, setSelectedChild] = useState("");
+  const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app'
 
   const [isTimeFrameOpen, setIsTimeFrameOpen] = useState(false);
   // const [fromDate, setFromDate] = useState("");
@@ -115,6 +165,7 @@ const School = () => {
   const dropdownRef = useRef(null);
   // Calculate the averages
   const numColumns = Object.keys(data[0]).length - 2;
+
   // excluding the first two columns
   const averages = Array(numColumns).fill(0);
   data.forEach((student) => {
@@ -126,11 +177,44 @@ const School = () => {
     averages[i] /= data.length;
   }
 
+  const [schoolName, setSchoolName] = useState()
+  const [tableHeaders, setTableHeaders] = useState([])
+  const [tableData, setTableData] = useState([])
+
+  useEffect(() => {
+    const email = localStorage.getItem('userEmail')
+    fetch(API_URL + '/api/teacher_dashboard', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: JSON.stringify({
+        email
+        // "email": "jbrogan5.208@lgflmail.org"
+      })
+    })
+      .then(response => response.json())
+      .then(response => {
+        setTableHeaders(response?.quizes?.headers)
+        setTableData(response?.quizes?.users)
+        if (response?.quizes?.users != null) {
+          setSchoolNama(Object.values(response?.quizes?.users)[0]?.attributes_properties)
+        }
+      })
+
+  }, [])
+
   const handleChildSelect = (childName) => {
     setSelectedChild(childName);
-    console.log(`Selected Teacher: ${childName}`);
     setIsChildOpen(false);
   };
+  
+  const setSchoolNama = (val) => {
+    let name = val.split(',')[2].substring(17)
+    name = name.slice(0, -1)
+    setSchoolName(name)
+  }
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -144,18 +228,35 @@ const School = () => {
       window.removeEventListener("click", handleClickOutside);
     };
   }, [dropdownRef]);
-
-
   const handleToDateChange = (event) => {
     setToDate(event.target.value);
-    console.log("Selected Year :", event.target.value);
   };
+  let backGroundColor = {
+    red: '#98485C',
+    green: '#649345',
+    yellow: '#A76C4F',
+    blue: '#35705B',
+    draft: 'white',
 
-  
+  }
+  const checkMarksColor = (mark) => {
+    if (mark == '')
+      return backGroundColor['draft']
+    else if (mark <= 40)
+      return backGroundColor['red']
+    else if (mark > 40 && mark <= 60)
+      return backGroundColor['yellow']
+    else if (mark > 60 && mark <= 85)
+      return backGroundColor['green']
+    else if (mark > 85)
+      return backGroundColor['blue']
+
+  }
+
   return (
     <div className="md:mx-20 my-6">
       {/* main bar starts */}
-      <div className="sticky w-ful h-auto gap-4 md:h-[20vh] flex justify-between items-center flex-col md:flex-row ">
+      <div className="sticky w-ful h-auto gap-4 flex justify-between items-center flex-col md:flex-row ">
         {/* logo */}
         <Link
           className="text-white no-underline hover:text-white hover:no-underline"
@@ -169,7 +270,7 @@ const School = () => {
         </Link>
         {/* name */}
         <h2 className="font-bold visible lg:text-4xl sm:text-xl md:text-2xl text-[#17026b] sm:my-6 cursor-pointer hidden md:block">
-          School Name
+          {schoolName}
         </h2>
 
         {/* username dropdown */}
@@ -206,12 +307,17 @@ const School = () => {
                   </li>
                   {/* <li className="border-b border-slate-400"> */}
                   <li>
-                    <Link
-                      to="/"
+                    <a
+                      href="/"
                       className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        navigate('/')
+                        localStorage.clear()
+                      }}
                     >
                       Logout
-                    </Link>
+                    </a>
                   </li>
                 </ul>
               )}
@@ -225,7 +331,7 @@ const School = () => {
       {/* ----------------------------------------------------------- */}
       {/* filter bar starts here */}
 
-      <div className="w-full md:w-[50vw] h-[15vh] flex justify-start items-center gap-4 flex-row mt-5">
+      <div className="w-full flex justify-start items-center gap-4 flex-row mt-5">
         {/* choose teacher dropdown */}
         <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
           <li className="mr-3">
@@ -258,7 +364,7 @@ const School = () => {
                             index !== childName.length - 1
                               ? "border-b border-slate-400 cursor-pointer"
                               : "cursor-pointer"
-                              
+
                           }
                           key={index}
                           onClick={() => handleChildSelect(childName)}
@@ -331,92 +437,88 @@ const School = () => {
       {/* ----------------------------------------------------------- */}
 
       {/* table starts here */}
-      <div className="overflow-x-auto shadow-md sm:rounded-sm  lg:mx-auto sm:w-full mt-10">
-        <table className="w-full text-sm text-left table-fixed rounded-lg overflow-hidden shadow-sm shadow-slate-400">
-          <thead className="text-xs text-white uppercase bg-[#17026b]">
-            <tr className="items-center">
-              <th
-                scope="col"
-                className="sticky left-0 z-10 px-6 py-3 bg-[#17026b] text-white w-40"
-              >
-                Username
-              </th>
-              <th
-                scope="col"
-                className="sticky left-40 z-10 px-6 py-3 bg-[#17026b] w-40 text-white "
-              >
-                First Name
-              </th>
-              <th scope="col" className="px-6 py-3 w-[7vw] text-white ">
-                Quiz 1
-              </th>
-              <th scope="col" className="px-6 py-3 w-[7vw] text-white ">
-                Quiz 2
-              </th>
-              <th scope="col" className="px-6 py-3 w-[7vw] text-white ">
-                Quiz 3
-              </th>
-              <th scope="col" className="px-6 py-3 w-[7vw] text-white ">
-                Quiz 4
-              </th>
-              <th scope="col" className="px-6 py-3 w-[7vw] text-white ">
-                Quiz 5
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((student) => (
-              <>
-                {student.firstname === selectedChild ? (
+      <div className="overflow-x-autoquiz5: 35,
+quiz5: 35,
+quiz5: 35,
+quiz5: 35,
+quiz5: 35,
+quiz5: 35,
+quiz5: 35,
+quiz5: 35,
+quiz5: 35,
+quiz5: 35,
+}</td> shadow-md sm:rounded-sm  lg:mx-auto sm:w-full mt-10">
+        {Boolean(tableHeaders.length) && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+          <table className="w-full text-sm text-left table-fixed rounded-lg overflow-hidden shadow-sm shadow-slate-400">
+            <thead className="text-xs text-white uppercase bg-[#17026b]">
+              <tr className="items-center">
+                <th
+                  scope="col"
+                  className="sticky left-0 z-10 px-6 py-3 bg-[#17026b] text-white w-40"
+                >
+                  User Name
+                </th>
+                <th
+                  scope="col"
+                  className="sticky left-0 z-10 px-6 py-3 bg-[#17026b] text-white w-96"
+                >
+                  Email
+                </th>
+                {
+
+                  tableHeaders?.map((item) => (
+                    <th
+                      scope="col"
+                      className="sticky left-0 z-10 px-6 py-3 bg-[#17026b] text-white w-40"
+                    >
+                      {item}
+                    </th>
+                  ))
+                }
+              </tr>
+            </thead>
+            <tbody>
+              {Object.values(tableData).map((student) => (
+                <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
+                  <td class="px-6 py-4">{student?.user_name}</td>
+                  <td class="px-6 py-4">{student?.email_address}</td>
+                  {
+                    Object.values(student?.quizes).map((item) => (
+                      <td class="px-6 py-4 text-white w-40" style={{ backgroundColor: checkMarksColor(item) }}>{item}</td>
+                    ))
+                  }
+                </tr>
+              ))}
+              <tr class="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
+                <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold">Average</td>
+                <td class="sticky left-40 z-10 px-6 py-3 w-40"></td>
+                {selectedChild === "" ? (
                   <>
-                    <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
-                      <td class="sticky left-0 z-10 px-6 py-3 w-40">
-                        {student.email}
-                      </td>
-                      <td class="sticky left-40 z-10 px-6 py-3 w-40">
-                        {student.firstname}
-                      </td>
-                      <td class="px-6 py-4">{student.quiz1}</td>
-                      <td class="px-6 py-4">{student.quiz2}</td>
-                      <td class="px-6 py-4">{student.quiz3}</td>
-                      <td class="px-6 py-4">{student.quiz4}</td>
-                      <td class="px-6 py-4">{student.quiz5}</td>
-                    </tr>
+                    {averages.map(
+                      (average, index) =>
+                        data.some((student) => student[`quiz${index + 1}`]) && (
+                          <td class="px-6 py-4 text-center">
+                            0.00
+                          </td>
+                        )
+                    )}
                   </>
                 ) : (
-                  <></>
+                  <>
+                    {averages.map(
+                      (average, index) =>
+                        data.some((student) => student[`quiz${index + 1}`]) && (
+                          <td class="px-6 py-4 text-center">
+                            {average.toFixed(2)}
+                          </td>
+                        )
+                    )}
+                  </>
                 )}
-              </>
-            ))}
-            <tr class="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-              <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold">Average</td>
-              <td class="sticky left-40 z-10 px-6 py-3 w-40"></td>
-              {selectedChild === "" ? (
-                <>
-                  {averages.map(
-                    (average, index) =>
-                      data.some((student) => student[`quiz${index + 1}`]) && (
-                        <td class="px-6 py-4 text-center">
-                          0.00
-                        </td>
-                      )
-                  )}
-                </>
-              ) : (
-                <>
-                  {averages.map(
-                    (average, index) =>
-                      data.some((student) => student[`quiz${index + 1}`]) && (
-                        <td class="px-6 py-4 text-center">
-                          {average.toFixed(2)}
-                        </td>
-                      )
-                  )}
-                </>
-              )}
-            </tr>
-          </tbody>
-        </table>
+              </tr>
+            </tbody>
+          </table>
+        </div>}
       </div>
       {/* table ends here */}
       {/* ----------------------------------------------------------- */}
