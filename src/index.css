@@ -26,3 +26,7 @@
 body {
   overflow-x: hidden;
 }
+
+.w-40{
+  width: '15px' !important
+}
