@@ -32,3 +32,12 @@ body {
 }
 
 .page-loader {position: fixed; left: 0; top: 0; width: 100%; height: 100vh; z-index: 99; background: rgba(47, 54, 61, .9) !important; display: flex; align-items: center; justify-content: center;}
+
+.column-2-sticky tr th:first-child {position: sticky; z-index: 1;  width: 140px; left: 0; background: #17026B;}
+.column-2-sticky tr th:nth-child(2) {position: sticky; z-index: 1; left: 140px; background: #17026B;}
+
+.column-2-sticky tr td:first-child {position: sticky; z-index: 1; left: 0; background-color: #fff;}
+.column-2-sticky tr td:nth-child(2) {position: sticky; z-index: 1; left: 140px; background-color: #fff;}
+
+.column-1-sticky tr th:first-child {position: sticky; z-index: 1;  width: 200px; left: 0; background: #17026B;}
+.column-1-sticky tr td:first-child {position: sticky; z-index: 1; left: 0; background-color: #fff;}

@@ -622,18 +622,18 @@ quiz5: 35,
 quiz5: 35,
 }</td> shadow-md sm:rounded-sm  lg:mx-auto sm:w-full mt-10">
         {Boolean(tableHeaders.length) && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
-          <table className="w-full text-sm text-left table-fixed rounded-lg overflow-hidden shadow-sm shadow-slate-400">
+          <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
             <thead className="text-xs text-white uppercase bg-[#17026b]">
               <tr className="items-center">
                 <th
                   scope="col"
-                  className="sticky left-0 z-10 px-6 py-3 bg-[#17026b] text-white w-40 fixed"
+                  className="z-10 px-6 py-3 bg-[#17026b] text-white w-40"
                 >
                   User Name
                 </th>
                 <th
                   scope="col"
-                  className="sticky left-0 z-10 px-6 py-3 bg-[#17026b] text-white w-96 fixed"
+                  className="z-10 px-6 py-3 bg-[#17026b] text-white w-96"
                 >
                   Email
                 </th>
@@ -642,7 +642,7 @@ quiz5: 35,
                   tableHeaders?.map((item) => (
                     <th
                       scope="col"
-                      className="sticky left-0 z-10 px-6 py-3 bg-[#17026b] text-white w-40"
+                      className="px-6 py-3 bg-[#17026b] text-white w-40"
                     >
                       {item}
                     </th>
