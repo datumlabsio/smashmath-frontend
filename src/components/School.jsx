@@ -504,7 +504,7 @@ const School = () => {
                   </svg>
                 </button>
                 {isChildOpen && (
-                  <ul className="absolute right-0 mt-2 py-2 w-64 bg-white rounded-lg shadow-slate-800 shadow-md">
+                  <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
                     {/* {ChildNames.map((childName, index) => {
                       return (
                         <>
@@ -698,7 +698,7 @@ quiz5: 35,
                   <td class="px-6 py-4">{student?.email_address}</td>
                   {
                     Object.values(student?.quizes).map((item) => (
-                      <td class="px-6 py-4 text-white w-40" style={{ backgroundColor: checkMarksColor(item?item:null) }}>{item}</td>
+                      <td class="px-6 py-4 text-white w-40" style={{ backgroundColor: checkMarksColor(item) }}>{item}</td>
                     ))
                   }
                 </tr>

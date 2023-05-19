@@ -356,7 +356,7 @@ const Parent = () => {
   }
 
   const checkMarksColor = (mark) => {
-    if (mark == null)
+    if (mark == '')
       return backGroundColor['draft']
     else if (mark <= 40)
       return backGroundColor['red']
@@ -639,7 +639,7 @@ quiz5: 35,
                   <td class="px-6 py-4">{localStorage.getItem('userEmail')}</td>
                   {
                     Object.values(student?.quizes).map((item) => (
-                      <td class="px-6 py-4 text-white w-40" style={{ backgroundColor: checkMarksColor(item?item:null) }}>{item}</td>
+                      <td class="px-6 py-4 text-white w-40" style={{ backgroundColor: checkMarksColor(item) }}>{item}</td>
                     ))
                   }
                 </tr>
