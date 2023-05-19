@@ -485,7 +485,7 @@ const Parent = () => {
               </button>
               {isChildOpen && (
                 <ul className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-slate-800 shadow-md">                  
-                  {['Selected All', '52 weeks data', 'All data since September'].map((childName, index) => {
+                  {['Selected All', 'Since Last 52 Weeks', 'Since Last September'].map((childName, index) => {
                     return (
                       <>
                         <li
@@ -633,13 +633,13 @@ quiz5: 35,
             </thead>
             <tbody>
               {Object.values(tableData).filter(({year_name})=> selectedYear == 'Selected All' ? true: year_name == selectedYear)
-              .filter(({date_submitted})=> (selectedDuraation == 'Selected All' || selectedDuraation == 'All data since September') ? true: new Date(date_submitted ) >= addMilliseconds(new Date(), -364 * 24 * 60 * 60 * 1000, date_submitted))
+              .filter(({date_submitted})=> (selectedDuraation == 'Selected All' || selectedDuraation == 'Since Last September') ? true: new Date(date_submitted ) >= addMilliseconds(new Date(), -364 * 24 * 60 * 60 * 1000, date_submitted))
               .map((student) => (
                 <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
                   <td class="px-6 py-4">{localStorage.getItem('userEmail')}</td>
                   {
                     Object.values(student?.quizes).map((item) => (
-                      <td class="px-6 py-4 text-white w-40" style={{ backgroundColor: checkMarksColor(item) }}>{item}</td>
+                      <td class="px-6 py-4 text-white w-40" style={{ backgroundColor: checkMarksColor(item?item:null) }}>{item}</td>
                     ))
                   }
                 </tr>

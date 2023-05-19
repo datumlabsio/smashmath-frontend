@@ -698,7 +698,7 @@ quiz5: 35,
                   <td class="px-6 py-4">{student?.email_address}</td>
                   {
                     Object.values(student?.quizes).map((item) => (
-                      <td class="px-6 py-4 text-white w-40" style={{ backgroundColor: checkMarksColor(item) }}>{item}</td>
+                      <td class="px-6 py-4 text-white w-40" style={{ backgroundColor: checkMarksColor(item?item:null) }}>{item}</td>
                     ))
                   }
                 </tr>
