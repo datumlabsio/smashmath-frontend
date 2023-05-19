@@ -196,6 +196,30 @@ const Parent = () => {
 
   const [schools, setSchools] = useState([])
 
+  const [quizesAverages, setQuizesAverages] = useState()
+
+
+  useEffect(() => {
+    const email = localStorage.getItem('userEmail')
+    try {
+      const token = localStorage.getItem('token')
+      fetch(API_URL + '/api/all_quiz_averages', {
+        method: 'POST',
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+          "Authorization": token ? `Bearer ${token}` : null
+        }
+      })
+        .then(response => response.json())
+        .then(response => {      
+          setQuizesAverages(response.quizes.averages)    
+        })
+    } catch (e) {
+      setDataLoadin(false)
+    }
+
+  }, [])
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
@@ -348,14 +372,13 @@ const Parent = () => {
   const addMilliseconds = (date, milliseconds = 0, date_submitted) => {
     const result = new Date(date);
     result.setMilliseconds(result.getMilliseconds() + milliseconds);
-    console.log('result------>',result)
-    console.log('result------>date_submitted',new Date(date_submitted))
-
-    console.log('result------>date_submitted',result >= new Date(date_submitted))
-
-
     return result;
 };
+
+  const getAverage = (item) =>{
+    let _avg = quizesAverages?.find(({quiz_name}) => quiz_name === item)
+    return _avg ? _avg.average_score.toFixed(2) : 0
+  } 
 
 
   return (
@@ -635,13 +658,20 @@ quiz5: 35,
                           </td>
                         )
                     )} */}
-                    {tableAverage.map((average, index) =>
+                    {
+                      tableHeaders?.map((item) => (
+                        <td class="px-6 py-4 text-center">
+                          {getAverage(item)}
+                      </td>
+                      ))
+                    }
+                    {/* {tableAverage.map((average, index) =>
                       // data.some((student) => student[`quiz${index + 1}`]) && (
                       <td class="px-6 py-4 text-center">
                         {(average / totalQuizCount).toFixed(2)}
                       </td>
                       // )
-                    )}
+                    )} */}
                   </>
                 ) : (
                   <>

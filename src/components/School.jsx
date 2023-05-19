@@ -191,6 +191,31 @@ const School = () => {
   const [selectedTeacher, setSelectedTeacher] = useState('Selected All')
   const [selectedYear, setSelectedYear] = useState('Selected All')
   const [dataLoadin, setDataLoadin] = useState(true)
+  const [quizesAverages, setQuizesAverages] = useState()
+
+
+  useEffect(() => {
+    const email = localStorage.getItem('userEmail')
+    try {
+      const token = localStorage.getItem('token')
+      fetch(API_URL + '/api/all_quiz_averages', {
+        method: 'POST',
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+          "Authorization": token ? `Bearer ${token}` : null
+        }
+      })
+        .then(response => response.json())
+        .then(response => {      
+          setQuizesAverages(response.quizes.averages)    
+        })
+    } catch (e) {
+      setDataLoadin(false)
+    }
+
+  }, [])
+
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
@@ -369,6 +394,11 @@ const School = () => {
       return backGroundColor['blue']
   }
 
+
+  const getAverage = (item) =>{
+    let _avg = quizesAverages?.find(({quiz_name}) => quiz_name === item)
+    return _avg ? _avg.average_score.toFixed(2) : 0
+  }
 
   return (
     <div className="md:mx-20 my-6">
@@ -678,12 +708,19 @@ quiz5: 35,
                 <td class="sticky left-40 z-10 px-6 py-3 w-40"></td>
                 {selectedChild === "" ? (
                   <>
-                    {tableAverage?.map((average) => (
+                  {
+                      tableHeaders?.map((item) => (
+                        <td class="px-6 py-4 text-center">
+                          {getAverage(item)}
+                      </td>
+                      ))
+                    }
+                    {/* {tableAverage?.map((average) => (
                       <td class="px-6 py-4 text-center">
                         {(average / totalQuizCount).toFixed(2)}
                       </td>
                     )
-                    )}
+                    )} */}
                   </>
                 ) : (
                   <>
