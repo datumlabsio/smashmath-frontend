@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { CustomLoader } from "../components/Loader";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -9,33 +10,62 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [selectedButton, setSelectedButton] = useState("School");
   const [showPassword, setShowPassword] = useState(false);
+  const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app'
+  const [loading, setLoading] = useState(false)
+
 
   const handleForm = (e) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("All fields must be filled");
-    } else if (password.length < 8 || password.length > 12) {
-      toast.error("Password must be 8-12 characters long");
-    } else if (!selectedButton) {
+    } else 
+    // if (password.length < 8 || password.length > 12 ) {
+    //   toast.error("Password must be 8-12 characters long");
+    // } else 
+    if (!selectedButton) {
       toast.error("Please select either 'School' or 'Parent'");
     } else {
       // Here's an example of how you can check the dummy data
-      if (email === "abc@example.com" || password === "password123" || true) {
+      // if (email === "abc@example.com" || password === "password123" || true) {
+        setLoading(true)
+        loginService()
+      // } else {
+        // toast.error("Invalid email or password");
+      // }
+    }
+  };
+
+  const loginService = () => {
+    try{fetch(API_URL + '/api/login', {
+      method: 'POST',
+      headers: {"Content-Type": "application/json",},
+      body: JSON.stringify({"email": email,"password": password})
+    })
+      .then(response => response.json())
+      .then(response => {
+        setLoading(false)
+        console.log('res--->',response.data[0]?.jwt_token)
+        if(response.data[1] != 200){
+          toast.error(response.data[0]?.error)
+          return
+        }
+        
+        toast.success("Login successful");        
         localStorage.setItem('userEmail',email)
-        toast.success("Login successful");
+        localStorage.setItem('token',response.data[0]?.jwt_token)
         if (selectedButton === "School") {
           navigate("/school-dashboard");
         } else {
           navigate("/parent-dashboard");
         }
-      } else {
-        toast.error("Invalid email or password");
+      })}catch(e){
+        setLoading(false)
       }
-    }
-  };
+  }
 
   return (
     <div className="flex flex-col items-center justify-center w-screen h-screen bg-gray-200 text-gray-700">
+      {loading && <CustomLoader />}
       <form
         className="flex flex-col bg-white rounded shadow-lg p-8"
         onSubmit={handleForm}

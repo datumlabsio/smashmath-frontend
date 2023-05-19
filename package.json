@@ -1,6 +1,7 @@
 {
   "name": "smashmath",
   "private": true,
+  "proxy": "https://api-dashboard-brr3fliswa-uc.a.run.app",
   "version": "0.0.0",
   "type": "module",
   "scripts": {

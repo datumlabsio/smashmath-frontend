@@ -188,25 +188,33 @@ const School = () => {
   const [teacherFilter, setTeacherFilter] = useState([])
   const [users, setUsers] = useState([])
   const [totalQuizCount, setTotalQuizCount] = useState(0)
-  const [selectedTeacher, setSelectedTeacher] = useState('')
-  const [selectedYear, setSelectedYear] = useState('')
+  const [selectedTeacher, setSelectedTeacher] = useState('Selected All')
+  const [selectedYear, setSelectedYear] = useState('Selected All')
   const [dataLoadin, setDataLoadin] = useState(true)
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
+    // fetch(API_URL + '/api/parent_dashboard', {teacher_dashboard
+    // "email": "jbrogan5.208@lgflmail.org"
+
+    const  token = localStorage.getItem('token')
     try{fetch(API_URL + '/api/teacher_dashboard', {
       method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
       headers: {
+        // "Access-Control-Allow-Headers": "X-Requested-With",
+        "Access-Control-Allow-Origin": "*",
         "Content-Type": "application/json",
-        // 'Content-Type': 'application/x-www-form-urlencoded',
+        "Authorization": token ? `Bearer ${token}` : null
       },
       body: JSON.stringify({
         email
-        // "email": "jbrogan5.208@lgflmail.org"
       })
     })
       .then(response => response.json())
       .then(response => {
+
         setDataLoadin(false)
         setTableHeaders(response?.quizes?.headers)
         setTableData(response?.quizes?.users)
@@ -219,15 +227,15 @@ const School = () => {
         if (response?.quizes?.users != null) {
           setSchoolNama(Object.values(response?.quizes?.users)[0]?.attributes_properties)
         }
+
       })}catch(e){
         setDataLoadin(false)
       }
-
   }, [])
 
   const setFilter = (dataSet) => {
-    let _yesrFilter = []
-    let _teacherFilter = []
+    let _yesrFilter = ['Selected All']
+    let _teacherFilter = ['Selected All']
 
     Object.values(dataSet).map(item => {
       _yesrFilter.push(item.year_name)
@@ -255,6 +263,7 @@ const School = () => {
 
   const handleTeacherSelect = (childName) => {
     setSelectedTeacher(childName)
+    return
     let _filterObj = {}
     Object.keys(users).forEach((key) => {
       if(selectedTeacher != ''){
@@ -276,6 +285,7 @@ const School = () => {
 
   const handleYearSelect = (childName) => {
     setSelectedYear(childName)
+    return
     let _filterObj = {}
     Object.keys(users).forEach((key) => {
       if(selectedTeacher != ''){
@@ -651,7 +661,8 @@ quiz5: 35,
               </tr>
             </thead>
             <tbody>
-              {Object.values(tableData).map((student) => (
+              {Object.values(tableData).filter(({year_name})=> selectedYear == 'Selected All' ? true: year_name == selectedYear)
+              .filter(({email_address})=> selectedTeacher == 'Selected All' ? true: email_address == selectedTeacher).map((student) => (
                 <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
                   <td class="px-6 py-4">{student?.user_name}</td>
                   <td class="px-6 py-4">{student?.email_address}</td>
