@@ -620,12 +620,12 @@ quiz5: 35,
                 </th>
                 {
 
-                  tableHeaders?.map((item) => (
+                  tableHeaders?.filter(({year_name})=> selectedYear == 'Selected All' ? true: year_name == selectedYear).map(({quiz_name}) => (
                     <th
                       scope="col"
                       className="px-6 py-3 bg-[#17026b] text-white w-40"
                     >
-                      {item}
+                      {quiz_name}
                     </th>
                   ))
                 }
@@ -659,9 +659,9 @@ quiz5: 35,
                         )
                     )} */}
                     {
-                      tableHeaders?.map((item) => (
+                      tableHeaders?.filter(({year_name})=> selectedYear == 'Selected All' ? true: year_name == selectedYear)?.map(({quiz_name}) => (
                         <td class="px-6 py-4 text-center">
-                          {getAverage(item)}
+                          {getAverage(quiz_name)}
                       </td>
                       ))
                     }
