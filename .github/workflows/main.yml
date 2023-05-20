@@ -26,7 +26,7 @@ jobs:
         script: |
           cd /root/smashmath-frontend
           git pull
-          pm2 stop npm -- start
-          pm2 start npm -- start
+          npm run build
+          pm2 restart npm -- start
 
 
