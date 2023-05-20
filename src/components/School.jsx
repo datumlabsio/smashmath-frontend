@@ -251,7 +251,7 @@ const School = () => {
         setAverage(avgArray, response?.quizes?.users)
 
         if (response?.quizes?.users != null) {
-          setSchoolNama(Object.values(response?.quizes?.users)[0]?.attributes_properties)
+          setSchoolNama(Object.values(response?.quizes?.users)[0]?.school_name_small)
         }
 
       })
@@ -302,9 +302,9 @@ const School = () => {
   };
 
   const setSchoolNama = (val) => {
-    let name = val.split(',')[2].substring(17)
-    name = name.slice(0, -1)
-    setSchoolName(name)
+    // let name = val.split(',')[2].substring(17)
+    // name = name.slice(0, -1)
+    setSchoolName(val)
   }
 
   useEffect(() => {
@@ -665,7 +665,7 @@ quiz5: 35,
                     <td class="px-6 py-4">{student?.email_address}</td>
                     {
                       Object.values(student?.quizes).map((item) => (
-                        <td class="px-6 py-4 text-white w-40" style={{ backgroundColor: checkMarksColor(item) }}>{item}</td>
+                        <td class="px-6 py-4 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(item) }}>{item}</td>
                       ))
                     }
                   </tr>
