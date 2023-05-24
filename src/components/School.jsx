@@ -714,8 +714,9 @@ quiz5: 35,
                   }
                 </tr>
               ))}
+              {/* SMASH Maths Cohort  */}
               <tr class="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-                <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
+                <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold">Average</td>
                 <td class="sticky left-40 z-10 px-6 py-3 w-40"></td>
                 {selectedChild === "" ? (
                   <>
