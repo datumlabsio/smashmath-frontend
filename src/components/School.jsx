@@ -181,6 +181,7 @@ const School = () => {
   }
 
   const [schoolName, setSchoolName] = useState()
+  const [tableHeadersAll, setTableHeadersAll] = useState([])
   const [tableHeaders, setTableHeaders] = useState([])
   const [tableData, setTableData] = useState([])
   const [tableAverage, setTableAverage] = useState([])
@@ -188,8 +189,8 @@ const School = () => {
   const [teacherFilter, setTeacherFilter] = useState([])
   const [users, setUsers] = useState([])
   const [totalQuizCount, setTotalQuizCount] = useState(0)
-  const [selectedTeacher, setSelectedTeacher] = useState('Selected All')
-  const [selectedYear, setSelectedYear] = useState('Selected All')
+  const [selectedTeacher, setSelectedTeacher] = useState()
+  const [selectedYear, setSelectedYear] = useState()
   const [dataLoadin, setDataLoadin] = useState(true)
   const [quizesAverages, setQuizesAverages] = useState()
 
@@ -238,39 +239,81 @@ const School = () => {
           email
         })
       })
-      .then(response => response.json())
-      .then(response => {
+        .then(response => response.json())
+        .then(response => {
 
-        setDataLoadin(false)
-        setTableHeaders(response?.quizes?.headers)
-        setTableData(response?.quizes?.users)
-        let avgArray = Array(response?.quizes?.headers.length).fill(0)
+          setDataLoadin(false)
 
-        setUsers(response?.quizes?.users)
-        setFilter(response?.quizes?.users)
-        setAverage(avgArray, response?.quizes?.users)
+          let { headers, users } = response?.quizes || [[], {}]
 
-        if (response?.quizes?.users != null) {
-          setSchoolNama(Object.values(response?.quizes?.users)[0]?.school_name_small)
-        }
+          setTableHeadersAll(headers)
+          setTableData(users)
+          let avgArray = Array(headers.length).fill(0)
 
-      })
+          setUsers(users)
+          setFilter(users, headers)
+          setAverage(avgArray, users)
+
+          if (users != null) {
+            setSchoolNama(Object.values(users)[0]?.school_name_small)
+          }
+
+        })
     } catch (e) {
       setDataLoadin(false)
     }
   }, [])
 
-  const setFilter = (dataSet) => {
-    let _yesrFilter = ['Selected All']
-    let _teacherFilter = ['Selected All']
+  const getWeekNumber = (quiz_name, i) => {
+    return quiz_name?.match(/WEEK (\d+)$/i) ? parseInt(quiz_name?.match(/WEEK (\d+)$/i)[1]) : []
+  }
+
+  const setFilter = (dataSet, headers) => {
+    let _yesrFilter = []
+    let _teacherFilter = []
 
     Object.values(dataSet).map(item => {
       _yesrFilter.push(item.year_name)
       _teacherFilter.push(item.email_address)
     })
 
+    let _email = [...new Set(_teacherFilter)][0]
+    let _year = [...new Set(_yesrFilter)][0]
+
+    applyFilter(_email, _year, headers, dataSet)
+    setTableHeadersAll(headers)
     setYearFilter([...new Set(_yesrFilter)])
     setTeacherFilter([...new Set(_teacherFilter)])
+  }
+
+  const applyFilter = (email, year, header, data) => {
+
+    setSelectedYear(year)
+    setSelectedTeacher(email)
+
+    let _filterObj = {}
+
+    Object.keys(data).forEach((key) => {
+      if (data[key]?.email_address === email && data[key]?.year_name === year) {
+        _filterObj = { ..._filterObj, [`${key}`]: data[key] }
+      }
+    });
+
+    let filterData = header?.map(({ quiz_name, year_name }, index) => {
+      return {
+        year_name,
+        quiz_name,
+        index,
+        week: getWeekNumber(quiz_name)
+      }
+    })
+
+    filterData = filterData.filter(({ year_name }) => year_name === year)
+    let sorted = filterData.sort((a, b) => a.week - b.week)
+
+    setTableData(_filterObj)
+    setTableHeaders(sorted)
+
   }
 
   const setAverage = (avgArr, dataSet) => {
@@ -287,14 +330,16 @@ const School = () => {
       setTotalQuizCount(_totalQuizCount)
     }
   }
+  const handleYearSelect = (childName) => {
+    setSelectedYear(childName)
+    applyFilter(selectedTeacher, childName, tableHeadersAll, users)
+  }
 
   const handleTeacherSelect = (childName) => {
     setSelectedTeacher(childName)
+    applyFilter(childName, selectedYear, tableHeadersAll, users)
   }
 
-  const handleYearSelect = (childName) => {
-    setSelectedYear(childName)
-  }
 
   const handleChildSelect = (childName) => {
     setSelectedChild(childName);
@@ -450,7 +495,8 @@ const School = () => {
         {/* choose teacher dropdown */}
         <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
           <li className="mr-3">
-            <div className="inline-block relative" ref={dropdownRef1}>
+          {/* <>asd</> */}
+            <div className="inline-block relative" ref={dropdownRef1}>              
               <button
                 onClick={() => setIsChildOpen(!isChildOpen)}
                 className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
@@ -645,8 +691,7 @@ quiz5: 35,
                   Email
                 </th>
                 {
-
-                  tableHeaders?.filter(({year_name})=> selectedYear == 'Selected All' ? true: year_name == selectedYear).map(({quiz_name}) => (
+                  tableHeaders?.map(({ quiz_name }) => (
                     <th
                       scope="col"
                       className="px-6 py-3 bg-[#17026b] text-white w-40"
@@ -658,25 +703,24 @@ quiz5: 35,
               </tr>
             </thead>
             <tbody>
-              {Object.values(tableData).filter(({ year_name }) => selectedYear == 'Selected All' ? true : year_name == selectedYear)
-                .filter(({ email_address }) => selectedTeacher == 'Selected All' ? true : email_address == selectedTeacher).map((student) => (
-                  <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
-                    <td class="px-6 py-4">{student?.user_name}</td>
-                    <td class="px-6 py-4">{student?.email_address}</td>
-                    {
-                      Object.values(student?.quizes).map((item) => (
-                        <td class="px-6 py-4 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(item) }}>{item}</td>
-                      ))
-                    }
-                  </tr>
-                ))}
+              {Object.values(tableData).map((student) => (
+                <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
+                  <td class="px-6 py-4">{student?.user_name}</td>
+                  <td class="px-6 py-4">{student?.email_address}</td>
+                  {
+                    tableHeaders?.map(({ index }) => (
+                      <td class="px-6 py-4 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(student?.quizes[index]) }}>{student?.quizes[index]}</td>
+                    ))
+                  }
+                </tr>
+              ))}
               <tr class="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-                <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold">Average</td>
+                <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
                 <td class="sticky left-40 z-10 px-6 py-3 w-40"></td>
                 {selectedChild === "" ? (
                   <>
                     {
-                      tableHeaders?.filter(({ year_name }) => selectedYear == 'Selected All' ? true : year_name == selectedYear)?.map(({quiz_name}) => (
+                      tableHeaders?.filter(({ year_name }) => selectedYear == 'Selected All' ? true : year_name == selectedYear)?.map(({ quiz_name }) => (
                         <td class="px-6 py-4 text-center">
                           {getAverage(quiz_name)}
                         </td>

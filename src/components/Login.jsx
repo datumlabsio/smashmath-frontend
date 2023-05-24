@@ -18,49 +18,51 @@ const Login = () => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("All fields must be filled");
-    } else 
-    // if (password.length < 8 || password.length > 12 ) {
-    //   toast.error("Password must be 8-12 characters long");
-    // } else 
-    if (!selectedButton) {
-      toast.error("Please select either 'School' or 'Parent'");
-    } else {
-      // Here's an example of how you can check the dummy data
-      // if (email === "abc@example.com" || password === "password123" || true) {
+    } else
+      // if (password.length < 8 || password.length > 12 ) {
+      //   toast.error("Password must be 8-12 characters long");
+      // } else 
+      if (!selectedButton) {
+        toast.error("Please select either 'School' or 'Parent'");
+      } else {
+        // Here's an example of how you can check the dummy data
+        // if (email === "abc@example.com" || password === "password123" || true) {
         setLoading(true)
         loginService()
-      // } else {
+        // } else {
         // toast.error("Invalid email or password");
-      // }
-    }
+        // }
+      }
   };
 
   const loginService = () => {
-    try{fetch(API_URL + '/api/login', {
-      method: 'POST',
-      headers: {"Content-Type": "application/json",},
-      body: JSON.stringify({"email": email,"password": password})
-    })
+    try {
+      fetch(API_URL + '/api/login', {
+        method: 'POST',
+        headers: { "Content-Type": "application/json", },
+        body: JSON.stringify({ "email": email, "password": password })
+      })
       .then(response => response.json())
       .then(response => {
         setLoading(false)
-        console.log('res--->',response.data[0]?.jwt_token)
-        if(response.data[1] != 200){
+        console.log('res--->', response.data[0]?.jwt_token)
+        if (response.data[1] != 200) {
           toast.error(response.data[0]?.error)
           return
         }
-        
-        toast.success("Login successful");        
-        localStorage.setItem('userEmail',email)
-        localStorage.setItem('token',response.data[0]?.jwt_token)
+
+        toast.success("Login successful");
+        localStorage.setItem('userEmail', email)
+        localStorage.setItem('token', response.data[0]?.jwt_token)
         if (selectedButton === "School") {
           navigate("/school-dashboard");
         } else {
           navigate("/parent-dashboard");
         }
-      })}catch(e){
-        setLoading(false)
-      }
+      })
+    } catch (e) {
+      setLoading(false)
+    }
   }
 
   return (
@@ -75,6 +77,20 @@ const Login = () => {
           src="https://static.wixstatic.com/media/6caf63_a83a2388007e4bec8f789dfe7818db84~mv2.jpg/v1/crop/x_0,y_53,w_1000,h_395/fill/w_230,h_91,al_c,q_80,usm_0.66_1.00_0.01,enc_auto/CUSTOM%20-%20Rectangle%20(22).jpg"
           alt="smashmath logo"
         />
+
+        <div className="flex mt-6 -justify-center text-xs ">
+          {/* <Link className="text-[#17026b] font-bold" style={{maxWidth: '15rem'}} to="#">
+          If you are a teacher using SMASH Maths at School,If you are a teacher using SMASH Maths at School,If you are a teacher using SMASH Maths at School,If you are a teacher using SMASH Maths at School,
+          </Link> */}
+          <span className="mx-2 -text-gray-300" style={{maxWidth: '15rem'}}>If you are a teacher using SMASH Maths at School, choose School. If you are a
+parent using SMASH Maths at Home, choose Parent</span>
+          {/* <span className="mx-2 text-gray-300">If you are a teacher using SMASH Maths at School, </span>
+<span className="mx-2 text-gray-300">choose School. If you are a parent using SMASH Maths</span>
+<span className="mx-2 text-gray-300"> at Home, choose Parent</span> */}
+          {/* <Link className="text-[#17026b] font-bold" to="/sign-up">
+            Sign Up
+          </Link> */}
+        </div>
 
         <div className="flex justify-between border border-[#17026b] my-6 gap-1">
           <button
@@ -165,9 +181,9 @@ const Login = () => {
           Login
         </button>
         <div className="flex mt-6 justify-center text-xs">
-          <Link className="text-[#17026b] font-bold" to="#">
+          {/* <Link className="text-[#17026b] font-bold" to="#">
             Forgot Password
-          </Link>
+          </Link> */}
           <span className="mx-2 text-gray-300">/</span>
           {/* <Link className="text-[#17026b] font-bold" to="/sign-up">
             Sign Up
