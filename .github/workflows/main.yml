@@ -23,4 +23,10 @@ jobs:
         # connection timeout to remote host
         connect_timeout: 30
         # execute commands on ssh
-        script: whoami
+        script: |
+          cd /root/smashmath-frontend
+          git pull
+          npm run build
+          pm2 restart npm -- start
+
+
