@@ -294,7 +294,9 @@ const School = () => {
     let _filterObj = {}
 
     Object.keys(data).forEach((key) => {
-      if (data[key]?.email_address === email && data[key]?.year_name === year) {
+      if (data[key]?.email_address === email 
+        // && data[key]?.year_name === year
+        ) {
         _filterObj = { ..._filterObj, [`${key}`]: data[key] }
       }
     });
