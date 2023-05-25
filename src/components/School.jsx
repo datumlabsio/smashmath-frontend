@@ -282,7 +282,7 @@ const School = () => {
 
     applyFilter(_email, _year, headers, dataSet)
     setTableHeadersAll(headers)
-    setYearFilter([...new Set(_yesrFilter)])
+    setYearFilter([...new Set(_yesrFilter)].sort())
     setTeacherFilter([...new Set(_teacherFilter)])
   }
 
