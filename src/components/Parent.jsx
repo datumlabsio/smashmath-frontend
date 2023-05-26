@@ -284,7 +284,7 @@ const Parent = () => {
 
     // // quiz_name?.match(/WEEK (\d+)$/i) ? quiz_name?.match(/WEEK (\d+)$/i) : []
     // )
-    return quiz_name?.match(/WEEK (\d+)$/i) ? parseInt(quiz_name?.match(/WEEK (\d+)$/i)[1]) + _inc : []
+    return quiz_name?.match(/WEEK (\d+)\./i) ? parseInt(quiz_name?.match(/WEEK (\d+)\./i)[1]) + _inc : []
   }
 
   const setFilter = (dataSet, headers) => {
@@ -324,15 +324,15 @@ const Parent = () => {
         year_name,
         quiz_name,
         index,
-        // week: getWeekNumber(quiz_name)
+        week: getWeekNumber(quiz_name)
       }
     })
 
     filterData = filterData.filter(({ year_name }) => year_name === year)
-    // let sorted = filterData.sort((a, b) => a.week - b.week)
+    let sorted = filterData.sort((a, b) => a.week - b.week)
 
     setTableData(_filterObj)
-    setTableHeaders(filterData)
+    setTableHeaders(sorted)
 
   }
 
