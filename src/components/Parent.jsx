@@ -196,7 +196,7 @@ const Parent = () => {
   const [dataLoadin, setDataLoadin] = useState(true)
   const [schools, setSchools] = useState([])
   const [quizesAverages, setQuizesAverages] = useState()
-
+  const durationOption = ['Since Last 52 Weeks', 'Since Last September']
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
@@ -269,6 +269,16 @@ const Parent = () => {
 
   }, [])
 
+  const handleYearSelect = (childName) => {
+    setSelectedYear(childName)
+    applyFilter(selectedDuraation, childName, tableHeadersAll, users)
+  }
+
+  const handleDurationSelect = (childName) => {
+    setSelectedDuraation(childName)
+    applyFilter(childName, selectedYear, tableHeadersAll, users)
+  }
+
   const getWeekNumber = (quiz_name, i) => {
     let _inc = 0
     if (quiz_name.includes('Spring')) {
@@ -280,7 +290,7 @@ const Parent = () => {
     }
 
     // console.log('week ----->', 'Year 4 - Practice 1 (Summer Week 03'?.match(/WEEK (\d+)$/i)
-    // // console.log('week ----->', 'Year 5 - SP 2023 Summer Term Week 01'?.match(/WEEK (\d+)$/i)
+    console.log('week::', quiz_name?.match(/WEEK (\d+)\./i))
 
     // // quiz_name?.match(/WEEK (\d+)$/i) ? quiz_name?.match(/WEEK (\d+)$/i) : []
     // )
@@ -296,19 +306,20 @@ const Parent = () => {
 
     let _year = [...new Set(_yesrFilter)][0]
 
-    applyFilter(_year, headers, dataSet)
+    applyFilter(selectedDuraation, _year, headers, dataSet)
     setTableHeadersAll(headers)
     setYearFilter([...new Set(_yesrFilter)].sort())
 
   }
 
-  const applyFilter = (year, header, data) => {
+  const applyFilter = (selectedDuraationParm, year, header, data) => {
 
+    console.log('therere--->', data)
     setSelectedYear(year)
 
     let _filterObj = {}
 
-    if (selectedDuraation === 'Since Last 52 Weeks') {
+    if (selectedDuraationParm === durationOption[0]) {
       Object.keys(data).forEach((key) => {
         if (new Date(data[key]?.date_submitted) >= addMilliseconds(new Date(), -364 * 24 * 60 * 60 * 1000, data[key]?.date_submitted)) {
           _filterObj = { ..._filterObj, [`${key}`]: data[key] }
@@ -329,7 +340,7 @@ const Parent = () => {
     })
 
     filterData = filterData.filter(({ year_name }) => year_name === year)
-    let sorted = filterData.sort((a, b) =>  a.week - b.week)
+    let sorted = filterData.sort((a, b) => a.week - b.week)
 
     setTableData(_filterObj)
     setTableHeaders(sorted)
@@ -544,7 +555,7 @@ const Parent = () => {
               </button>
               {isChildOpen && (
                 <ul className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-slate-800 shadow-md">
-                  {['Since Last 52 Weeks', 'Since Last September'].map((childName, index) => {
+                  {durationOption.map((childName, index) => {
                     return (
                       <>
                         <li
@@ -557,7 +568,7 @@ const Parent = () => {
                           key={index}
                           onClick={() => {
                             setIsChildOpen(!isChildOpen)
-                            setSelectedDuraation(childName)
+                            handleDurationSelect(childName)
                           }}
                         >
                           <span
@@ -613,8 +624,8 @@ const Parent = () => {
                             }
                             key={index}
                             onClick={() => {
-                              setIsTimeFrameOpen(!isTimeFrameOpen)
-                              setSelectedYear(childName)
+                              setIsTimeFrameOpen(!isTimeFrameOpen)                              
+                              handleYearSelect(childName)
                             }}
                           >
                             <span
