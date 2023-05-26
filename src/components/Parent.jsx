@@ -533,7 +533,7 @@ const Parent = () => {
       <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
         {/* choose teacher dropdown */}
         <div className="grid gap-1">
-          <label htmlFor="">Time interval Year </label>
+          <label htmlFor="">Time interval</label>
           <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
               <div className="inline-block relative" ref={dropdownRef2}>
@@ -591,7 +591,7 @@ const Parent = () => {
         {/* choose Time Frame dropdown */}
         {/* choose Time Frame dropdown */}
         <div className="grid gap-1">
-          <label htmlFor="">Teacher Year</label>
+          <label htmlFor="">Year</label>
           <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
               <div className="inline-block relative" ref={dropdownRef}>
