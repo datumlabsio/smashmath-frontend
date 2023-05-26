@@ -329,7 +329,7 @@ const Parent = () => {
     })
 
     filterData = filterData.filter(({ year_name }) => year_name === year)
-    let sorted = filterData.sort((a, b) => a.week - b.week)
+    let sorted = filterData.sort((a, b) =>  b.week - a.week)
 
     setTableData(_filterObj)
     setTableHeaders(sorted)
