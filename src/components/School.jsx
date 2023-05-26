@@ -503,111 +503,56 @@ const School = () => {
       {/* ----------------------------------------------------------- */}
       {/* filter bar starts here */}
 
-      <div className="w-full flex justify-start items-center gap-4 flex-row mt-5">
+      <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
         {/* choose teacher dropdown */}        
-        <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-          <li className="mr-3">
-            <div className="inline-block relative" ref={dropdownRef1}>              
-              <button
-                onClick={() => setIsChildOpen(!isChildOpen)}
-                className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
-              >
-                {selectedTeacher ? selectedTeacher : "Choose Teacher"}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="white"
-                  className="inline w-4 h-4 ml-1"
+        <div className="grid gap-1">
+          <label htmlFor="">Teacher</label>
+          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+            <li className="mr-3">
+              <div className="inline-block relative" ref={dropdownRef1}>              
+                <button
+                  onClick={() => setIsChildOpen(!isChildOpen)}
+                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-              {isChildOpen && (
-                <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
-                  {/* {ChildNames.map((childName, index) => {
-                      return (
-                        <>
-                          <li
-                            className={
-                              index !== childName.length - 1
-                                ? "border-b border-slate-400 cursor-pointer"
-                                : "cursor-pointer"
+                  {selectedTeacher ? selectedTeacher : "Choose Teacher"}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="white"
+                    className="inline w-4 h-4 ml-1"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                {isChildOpen && (
+                  <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                    {/* {ChildNames.map((childName, index) => {
+                        return (
+                          <>
+                            <li
+                              className={
+                                index !== childName.length - 1
+                                  ? "border-b border-slate-400 cursor-pointer"
+                                  : "cursor-pointer"
 
-                            }
-                            key={index}
-                            onClick={() => handleChildSelect(childName)}
-                          >
-                            <span
-                              className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
+                              }
+                              key={index}
+                              onClick={() => handleChildSelect(childName)}
                             >
-                              {childName}
-                            </span>
-                          </li>
-                        </>
-                      );
-                    })} */}
-                  {teacherFilter.map((childName, index) => {
-                    return (
-                      <>
-                        <li
-                          className={
-                            index !== childName.length - 1
-                              ? "border-b border-slate-400 cursor-pointer"
-                              : "cursor-pointer"
-
-                          }
-                          key={index}
-                          onClick={() => {
-                            setIsChildOpen(!isChildOpen)
-                            handleTeacherSelect(childName)
-                          }}
-                        >
-                          <span
-                            className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
-                          >
-                            {childName}
-                          </span>
-                        </li>
-                      </>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          </li>
-        </ul>
-
-        {/* choose Time Frame dropdown */}
-        <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-          <li className="mr-3">
-            <div className="inline-block relative" ref={dropdownRef}>
-              <button
-                onClick={() => setIsTimeFrameOpen(!isTimeFrameOpen)}
-                className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
-                
-                {selectedYear ? selectedYear : "Choose Year"}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="white"
-                  className="inline w-4 h-4 ml-1"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </button>
-              {
-                isTimeFrameOpen &&
-                (
-                  <ul className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-slate-800 shadow-md">
-                    {yearFilter.map((childName, index) => {
+                              <span
+                                className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
+                              >
+                                {childName}
+                              </span>
+                            </li>
+                          </>
+                        );
+                      })} */}
+                    {teacherFilter.map((childName, index) => {
                       return (
                         <>
                           <li
@@ -619,8 +564,8 @@ const School = () => {
                             }
                             key={index}
                             onClick={() => {
-                              setIsTimeFrameOpen(!isTimeFrameOpen)
-                              handleYearSelect(childName)
+                              setIsChildOpen(!isChildOpen)
+                              handleTeacherSelect(childName)
                             }}
                           >
                             <span
@@ -632,31 +577,92 @@ const School = () => {
                         </>
                       );
                     })}
-                    {/* <li className="">
-                    <input
-                      type="date"
-                      name="date-range"
-                      id="to-date"
-                      className="block w-full px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white focus:outline-none"
-                      value={toDate}
-                      onChange={handleToDateChange}
-                    />
-                  </li>
-                  <li>
-                    <input
-                      type="date"
-                      name="date-range"
-                      id="from-date"
-                      className="block px-4 w-full py-2 text-gray-800 hover:bg-indigo-500 hover:text-white focus:outline-none"
-                      value={fromDate}
-                      onChange={handleFromDateChange}
-                    />
-                  </li> */}
                   </ul>
                 )}
-            </div>
-          </li>
-        </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        {/* choose Time Frame dropdown */}
+        <div className="grid gap-1">
+          <label htmlFor="">Year</label>
+          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+            <li className="mr-3">
+              <div className="inline-block relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsTimeFrameOpen(!isTimeFrameOpen)}
+                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
+                  
+                  {selectedYear ? selectedYear : "Choose Year"}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="white"
+                    className="inline w-4 h-4 ml-1"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                {
+                  isTimeFrameOpen &&
+                  (
+                    <ul className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-slate-800 shadow-md">
+                      {yearFilter.map((childName, index) => {
+                        return (
+                          <>
+                            <li
+                              className={
+                                index !== childName.length - 1
+                                  ? "border-b border-slate-400 cursor-pointer"
+                                  : "cursor-pointer"
+
+                              }
+                              key={index}
+                              onClick={() => {
+                                setIsTimeFrameOpen(!isTimeFrameOpen)
+                                handleYearSelect(childName)
+                              }}
+                            >
+                              <span
+                                className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
+                              >
+                                {childName}
+                              </span>
+                            </li>
+                          </>
+                        );
+                      })}
+                      {/* <li className="">
+                      <input
+                        type="date"
+                        name="date-range"
+                        id="to-date"
+                        className="block w-full px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white focus:outline-none"
+                        value={toDate}
+                        onChange={handleToDateChange}
+                      />
+                    </li>
+                    <li>
+                      <input
+                        type="date"
+                        name="date-range"
+                        id="from-date"
+                        className="block px-4 w-full py-2 text-gray-800 hover:bg-indigo-500 hover:text-white focus:outline-none"
+                        value={fromDate}
+                        onChange={handleFromDateChange}
+                      />
+                    </li> */}
+                    </ul>
+                  )}
+              </div>
+            </li>
+          </ul>
+        </div>
 
         {/* <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
@@ -685,20 +691,20 @@ quiz5: 35,
 quiz5: 35,
 quiz5: 35,
 quiz5: 35,
-}</td> shadow-md sm:rounded-sm  lg:mx-auto sm:w-full mt-10">
+}</td> shadow-md sm:rounded-sm  lg:mx-auto sm:w-full mt-5">
         {Boolean(tableHeaders.length) && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
           <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
             <thead className="text-xs text-white uppercase bg-[#17026b]">
               <tr className="items-center">
                 <th
                   scope="col"
-                  className="z-10 px-6 py-3 bg-[#17026b] text-white w-40"
+                  className="z-10 p-3 bg-[#17026b] text-white w-40"
                 >
                   User Name
                 </th>
                 <th
                   scope="col"
-                  className="z-10 px-6 py-3 bg-[#17026b] text-white w-96"
+                  className="z-10 p-3 bg-[#17026b] text-white w-96"
                 >
                   Email
                 </th>
@@ -706,7 +712,7 @@ quiz5: 35,
                   tableHeaders?.map(({ quiz_name }) => (
                     <th
                       scope="col"
-                      className="px-6 py-3 bg-[#17026b] text-white w-40"
+                      className="p-3 bg-[#17026b] text-white w-40"
                     >
                       {quiz_name}
                     </th>
@@ -717,11 +723,11 @@ quiz5: 35,
             <tbody>
               {Object.values(tableData).map((student) => (
                 <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
-                  <td class="px-6 py-4">{student?.user_name}</td>
-                  <td class="px-6 py-4">{student?.email_address}</td>
+                  <td class="p-3">{student?.user_name}</td>
+                  <td class="p-3">{student?.email_address}</td>
                   {
                     tableHeaders?.map(({ index }) => (
-                      <td class="px-6 py-4 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(student?.quizes[index]) }}>{student?.quizes[index]}</td>
+                      <td class="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(student?.quizes[index]) }}>{student?.quizes[index]}</td>
                     ))
                   }
                 </tr>
@@ -734,13 +740,13 @@ quiz5: 35,
                   <>
                     {
                       tableHeaders?.filter(({ year_name }) => selectedYear == 'Selected All' ? true : year_name == selectedYear)?.map(({ quiz_name }) => (
-                        <td class="px-6 py-4 text-center">
+                        <td class="p-3 text-center">
                           {getAverage(quiz_name)}
                         </td>
                       ))
                     }
                     {/* {tableAverage?.map((average) => (
-                      <td class="px-6 py-4 text-center">
+                      <td class="p-3 text-center">
                         {(average / totalQuizCount).toFixed(2)}
                       </td>
                     )
@@ -751,7 +757,7 @@ quiz5: 35,
                     {averages.map(
                       (average, index) =>
                         data.some((student) => student[`quiz${index + 1}`]) && (
-                          <td class="px-6 py-4 text-center">
+                          <td class="p-3 text-center">
                             {average.toFixed(2)}
                           </td>
                         )

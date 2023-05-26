@@ -82,7 +82,7 @@ const Login = () => {
           {/* <Link className="text-[#17026b] font-bold" style={{maxWidth: '15rem'}} to="#">
           If you are a teacher using SMASH Maths at School,If you are a teacher using SMASH Maths at School,If you are a teacher using SMASH Maths at School,If you are a teacher using SMASH Maths at School,
           </Link> */}
-          <span className="mx-2 -text-gray-300" style={{maxWidth: '15rem'}}>If you are a teacher using SMASH Maths at School, choose School. If you are a
+          <span className="mx-2 -text-gray-300" style={{maxWidth: '20rem'}}>If you are a teacher using SMASH Maths at School, choose School. If you are a
 parent using SMASH Maths at Home, choose Parent</span>
           {/* <span className="mx-2 text-gray-300">If you are a teacher using SMASH Maths at School, </span>
 <span className="mx-2 text-gray-300">choose School. If you are a parent using SMASH Maths</span>
@@ -113,7 +113,7 @@ parent using SMASH Maths at Home, choose Parent</span>
           Email
         </label>
         <input
-          className="flex items-center h-10 px-4 w-64 bg-gray-200 mt-2 rounded focus:outline-none focus:ring-2 placeholder:text-sm"
+          className="flex items-center h-10 px-4 w-full bg-gray-200 mt-2 rounded focus:outline-none focus:ring-2 placeholder:text-sm"
           type="text"
           placeholder="Email"
           value={email}
@@ -122,7 +122,7 @@ parent using SMASH Maths at Home, choose Parent</span>
         <label className="font-semibold text-xs mt-3" htmlFor="passwordField">
           Password
         </label>
-        <div className="relative flex items-center h-10 px-4 w-64 bg-gray-200 mt-2 rounded focus:outline-none focus:ring-2">
+        <div className="relative flex items-center h-10 px-4 w-full bg-gray-200 mt-2 rounded focus:outline-none focus:ring-2">
           <input
             className="flex-1 placeholder:text-sm focus:outline-none bg-inherit"
             type={showPassword ? "text" : "password"}
@@ -132,7 +132,7 @@ parent using SMASH Maths at Home, choose Parent</span>
           />
           <button
             type="button"
-            className="absolute right-0 mr-2 focus:outline-none"
+            className="absolute right-0 mr-2 focus:outline-none "
             onClick={() => setShowPassword(!showPassword)}
           >
             {showPassword ? (
@@ -175,7 +175,7 @@ parent using SMASH Maths at Home, choose Parent</span>
           </button>
         </div>
         <button
-          className="flex items-center justify-center bg-[#17026b] hover:bg-[#a8a2c1] h-10 px-6 w-64 bg- mt-8 rounded-sm font-semibold text-sm text-white "
+          className="flex items-center justify-center bg-[#17026b] hover:bg-[#a8a2c1] h-10 px-6 w-full bg- mt-8 rounded-sm font-semibold text-sm text-white "
           type="submit"
         >
           Login
