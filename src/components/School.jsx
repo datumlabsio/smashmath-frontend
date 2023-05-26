@@ -265,7 +265,17 @@ const School = () => {
   }, [])
 
   const getWeekNumber = (quiz_name, i) => {
-    return quiz_name?.match(/WEEK (\d+)$/i) ? parseInt(quiz_name?.match(/WEEK (\d+)$/i)[1]) : []
+    let _inc = 0
+    if(quiz_name.includes('Spring')){
+      _inc = 200
+    }else if(quiz_name.includes('Autumn')){
+      _inc = 100
+    }else if(quiz_name.includes('Summer')){
+      _inc = 300
+    }    
+
+    console.log('week ----->', quiz_name?.match(/WEEK (\d+)$/i) ? quiz_name?.match(/WEEK (\d+)$/i) : [])
+    return quiz_name?.match(/WEEK (\d+)$/i) ? parseInt(quiz_name?.match(/WEEK (\d+)$/i)[1]) + _inc : []
   }
 
   const setFilter = (dataSet, headers) => {
@@ -345,7 +355,7 @@ const School = () => {
 
   const handleChildSelect = (childName) => {
     setSelectedChild(childName);
-    setIsChildOpen(false);
+    setIsChildOpen(false);summer
   };
 
   const setSchoolNama = (val) => {
@@ -494,10 +504,9 @@ const School = () => {
       {/* filter bar starts here */}
 
       <div className="w-full flex justify-start items-center gap-4 flex-row mt-5">
-        {/* choose teacher dropdown */}
+        {/* choose teacher dropdown */}        
         <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
           <li className="mr-3">
-          {/* <>asd</> */}
             <div className="inline-block relative" ref={dropdownRef1}>              
               <button
                 onClick={() => setIsChildOpen(!isChildOpen)}
@@ -571,14 +580,15 @@ const School = () => {
             </div>
           </li>
         </ul>
+
         {/* choose Time Frame dropdown */}
         <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
           <li className="mr-3">
             <div className="inline-block relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsTimeFrameOpen(!isTimeFrameOpen)}
-                className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
-              >
+                className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
+                
                 {selectedYear ? selectedYear : "Choose Year"}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -718,8 +728,8 @@ quiz5: 35,
               ))}
               {/* SMASH Maths Cohort  */}
               <tr class="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-                <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold">Average</td>
-                <td class="sticky left-40 z-10 px-6 py-3 w-40"></td>
+                <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
+                <td class="sticky left-40 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
                 {selectedChild === "" ? (
                   <>
                     {

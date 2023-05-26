@@ -184,7 +184,7 @@ parent using SMASH Maths at Home, choose Parent</span>
           {/* <Link className="text-[#17026b] font-bold" to="#">
             Forgot Password
           </Link> */}
-          <span className="mx-2 text-gray-300">/</span>
+          {/* <span className="mx-2 text-gray-300">/</span> */}
           {/* <Link className="text-[#17026b] font-bold" to="/sign-up">
             Sign Up
           </Link> */}
