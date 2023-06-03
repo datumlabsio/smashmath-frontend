@@ -188,6 +188,7 @@ const School = () => {
   const [yearFilter, setYearFilter] = useState([])
   const [teacherFilter, setTeacherFilter] = useState([])
   const [users, setUsers] = useState([])
+  const [quizesData, setQuizesData] = useState([])
   const [totalQuizCount, setTotalQuizCount] = useState(0)
   const [selectedTeacher, setSelectedTeacher] = useState()
   const [selectedYear, setSelectedYear] = useState()
@@ -230,7 +231,6 @@ const School = () => {
         mode: 'cors',
         cache: 'no-cache',
         headers: {
-          // "Access-Control-Allow-Headers": "X-Requested-With",
           "Access-Control-Allow-Origin": "*",
           "Content-Type": "application/json",
           "Authorization": token ? `Bearer ${token}` : null
@@ -241,22 +241,40 @@ const School = () => {
       })
         .then(response => response.json())
         .then(response => {
-
           setDataLoadin(false)
 
-          let { headers, users } = response?.quizes || [[], {}]
+          const quizes = response?.quizes || [[]]
+          setQuizesData(quizes)
+          const teacherFilters = quizes.map(x => x.email_address)
+          const yearsFilters = quizes.map(x => x.year_name)
+          const uniqueTeacherFilters = [...new Set(teacherFilters)]
+          const uniqueYearsFilters = [...new Set(yearsFilters)].sort()
 
-          setTableHeadersAll(headers)
-          setTableData(users)
-          let avgArray = Array(headers.length).fill(0)
+          setTeacherFilter(uniqueTeacherFilters)
+          setYearFilter(uniqueYearsFilters)
 
-          setUsers(users)
-          setFilter(users, headers)
-          setAverage(avgArray, users)
+          let filterData = quizes?.map(({ quiz_name, year_name }, index) => {
+            return {
+              year_name,
+              quiz_name,
+              index,
+              week: getWeekNumber(quiz_name)
+            }
+          })
+          setTableHeadersAll(filterData)
+          applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes)
 
-          if (users != null) {
-            setSchoolNama(Object.values(users)[0]?.school_name_small)
-          }
+          return
+
+          // let { headers, users } = response?.quizes || [[], {}]
+          // setTableHeadersAll(headers)
+          // setTableData(users)
+          // let avgArray = Array(headers.length).fill(0)
+
+          // setUsers(users)
+          // setFilter(users, headers)
+          // setAverage(avgArray, users)
+          if (users != null) { setSchoolNama(Object.values(users)[0]?.school_name_small) }
 
         })
     } catch (e) {
@@ -266,15 +284,14 @@ const School = () => {
 
   const getWeekNumber = (quiz_name, i) => {
     let _inc = 0
-    if(quiz_name.includes('Spring')){
+    if (quiz_name?.includes('Spring')) {
       _inc = 200
-    }else if(quiz_name.includes('Autumn')){
+    } else if (quiz_name?.includes('Autumn')) {
       _inc = 100
-    }else if(quiz_name.includes('Summer')){
+    } else if (quiz_name?.includes('Summer')) {
       _inc = 300
-    }    
+    }
 
-    console.log('week ----->', quiz_name?.match(/WEEK (\d+)$/i) ? quiz_name?.match(/WEEK (\d+)$/i) : [])
     return quiz_name?.match(/WEEK (\d+)$/i) ? parseInt(quiz_name?.match(/WEEK (\d+)$/i)[1]) + _inc : []
   }
 
@@ -296,35 +313,47 @@ const School = () => {
     setTeacherFilter([...new Set(_teacherFilter)])
   }
 
-  const applyFilter = (email, year, header, data) => {
+  const applyFilter = (email, year, headers, data) => {
 
     setSelectedYear(year)
     setSelectedTeacher(email)
 
-    let _filterObj = {}
+    let filterHeader = headers.filter(({ year_name }) => year_name === year)
+    let sortedHeader = filterHeader.sort((a, b) => a.week - b.week)
+    // console.log('therer------>1Header', filterHeader)
+    setTableHeaders(sortedHeader)
 
-    Object.keys(data).forEach((key) => {
-      if (data[key]?.email_address === email 
-        // && data[key]?.year_name === year
-        ) {
-        _filterObj = { ..._filterObj, [`${key}`]: data[key] }
+    let filterEmailData = data.filter(({ email_address }) => email_address == email)
+    let filterFinalData = filterEmailData.filter(({ year_name }) => year_name == year)
+    // console.log('therer------>1', filterFinalData)
+    let usersObject = {}
+    filterFinalData.map((item) => {
+      // console.log('therer------>2', usersObject)
+      if (usersObject[item?.user_name]) {
+        usersObject[item?.user_name] = [...usersObject[item?.user_name], item]
       }
-    });
-
-    let filterData = header?.map(({ quiz_name, year_name }, index) => {
-      return {
-        year_name,
-        quiz_name,
-        index,
-        week: getWeekNumber(quiz_name)
+      else {
+        usersObject[item?.user_name] = [item]
       }
     })
+    setUsers(usersObject)
+    // console.log('therer------>2', usersObject)
+    return
 
-    filterData = filterData.filter(({ year_name }) => year_name === year)
-    let sorted = filterData.sort((a, b) => a.week - b.week)
+    // let filterData = header?.map(({ quiz_name, year_name }, index) => {
+    //   return {
+    //     year_name,
+    //     quiz_name,
+    //     index,
+    //     week: getWeekNumber(quiz_name)
+    //   }
+    // })
 
-    setTableData(_filterObj)
-    setTableHeaders(sorted)
+    // filterData = filterData.filter(({ year_name }) => year_name === year)
+    // let sorted = filterData.sort((a, b) => a.week - b.week)
+
+    // setTableData(_filterObj)
+    // setTableHeaders(sorted)
 
   }
 
@@ -342,20 +371,18 @@ const School = () => {
       setTotalQuizCount(_totalQuizCount)
     }
   }
+
   const handleYearSelect = (childName) => {
-    setSelectedYear(childName)
-    applyFilter(selectedTeacher, childName, tableHeadersAll, users)
+    applyFilter(selectedTeacher, childName, tableHeadersAll, quizesData)
   }
 
   const handleTeacherSelect = (childName) => {
-    setSelectedTeacher(childName)
-    applyFilter(childName, selectedYear, tableHeadersAll, users)
+    applyFilter(childName, selectedYear, tableHeadersAll, quizesData)
   }
-
 
   const handleChildSelect = (childName) => {
     setSelectedChild(childName);
-    setIsChildOpen(false);summer
+    setIsChildOpen(false); summer
   };
 
   const setSchoolNama = (val) => {
@@ -421,6 +448,11 @@ const School = () => {
   const getAverage = (item) => {
     let _avg = quizesAverages?.find(({ quiz_name }) => quiz_name === item)
     return _avg ? _avg.average_score.toFixed(2) : 0
+  }
+
+  const getMarks = (key, name) => {
+    let obj = users[key]?.find(({quiz_name}) => quiz_name == name )
+    return obj ? obj.percentage_score : '' 
   }
 
   return (
@@ -504,12 +536,12 @@ const School = () => {
       {/* filter bar starts here */}
 
       <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
-        {/* choose teacher dropdown */}        
+        {/* choose teacher dropdown */}
         <div className="grid gap-1">
           <label htmlFor="">Teacher</label>
           <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
-              <div className="inline-block relative" ref={dropdownRef1}>              
+              <div className="inline-block relative" ref={dropdownRef1}>
                 <button
                   onClick={() => setIsChildOpen(!isChildOpen)}
                   className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
@@ -530,29 +562,7 @@ const School = () => {
                 </button>
                 {isChildOpen && (
                   <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
-                    {/* {ChildNames.map((childName, index) => {
-                        return (
-                          <>
-                            <li
-                              className={
-                                index !== childName.length - 1
-                                  ? "border-b border-slate-400 cursor-pointer"
-                                  : "cursor-pointer"
-
-                              }
-                              key={index}
-                              onClick={() => handleChildSelect(childName)}
-                            >
-                              <span
-                                className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
-                              >
-                                {childName}
-                              </span>
-                            </li>
-                          </>
-                        );
-                      })} */}
-                    {teacherFilter.map((childName, index) => {
+                    {teacherFilter?.map((childName, index) => {
                       return (
                         <>
                           <li
@@ -569,8 +579,7 @@ const School = () => {
                             }}
                           >
                             <span
-                              className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
-                            >
+                              className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
                               {childName}
                             </span>
                           </li>
@@ -593,7 +602,7 @@ const School = () => {
                 <button
                   onClick={() => setIsTimeFrameOpen(!isTimeFrameOpen)}
                   className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
-                  
+
                   {selectedYear ? selectedYear : "Choose Year"}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -612,7 +621,7 @@ const School = () => {
                   isTimeFrameOpen &&
                   (
                     <ul className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-slate-800 shadow-md">
-                      {yearFilter.map((childName, index) => {
+                      {yearFilter?.map((childName, index) => {
                         return (
                           <>
                             <li
@@ -692,82 +701,62 @@ quiz5: 35,
 quiz5: 35,
 quiz5: 35,
 }</td> shadow-md sm:rounded-sm  lg:mx-auto sm:w-full mt-5">
-        {Boolean(tableHeaders.length) && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
-          <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
-            <thead className="text-xs text-white uppercase bg-[#17026b]">
-              <tr className="items-center">
-                <th
-                  scope="col"
-                  className="z-10 p-3 bg-[#17026b] text-white w-40"
-                >
-                  User Name
-                </th>
-                <th
-                  scope="col"
-                  className="z-10 p-3 bg-[#17026b] text-white w-96"
-                >
-                  Email
-                </th>
-                {
-                  tableHeaders?.map(({ quiz_name }) => (
-                    <th
-                      scope="col"
-                      className="p-3 bg-[#17026b] text-white w-40"
-                    >
-                      {quiz_name}
-                    </th>
-                  ))
-                }
-              </tr>
-            </thead>
-            <tbody>
-              {Object.values(tableData).map((student) => (
-                <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
-                  <td class="p-3">{student?.user_name}</td>
-                  <td class="p-3">{student?.email_address}</td>
-                  {
-                    tableHeaders?.map(({ index }) => (
-                      <td class="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(student?.quizes[index]) }}>{student?.quizes[index]}</td>
-                    ))
-                  }
+
+        {
+          Boolean(tableHeaders?.length) &&
+           true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+            <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
+              <thead className="text-xs text-white uppercase bg-[#17026b]">
+                <tr className="items-center">
+                  <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
+                  <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Email</th>
+                  {tableHeaders?.map(({ quiz_name }) => (<th scope="col" className="p-3 bg-[#17026b] text-white w-40"> {quiz_name}</th>))}
                 </tr>
-              ))}
-              {/* SMASH Maths Cohort  */}
-              <tr class="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-                <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
-                <td class="sticky left-40 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
-                {selectedChild === "" ? (
-                  <>
-                    {
-                      tableHeaders?.filter(({ year_name }) => selectedYear == 'Selected All' ? true : year_name == selectedYear)?.map(({ quiz_name }) => (
-                        <td class="p-3 text-center">
-                          {getAverage(quiz_name)}
-                        </td>
-                      ))
-                    }
-                    {/* {tableAverage?.map((average) => (
+              </thead>
+              <tbody>
+                {Object.keys(users).map((student) => (
+                  <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
+                    <td class="p-3">{users[student][0]?.user_name}</td>
+                    <td class="p-3">{users[student][0]?.email_address}</td>
+                    {tableHeaders?.map(({quiz_name }) => (<td class="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
+                  </tr>
+                ))}
+                {/* SMASH Maths Cohort  */}
+                <tr class="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
+                  <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
+                  <td class="sticky left-40 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
+                  {selectedChild === "" ? (
+                    <>
+                      {
+                        tableHeaders?.filter(({ year_name }) => selectedYear == 'Selected All' ? true : year_name == selectedYear)?.map(({ quiz_name }) => (
+                          <td class="p-3 text-center">
+                            {getAverage(quiz_name)}
+                          </td>
+                        ))
+                      }
+                      {/* {tableAverage?.map((average) => (
                       <td class="p-3 text-center">
                         {(average / totalQuizCount).toFixed(2)}
                       </td>
                     )
                     )} */}
-                  </>
-                ) : (
-                  <>
-                    {averages.map(
-                      (average, index) =>
-                        data.some((student) => student[`quiz${index + 1}`]) && (
-                          <td class="p-3 text-center">
-                            {average.toFixed(2)}
-                          </td>
-                        )
-                    )}
-                  </>
-                )}
-              </tr>
-            </tbody>
-          </table>
-        </div>}
+                    </>
+                  ) : (
+                    <>
+                      {averages.map(
+                        (average, index) =>
+                          data.some((student) => student[`quiz${index + 1}`]) && (
+                            <td class="p-3 text-center">
+                              {average.toFixed(2)}
+                            </td>
+                          )
+                      )}
+                    </>
+                  )}
+                </tr>
+              </tbody>
+            </table>
+          </div>}
       </div>
       {/* table ends here */}
       {/* ----------------------------------------------------------- */}
