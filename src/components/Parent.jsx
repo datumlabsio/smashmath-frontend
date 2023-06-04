@@ -199,6 +199,7 @@ const Parent = () => {
   const durationOption = ['Since Last 52 Weeks', 'Since Last September']
 
   useEffect(() => {
+
     const email = localStorage.getItem('userEmail')
     try {
       const token = localStorage.getItem('token')
@@ -240,10 +241,11 @@ const Parent = () => {
           setDataLoadin(false)
           const quizes = response?.quizes || [[]]
           setQuizesData(quizes)
-          quizes.map(x => 
-            {if(x.year_name === 'Multip'){
-             console.log('therer====>',x) 
-            }})
+          quizes.map(x => {
+            if (x.year_name === 'Multip') {
+              console.log('therer====>', x)
+            }
+          })
           const yearsFilters = quizes.map(x => x.year_name)
           const uniqueYearsFilters = [...new Set(yearsFilters)].sort()
           setYearFilter(uniqueYearsFilters)
@@ -352,11 +354,14 @@ const Parent = () => {
 
     console.log('therer------>1', data)
     let filterDurationlData = data
-    if(selectedDuraationParm === 'Since Last 52 Weeks'){
-      filterDurationlData = data.filter(({ date_submitted }) => new Date(date_submitted) >= addMilliseconds(new Date(), -364 * 24 * 60 * 60 * 1000, date_submitted))  
+    if (selectedDuraationParm === 'Since Last 52 Weeks') {
+      filterDurationlData = data.filter(({ date_submitted }) => new Date(date_submitted) >= addMilliseconds(new Date(), -364 * 24 * 60 * 60 * 1000, date_submitted))
+    }
+    else {
+      filterDurationlData = data.filter(({ date_submitted }) => new Date(date_submitted) <= new Date() && new Date(date_submitted) >= getFilterDate(date_submitted) )
     }
     let filterFinalData = filterDurationlData.filter(({ year_name }) => year_name == year)
-   
+
     let usersObject = {}
     filterFinalData.map((item) => {
       if (usersObject[item?.user_name]) {
@@ -509,6 +514,24 @@ const Parent = () => {
   const getMarks = (key, name) => {
     let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
     return obj ? obj.percentage_score : ''
+  }
+
+  const getFilterDate = (date) => {
+    const currentDate = new Date(date);
+    const monthNumber = currentDate.getMonth();
+
+    if (monthNumber > 8) {
+      let d = new Date();
+      let current_year = new Date(d.setFullYear(d.getFullYear())).getFullYear()
+      let new_date = new Date(current_year, 8, 1, 0, 0, 0, 0);
+      return new_date
+
+    } else {
+      let d = new Date();
+      let last_year = new Date(d.setFullYear(d.getFullYear() - 1)).getFullYear()
+      let new_date = new Date(last_year, 8, 1, 0, 0, 0, 0);
+      return new_date
+    }
   }
 
   return (
@@ -754,11 +777,11 @@ quiz5: 35,
             </thead>
             <tbody>
               {Object.keys(users).map((student) => (
-                  <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
-                    <td class="px-6 py-4">{users[student][0]?.user_name}</td>
-                    {tableHeaders?.map(({ quiz_name }) => (<td class="px-6 py-4 text-white w-8 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
-                  </tr>
-                ))}
+                <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
+                  <td class="px-6 py-4">{users[student][0]?.user_name}</td>
+                  {tableHeaders?.map(({ quiz_name }) => (<td class="px-6 py-4 text-white w-8 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
+                </tr>
+              ))}
               <tr class="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
                 <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
                 {/* <td class="sticky left-40 z-10 px-6 py-3 w-40"></td> */}
