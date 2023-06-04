@@ -242,7 +242,6 @@ const School = () => {
         .then(response => response.json())
         .then(response => {
           setDataLoadin(false)
-
           const quizes = response?.quizes || [[]]
           setQuizesData(quizes)
           const teacherFilters = quizes.map(x => x.email_address)
@@ -320,12 +319,16 @@ const School = () => {
 
     let filterHeader = headers.filter(({ year_name }) => year_name === year)
     let sortedHeader = filterHeader.sort((a, b) => a.week - b.week)
-    // console.log('therer------>1Header', filterHeader)
-    setTableHeaders(sortedHeader)
+    console.log('therer------>1Header', filterHeader)
+    // sortedHeader = [new Set(sortedHeader)]
+    const ids = sortedHeader.map(o => o.quiz_name)
+    const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
+    console.log('filtered---->',filtered)
+    setTableHeaders(filtered)
 
     let filterEmailData = data.filter(({ email_address }) => email_address == email)
     let filterFinalData = filterEmailData.filter(({ year_name }) => year_name == year)
-    // console.log('therer------>1', filterFinalData)
+    console.log('therer------>1', filterFinalData)
     let usersObject = {}
     filterFinalData.map((item) => {
       // console.log('therer------>2', usersObject)
@@ -451,8 +454,8 @@ const School = () => {
   }
 
   const getMarks = (key, name) => {
-    let obj = users[key]?.find(({quiz_name}) => quiz_name == name )
-    return obj ? obj.percentage_score : '' 
+    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
+    return obj ? obj.percentage_score : ''
   }
 
   return (
@@ -703,8 +706,7 @@ quiz5: 35,
 }</td> shadow-md sm:rounded-sm  lg:mx-auto sm:w-full mt-5">
 
         {
-          Boolean(tableHeaders?.length) &&
-           true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+          Boolean(tableHeaders?.length) && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
             <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
               <thead className="text-xs text-white uppercase bg-[#17026b]">
                 <tr className="items-center">
@@ -718,7 +720,7 @@ quiz5: 35,
                   <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
                     <td class="p-3">{users[student][0]?.user_name}</td>
                     <td class="p-3">{users[student][0]?.email_address}</td>
-                    {tableHeaders?.map(({quiz_name }) => (<td class="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
+                    {tableHeaders?.map(({ quiz_name }) => (<td class="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
                   </tr>
                 ))}
                 {/* SMASH Maths Cohort  */}

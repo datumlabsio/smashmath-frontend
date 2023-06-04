@@ -188,8 +188,8 @@ const Parent = () => {
   const [tableData, setTableData] = useState([])
   const [tableAverage, setTableAverage] = useState([])
   const [yearFilter, setYearFilter] = useState([])
-  const [teacherFilter, setTeacherFilter] = useState([])
   const [users, setUsers] = useState([])
+  const [quizesData, setQuizesData] = useState([])
   const [totalQuizCount, setTotalQuizCount] = useState(0)
   const [selectedDuraation, setSelectedDuraation] = useState('Since Last 52 Weeks')
   const [selectedYear, setSelectedYear] = useState('')
@@ -238,16 +238,42 @@ const Parent = () => {
         .then(response => response.json())
         .then(response => {
           setDataLoadin(false)
+          const quizes = response?.quizes || [[]]
+          setQuizesData(quizes)
+          quizes.map(x => 
+            {if(x.year_name === 'Multip'){
+             console.log('therer====>',x) 
+            }})
+          const yearsFilters = quizes.map(x => x.year_name)
+          const uniqueYearsFilters = [...new Set(yearsFilters)].sort()
+          setYearFilter(uniqueYearsFilters)
 
-          let { headers, users } = response?.quizes || [[], {}]
+          let filterData = quizes?.map(({ quiz_name, year_name }, index) => {
+            return {
+              year_name,
+              quiz_name,
+              index,
+              week: getWeekNumber(quiz_name)
+            }
+          })
+          setTableHeadersAll(filterData)
+          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes)
 
-          setTableHeadersAll(headers)
-          setTableData(users)
-          let avgArray = Array(headers.length).fill(0)
 
-          setUsers(users)
-          setFilter(users, headers)
-          setAverage(avgArray, users)
+
+          return
+
+          // let { headers, users } = response?.quizes || [[], {}]
+
+          // setTableHeadersAll(headers)
+          // setTableData(users)
+          // let avgArray = Array(headers.length).fill(0)
+
+          // setUsers(users)
+          // setFilter(users, headers)
+          // setAverage(avgArray, users)
+
+          //////////////////////////////////////////
 
           // setTableHeaders(response?.quizes?.headers)
           // setTableData(response?.quizes?.users)
@@ -270,13 +296,11 @@ const Parent = () => {
   }, [])
 
   const handleYearSelect = (childName) => {
-    setSelectedYear(childName)
-    applyFilter(selectedDuraation, childName, tableHeadersAll, users)
+    applyFilter(selectedDuraation, childName, tableHeadersAll, quizesData)
   }
 
   const handleDurationSelect = (childName) => {
-    setSelectedDuraation(childName)
-    applyFilter(childName, selectedYear, tableHeadersAll, users)
+    applyFilter(childName, selectedYear, tableHeadersAll, quizesData)
   }
 
   const getWeekNumber = (quiz_name, i) => {
@@ -312,9 +336,40 @@ const Parent = () => {
 
   }
 
-  const applyFilter = (selectedDuraationParm, year, header, data) => {
+  const applyFilter = (selectedDuraationParm, year, headers, data) => {
 
-    console.log('therere--->', data)
+    setSelectedYear(year)
+    setSelectedDuraation(selectedDuraationParm)
+
+    let filterHeader = headers.filter(({ year_name }) => year_name === year)
+    let sortedHeader = filterHeader.sort((a, b) => a.week - b.week)
+    console.log('therer------>1Header', filterHeader)
+    // sortedHeader = [new Set(sortedHeader)]
+    const ids = sortedHeader.map(o => o.quiz_name)
+    const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
+    console.log('filtered---->', filtered)
+    setTableHeaders(filtered)
+
+    console.log('therer------>1', data)
+    let filterDurationlData = data
+    if(selectedDuraationParm === 'Since Last 52 Weeks'){
+      filterDurationlData = data.filter(({ date_submitted }) => new Date(date_submitted) >= addMilliseconds(new Date(), -364 * 24 * 60 * 60 * 1000, date_submitted))  
+    }
+    let filterFinalData = filterDurationlData.filter(({ year_name }) => year_name == year)
+   
+    let usersObject = {}
+    filterFinalData.map((item) => {
+      if (usersObject[item?.user_name]) {
+        usersObject[item?.user_name] = [...usersObject[item?.user_name], item]
+      }
+      else {
+        usersObject[item?.user_name] = [item]
+      }
+    })
+    setUsers(usersObject)
+    console.log('therer------>2', usersObject)
+    return
+
     setSelectedYear(year)
 
     let _filterObj = {}
@@ -449,6 +504,11 @@ const Parent = () => {
   const getAverage = (item) => {
     let _avg = quizesAverages?.find(({ quiz_name }) => quiz_name === item)
     return _avg ? _avg.average_score.toFixed(2) : 0
+  }
+
+  const getMarks = (key, name) => {
+    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
+    return obj ? obj.percentage_score : ''
   }
 
   return (
@@ -629,7 +689,7 @@ const Parent = () => {
                               }
                               key={index}
                               onClick={() => {
-                                setIsTimeFrameOpen(!isTimeFrameOpen)                              
+                                setIsTimeFrameOpen(!isTimeFrameOpen)
                                 handleYearSelect(childName)
                               }}
                             >
@@ -684,43 +744,19 @@ quiz5: 35,
 quiz5: 35,
 quiz5: 35,
 }</td> shadow-md sm:rounded-sm  lg:mx-auto sm:w-full mt-10">
-        {Boolean(tableHeaders.length) && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+        {Boolean(tableHeaders?.length) && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
           <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-1-sticky">
             <thead className="text-xs text-white uppercase bg-[#17026b]">
               <tr className="items-center">
-                <th
-                  scope="col"
-                  className="px-6 py-3 bg-[#17026b] text-white w-96"
-                >
-                  Email
-                </th>
-                {
-                  // .filter(({ year_name }) => selectedYear == 'Selected All' ? true : year_name == selectedYear)
-
-                  tableHeaders?.map(({ quiz_name }) => (
-                    <th
-                      scope="col"
-                      className="px-6 py-3 bg-[#17026b] text-white w-40"
-                    >
-                      {quiz_name}
-                    </th>
-                  ))
-                }
+                <th scope="col" className="px-6 py-3 bg-[#17026b] text-white w-96">Email</th>
+                {tableHeaders?.map(({ quiz_name }) => (<th scope="col" className="px-6 py-3 bg-[#17026b] text-white w-40">{quiz_name}</th>))}
               </tr>
             </thead>
             <tbody>
-              {Object.values(tableData)
-                // .filter(({ year_name }) => selectedYear == 'Selected All' ? true : year_name == selectedYear)
-                // .filter(({ date_submitted }) => (selectedDuraation == 'Selected All' || selectedDuraation == 'Since Last September') ? true : new Date(date_submitted) >= addMilliseconds(new Date(), -364 * 24 * 60 * 60 * 1000, date_submitted))
-                .map((student) => (
+              {Object.keys(users).map((student) => (
                   <tr class="bg-white border border-[#17026b]  dark:border-gray-700 hover:bg-[#17026b] hover:text-white dark:hover:bg-gray-600 rounded-lg overflow-hidden">
-                    <td class="px-6 py-4">{localStorage.getItem('userEmail')}</td>
-                    {
-                      // Object.values(student?.quizes).map((item) => (
-                      tableHeaders?.map(({ index }) => (
-                        <td class="px-6 py-4 text-white w-8 text-center" style={{ backgroundColor: checkMarksColor(student?.quizes[index]) }}>{student?.quizes[index]}</td>
-                      ))
-                    }
+                    <td class="px-6 py-4">{users[student][0]?.user_name}</td>
+                    {tableHeaders?.map(({ quiz_name }) => (<td class="px-6 py-4 text-white w-8 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
                   </tr>
                 ))}
               <tr class="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
