@@ -263,7 +263,7 @@ const School = () => {
           })
           setTableHeadersAll(filterData)
           applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes)
-
+          if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
           return
 
           // let { headers, users } = response?.quizes || [[], {}]
