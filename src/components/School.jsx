@@ -245,7 +245,8 @@ const School = () => {
           const quizes = response?.quizes || [[]]
           setQuizesData(quizes)
           const teacherFilters = quizes.map(x => x.email_address)
-          const yearsFilters = quizes.map(x => x.year_name)
+          let yearsFilters = quizes.map(x => x.year_name)
+          yearsFilters = yearsFilters.filter(item => item.includes('Year'))
           const uniqueTeacherFilters = [...new Set(teacherFilters)]
           const uniqueYearsFilters = [...new Set(yearsFilters)].sort()
 

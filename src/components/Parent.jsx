@@ -246,7 +246,8 @@ const Parent = () => {
               console.log('therer====>', x)
             }
           })
-          const yearsFilters = quizes.map(x => x.year_name)
+          let yearsFilters = quizes.map(x => x.year_name)
+          yearsFilters = yearsFilters.filter(item => item.includes('Year'))
           const uniqueYearsFilters = [...new Set(yearsFilters)].sort()
           setYearFilter(uniqueYearsFilters)
 
