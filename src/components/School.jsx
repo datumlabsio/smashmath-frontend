@@ -340,7 +340,15 @@ const School = () => {
         usersObject[item?.user_name] = [item]
       }
     })
-    setUsers(usersObject)
+
+    const ordered = Object.keys(usersObject).sort().reduce(
+      (obj, key) => { 
+        obj[key] = usersObject[key]; 
+        return obj;
+      }, 
+      {}
+    );
+    setUsers(ordered)
     // console.log('therer------>2', usersObject)
     return
 
