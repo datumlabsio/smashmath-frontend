@@ -253,6 +253,11 @@ const School = () => {
           setTeacherFilter(uniqueTeacherFilters)
           setYearFilter(uniqueYearsFilters)
 
+          // console.log('bilal--->',"Year 4 - SP Autumn Term Week 14 - Christmas Practice 01"?.match(/WEEK (\d+)$/i)[1])
+          let arr = "Year 4 - SP Autumn Term Week 14 - Christmas Practice 01".split(' ')
+          console.log('bilal--->', parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]))
+
+
           let filterData = quizes?.map(({ quiz_name, year_name }, index) => {
             return {
               year_name,
@@ -261,6 +266,7 @@ const School = () => {
               week: getWeekNumber(quiz_name)
             }
           })
+
           setTableHeadersAll(filterData)
           applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes)
           if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
@@ -285,14 +291,15 @@ const School = () => {
   const getWeekNumber = (quiz_name, i) => {
     let _inc = 0
     if (quiz_name?.includes('Spring')) {
-      _inc = 200
-    } else if (quiz_name?.includes('Autumn')) {
-      _inc = 100
-    } else if (quiz_name?.includes('Summer')) {
       _inc = 300
+    } else if (quiz_name?.includes('Autumn')) {
+      _inc = 200
+    } else if (quiz_name?.includes('Summer')) {
+      _inc = 100
     }
 
-    return quiz_name?.match(/WEEK (\d+)$/i) ? parseInt(quiz_name?.match(/WEEK (\d+)$/i)[1]) + _inc : []
+    let arr = quiz_name.split(' ')
+    return arr.length ? parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]) + _inc : []
   }
 
   const setFilter = (dataSet, headers) => {
@@ -324,7 +331,7 @@ const School = () => {
     // sortedHeader = [new Set(sortedHeader)]
     const ids = sortedHeader.map(o => o.quiz_name)
     const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
-    console.log('filtered---->',filtered)
+    console.log('therer------>2', filtered)
     setTableHeaders(filtered)
 
     let filterEmailData = data.filter(({ email_address }) => email_address == email)
@@ -342,14 +349,15 @@ const School = () => {
     })
 
     const ordered = Object.keys(usersObject).sort().reduce(
-      (obj, key) => { 
-        obj[key] = usersObject[key]; 
+      (obj, key) => {
+        obj[key] = usersObject[key];
         return obj;
-      }, 
+      },
       {}
     );
     setUsers(ordered)
-    // console.log('therer------>2', usersObject)
+    console.log('therer------>2', usersObject)
+    console.log('therer------>2', usersObject)
     return
 
     // let filterData = header?.map(({ quiz_name, year_name }, index) => {

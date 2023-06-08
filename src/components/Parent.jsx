@@ -315,13 +315,10 @@ const Parent = () => {
     } else if (quiz_name.includes('Summer')) {
       _inc = 300
     }
-
-    // console.log('week ----->', 'Year 4 - Practice 1 (Summer Week 03'?.match(/WEEK (\d+)$/i)
-    console.log('week::', quiz_name?.match(/WEEK (\d+)\./i))
-
-    // // quiz_name?.match(/WEEK (\d+)$/i) ? quiz_name?.match(/WEEK (\d+)$/i) : []
-    // )
-    return quiz_name?.match(/WEEK (\d+)\./i) ? parseInt(quiz_name?.match(/WEEK (\d+)\./i)[1]) + _inc : []
+    
+    let arr = quiz_name.split(' ')
+    return arr.length ? parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]) + _inc : []
+    // return quiz_name?.match(/WEEK (\d+)\./i) ? parseInt(quiz_name?.match(/WEEK (\d+)\./i)[1]) + _inc : []
   }
 
   const setFilter = (dataSet, headers) => {
@@ -346,14 +343,10 @@ const Parent = () => {
 
     let filterHeader = headers.filter(({ year_name }) => year_name === year)
     let sortedHeader = filterHeader.sort((a, b) => a.week - b.week)
-    console.log('therer------>1Header', filterHeader)
-    // sortedHeader = [new Set(sortedHeader)]
     const ids = sortedHeader.map(o => o.quiz_name)
     const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
-    console.log('filtered---->', filtered)
     setTableHeaders(filtered)
 
-    console.log('therer------>1', data)
     let filterDurationlData = data
     if (selectedDuraationParm === 'Since Last 52 Weeks') {
       filterDurationlData = data.filter(({ date_submitted }) => new Date(date_submitted) >= addMilliseconds(new Date(), -364 * 24 * 60 * 60 * 1000, date_submitted))
@@ -381,7 +374,6 @@ const Parent = () => {
       {}
     );
     setUsers(ordered)
-    console.log('therer------>2', usersObject)
     return
 
     setSelectedYear(year)
