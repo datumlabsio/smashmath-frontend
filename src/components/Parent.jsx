@@ -309,11 +309,11 @@ const Parent = () => {
   const getWeekNumber = (quiz_name, i) => {
     let _inc = 0
     if (quiz_name.includes('Spring')) {
-      _inc = 200
-    } else if (quiz_name.includes('Autumn')) {
-      _inc = 100
-    } else if (quiz_name.includes('Summer')) {
       _inc = 300
+    } else if (quiz_name.includes('Autumn')) {
+      _inc = 200
+    } else if (quiz_name.includes('Summer')) {
+      _inc = 100
     }
     
     let arr = quiz_name.split(' ')
