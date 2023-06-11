@@ -309,11 +309,11 @@ const Parent = () => {
   const getWeekNumber = (quiz_name, i) => {
     let _inc = 0
     if (quiz_name.includes('Spring')) {
-      _inc = 300
+      _inc = 100
     } else if (quiz_name.includes('Autumn')) {
       _inc = 200
     } else if (quiz_name.includes('Summer')) {
-      _inc = 100
+      _inc = 300
     }
     
     let arr = quiz_name.split(' ')
@@ -342,7 +342,7 @@ const Parent = () => {
     setSelectedDuraation(selectedDuraationParm)
 
     let filterHeader = headers.filter(({ year_name }) => year_name === year)
-    let sortedHeader = filterHeader.sort((a, b) => a.week - b.week)
+    let sortedHeader = filterHeader.sort((a, b) => b.week - a.week)
     const ids = sortedHeader.map(o => o.quiz_name)
     const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
     setTableHeaders(filtered)
