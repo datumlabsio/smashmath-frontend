@@ -19,7 +19,7 @@ const SchoolDashboard = () => {
     .then(response => setSchools(response))
   }, [schools])
   
-
+  console.log("nidal")
   return (
     <div className="w-full overflow-hidden mb-10">
       {'HEllo '}
@@ -94,13 +94,13 @@ const SchoolDashboard = () => {
       <div className="flex mx-auto w-5/6">
         <div className="flex flex-col">
           <label
-            for="teacher"
+            // for="teacher"
             class="block mb-2 text-sm font-bold text-[#17026b] dark:text-white"
           >
             Choose child
           </label>
           <select
-            id="teacher"
+            // id="teacher"
             class=" bg-[#17026b] border border-gray-300 text-white text-sm rounded-sm focus:ring-blue-500 focus:border-blue-500 block w-32 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           >
             <option value="Math" className="bg-white text-[#17026b]">
@@ -113,13 +113,13 @@ const SchoolDashboard = () => {
         </div>
         <div className="flex flex-col w-5/6 mx-auto">
           <label
-            for="year"
+            // for="year"
             class="block mb-2 text-sm font-bold text-[#17026b] dark:text-white"
           >
             Time Frame
           </label>
           <select
-            id="year"
+            // id="year"
             class=" bg-[#17026b] border border-[#17026b] text-white text-sm rounded-sm focus:ring-[#17026b] focus:border-[#17026b] block w-32 p-2.5  dark:text-white "
           >
             <option disabled className="bg-white text-gray-400">

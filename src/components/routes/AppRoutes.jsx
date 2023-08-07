@@ -5,6 +5,7 @@ import Parent from "../Parent";
 import School from "../School";
 import SignUp from "../SignUp";
 import Login from "../Login";
+import SchoolParent from "../SchoolParent";
 
 const AppRoutes = () => {
   return (
@@ -15,6 +16,7 @@ const AppRoutes = () => {
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/parent-dashboard" element={<Parent />} />
         <Route path="/school-dashboard" element={<School />} />
+        <Route path="/extra-dashboard" element={<SchoolParent />} />
       </Routes>
     </BrowserRouter>
   );
