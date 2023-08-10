@@ -175,11 +175,11 @@ const School = () => {
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isChildOpen, setIsChildOpen] = useState(false);
   const [selectedChild, setSelectedChild] = useState("");
-  const [isChildOpen2, setIsChildOpen2] = useState(false);
   const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app';
   const testURL = 'https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api'
 
   const [isTimeFrameOpen, setIsTimeFrameOpen] = useState(false);
+  const [isChildOpen2, setIsChildOpen2] = useState(false);
   const [studentOpen, setStudentOpen] = useState(false);
   const [yearOpen, setYearOpen] = useState(false);
   // const [fromDate, setFromDate] = useState("");
@@ -219,6 +219,7 @@ const School = () => {
   const [selectedYear, setSelectedYear] = useState()
   const [dataLoadin, setDataLoadin] = useState(true)
   const [quizesAverages, setQuizesAverages] = useState()
+  const [allUniqueUsers, setallUniqueUsers] = useState([])
   const [chartsData, setChartsData] = useState([])
   const [filteredChartData, setFilteredChartData] = useState(initialChartData)
   const [chartTeacherList, setChartTeacherList] = useState([])
@@ -252,6 +253,27 @@ const School = () => {
 
   }, [])
 
+  useEffect(() => {
+    try {
+      const token = localStorage.getItem('token')
+      fetch(testURL + '/getuser', {
+        method: 'GET',
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+          "Authorization": token ? `${token}` : null
+        }
+      })
+        .then(response => response.json())
+        .then(response => {
+          setallUniqueUsers(response.data)
+        })
+    } catch (e) {
+      setDataLoadin(false)
+    }
+
+  }, [])
+
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
@@ -275,7 +297,7 @@ const School = () => {
       })
         .then(response => response.json())
         .then(response => {
-          setDataLoadin(false)
+          // setDataLoadin(false)
           const quizes = response?.quizes || [[]]
           setQuizesData(quizes)
           const teacherFilters = quizes.map(x => x.email_address)
@@ -329,6 +351,8 @@ const School = () => {
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
     try {
+      
+      setDataLoadin(true)
       const token = localStorage.getItem('token')
       fetch(testURL + '/linechart', {
         method: 'GET',
@@ -351,9 +375,14 @@ const School = () => {
             }
           }
           setChartYearList(allIntegersYear);
-
           setChartsData(response?.data)
+          setDataLoadin(false)
         })
+        .then( response =>{
+          setDataLoadin(false)
+        }
+
+        )
     } catch (e) {
       setDataLoadin(false)
     }
@@ -612,7 +641,8 @@ const School = () => {
       }
       return acc;
     }, {});
-    const filteredData = Object.values(uniqueObjectsById);
+    let filteredData = Object.values(uniqueObjectsById);
+    filteredData = filteredData.filter(item => item.percentage_score > 0)
     const sumOfAllQuizes = filteredData.reduce((acc, item) => acc + item['percentage_score'], 0)
     // console.log(quiz, filterQuizeTeacherYear);
     return filterQuizeTeacherYear.length === 0 ? '-' :(sumOfAllQuizes / filteredData.length).toFixed(2);
@@ -639,18 +669,93 @@ const School = () => {
   }
 
   const getStudentEffort = (student) =>{
-    const studentData = quizesData.filter(item => item.user_name === student);
+    const studentData = quizesData.filter(item => item.user_name === student && item.year_name === selectedYear && item.percentage_score > 0);
+    if(studentData.length === 0) return '-';
     // Calculate the effort score for the student user_name
     const totalQuizzes = studentData.length;
-    const completedQuizzes = studentData.filter(item => item.status === 'submitted').length;
+    let completedQuizzes = studentData.filter(item => item.status === 'submitted').length;
+    // completedQuizzes = completedQuizzes.filter(item => item.percentage_score > 0)
     const effortScore = (completedQuizzes / totalQuizzes) * 100;
     return effortScore === 0 ? '-' : effortScore.toFixed(2);
   }
 
-  const UpdateFullName = (e, user_name, email_address) =>{
+  const UpdateFullName = (e, username ) =>{
     const full_name = e.target.value;
-    console.log(`Full name for update`, full_name);
+    console.log(full_name)
+    const found = allUniqueUsers.filter(item => item.user_name === username);
+    const id = found[0].id;
     const email = localStorage.getItem('userEmail')
+    
+    // for (let i = 0; i < allUniqueUsers.length; i++) {
+    //   if (array[i].id === id) {
+    //     array[i].full_name = full_name;
+    //     break;  // Assuming you only want to update the first occurrence with id
+    //   }
+    // }
+    
+    // let temp = [...allUniqueUsers];
+    // for (let user of temp) {
+    //   if (user.id === id) {
+    //     console.log(user)
+    //     user.full_name = full_name;
+    //     console.log(user)
+    //     break;
+    //   }
+    // }
+
+    const updatedData = allUniqueUsers.map(user => {
+      if (user.id === id) {
+        const modified =  { ...user, full_name: full_name }
+        return modified;
+      }
+      return user;
+    });
+    setallUniqueUsers(updatedData);
+    // try {
+    //   const token = localStorage.getItem('token')
+    //   fetch(testURL + '/updateuser', {
+    //     method: 'PUT',
+    //     headers: {
+    //       "Access-Control-Allow-Origin": "*",
+    //       "Content-Type": "application/json",
+    //       "Authorization": token ? `${token}` : null
+    //     },
+    //     body: JSON.stringify({
+    //       full_name,
+    //       id,
+    //     })
+    //   })
+    //     .then(response => {
+    //       // window.location.reload();
+    //     })
+    // } catch (e) {
+    //   setDataLoadin(false)
+    // }
+  }
+
+  const UpdateFullNameDB = (e, username ) =>{
+    const full_name = e.target.value;
+    console.log(full_name)
+    const found = allUniqueUsers.filter(item => item.user_name === username);
+    const id = found[0].id;
+    const email = localStorage.getItem('userEmail')
+    
+    // for (let i = 0; i < allUniqueUsers.length; i++) {
+    //   if (array[i].id === id) {
+    //     array[i].full_name = full_name;
+    //     break;  // Assuming you only want to update the first occurrence with id
+    //   }
+    // }
+    
+    // let temp = [...allUniqueUsers];
+    // for (let user of temp) {
+    //   if (user.id === id) {
+    //     console.log(user)
+    //     user.full_name = full_name;
+    //     console.log(user)
+    //     break;
+    //   }
+    // }
     try {
       const token = localStorage.getItem('token')
       fetch(testURL + '/updateuser', {
@@ -662,13 +767,19 @@ const School = () => {
         },
         body: JSON.stringify({
           full_name,
-          user_name,
-          email_address
+          id,
         })
       })
-        .then(response => response.json())
         .then(response => {
-          setQuizesAverages(response.quizes.averages)
+          // window.location.reload();
+          const updatedData = allUniqueUsers.map(user => {
+            if (user.id === id) {
+              const modified =  { ...user, full_name: full_name }
+              return modified;
+            }
+            return user;
+          });
+          setallUniqueUsers(updatedData);
         })
     } catch (e) {
       setDataLoadin(false)
@@ -688,7 +799,7 @@ const School = () => {
     const studentAvg = DataToArrayOfMonths(filteredByStudent);
     const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
     // console.log(filteredByClass)
-    // console.log(`Final Data`, filteredByStudent);
+    // console.log(`Final Data`, filteredByClass);
     setFilteredChartData(ToSingleObj);
   }
 
@@ -738,6 +849,12 @@ const School = () => {
       }
     });
     return result;
+  }
+
+  const getFullName = (username) => {
+    const found = allUniqueUsers.filter(item => item.user_name == username)
+    console.log(username , found[0]?.full_name)
+    return found[0]?.full_name
   }
 
   return (
@@ -1094,8 +1211,8 @@ quiz5: 35,
                 {Object.keys(users).map((student) => (
                   <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
                     <td className="p-3">{users[student][0]?.user_name}</td>
-                    <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td>
-                    {/* <td className="p-3">{users[student][0]?.email_address}</td> */}
+                    <td className="p-3"><input value={getFullName(users[student][0]?.user_name)} className="h-8" placeholder="Enter name here" onChange={(e) => UpdateFullName(e, users[student][0]?.user_name)} onBlur={(e) => UpdateFullNameDB(e, users[student][0]?.user_name)}/></td>
+                    {/* <td className="p-3">{users[student][0]?.full_name}</td> */}
                     <td className="p-3 text-center">{getStudentaverage(users[student][0]?.user_name)}</td>
                     <td className="p-3 text-center">{getStudentEffort(users[student][0]?.user_name)}</td>
                     {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
