@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CustomLoader } from "../components/Loader";
 import LineCharts from "./LineCharts";
-
+import {datachartslinefromfile} from './lineChart'
 const ChildNames = ["Ali", "Usama", "Omair", "Talha", "Agha", "Hassan"];
 const data = [
   {
@@ -175,11 +175,11 @@ const School = () => {
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isChildOpen, setIsChildOpen] = useState(false);
   const [selectedChild, setSelectedChild] = useState("");
-  const [isChildOpen2, setIsChildOpen2] = useState(false);
   const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app';
   const testURL = 'https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api'
 
   const [isTimeFrameOpen, setIsTimeFrameOpen] = useState(false);
+  const [isChildOpen2, setIsChildOpen2] = useState(false);
   const [studentOpen, setStudentOpen] = useState(false);
   const [yearOpen, setYearOpen] = useState(false);
   // const [fromDate, setFromDate] = useState("");
@@ -215,11 +215,12 @@ const School = () => {
   const [users, setUsers] = useState([])
   const [quizesData, setQuizesData] = useState([])
   const [totalQuizCount, setTotalQuizCount] = useState(0)
-  const [selectedTeacher, setSelectedTeacher] = useState()
+  const [selectedTeacher, setSelectedTeacher] = useState(null)
   const [selectedYear, setSelectedYear] = useState()
   const [dataLoadin, setDataLoadin] = useState(true)
   const [quizesAverages, setQuizesAverages] = useState()
-  const [chartsData, setChartsData] = useState([])
+  const [allUniqueUsers, setallUniqueUsers] = useState([])
+  const [chartsData, setChartsData] = useState(datachartslinefromfile)
   const [filteredChartData, setFilteredChartData] = useState(initialChartData)
   const [chartTeacherList, setChartTeacherList] = useState([])
   const [selectedChartTeacher, setSelectedChartTeacher] = useState()
@@ -252,7 +253,6 @@ const School = () => {
 
   }, [])
 
-
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
     // fetch(API_URL + '/api/parent_dashboard', {teacher_dashboard
@@ -275,7 +275,7 @@ const School = () => {
       })
         .then(response => response.json())
         .then(response => {
-          setDataLoadin(false)
+          // setDataLoadin(false)
           const quizes = response?.quizes || [[]]
           setQuizesData(quizes)
           const teacherFilters = quizes.map(x => x.email_address)
@@ -329,6 +329,8 @@ const School = () => {
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
     try {
+      
+      setDataLoadin(true)
       const token = localStorage.getItem('token')
       fetch(testURL + '/linechart', {
         method: 'GET',
@@ -351,14 +353,59 @@ const School = () => {
             }
           }
           setChartYearList(allIntegersYear);
-
           setChartsData(response?.data)
+          setDataLoadin(false)
         })
+        .then( response =>{
+          setDataLoadin(false)
+        }
+
+        )
     } catch (e) {
       setDataLoadin(false)
     }
 
+    // Test Data.json code
+    // const years = chartsData.map(item => item.name[1]);
+    //       const minYear = years.reduce((min, current) => (current < min ? current : min), years[0]);
+    //       const maxYear = years.reduce((max, current) => (current > max ? current : max), years[0]);
+    //       const allIntegersYear = [];
+    //       for (let i = parseInt(minYear, 10); i <= parseInt(maxYear, 10); i++) {
+    //         if (!isNaN(i)) {
+    //           allIntegersYear.push(i);
+    //         }
+    //       }
+    //       setChartYearList(allIntegersYear);
+
   }, [])
+
+  // Get User's Data from DB
+  useEffect(() => {
+    console.log(`Selected teachersssss` , selectedTeacher)
+    setDataLoadin(true)
+    try {
+      const token = localStorage.getItem('token')
+      const email = selectedTeacher;
+      fetch(testURL + '/user', {
+        method: 'POST',
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+          "Authorization": token ? `${token}` : null
+        },
+        body: JSON.stringify({
+          email
+        })
+      })
+        .then(response => response.json())
+        .then(response => {
+          setallUniqueUsers(response.data)
+          setDataLoadin(false)
+        })
+    } catch (e) {
+      setDataLoadin(false)
+    }
+  }, [selectedTeacher])
 
   const getWeekNumber = (quiz_name, i) => {
     let _inc = 0
@@ -612,7 +659,8 @@ const School = () => {
       }
       return acc;
     }, {});
-    const filteredData = Object.values(uniqueObjectsById);
+    let filteredData = Object.values(uniqueObjectsById);
+    filteredData = filteredData.filter(item => item.percentage_score > 0)
     const sumOfAllQuizes = filteredData.reduce((acc, item) => acc + item['percentage_score'], 0)
     // console.log(quiz, filterQuizeTeacherYear);
     return filterQuizeTeacherYear.length === 0 ? '-' :(sumOfAllQuizes / filteredData.length).toFixed(2);
@@ -639,18 +687,93 @@ const School = () => {
   }
 
   const getStudentEffort = (student) =>{
-    const studentData = quizesData.filter(item => item.user_name === student);
+    const studentData = quizesData.filter(item => item.user_name === student && item.year_name === selectedYear && item.percentage_score > 0);
+    if(studentData.length === 0) return '-';
     // Calculate the effort score for the student user_name
     const totalQuizzes = studentData.length;
-    const completedQuizzes = studentData.filter(item => item.status === 'submitted').length;
+    let completedQuizzes = studentData.filter(item => item.status === 'submitted').length;
+    // completedQuizzes = completedQuizzes.filter(item => item.percentage_score > 0)
     const effortScore = (completedQuizzes / totalQuizzes) * 100;
     return effortScore === 0 ? '-' : effortScore.toFixed(2);
   }
 
-  const UpdateFullName = (e, user_name, email_address) =>{
+  const UpdateFullName = (e, username ) =>{
     const full_name = e.target.value;
-    console.log(`Full name for update`, full_name);
+    console.log(full_name)
+    const found = allUniqueUsers.filter(item => item.user_name === username);
+    const id = found[0].id;
     const email = localStorage.getItem('userEmail')
+    
+    // for (let i = 0; i < allUniqueUsers.length; i++) {
+    //   if (array[i].id === id) {
+    //     array[i].full_name = full_name;
+    //     break;  // Assuming you only want to update the first occurrence with id
+    //   }
+    // }
+    
+    // let temp = [...allUniqueUsers];
+    // for (let user of temp) {
+    //   if (user.id === id) {
+    //     console.log(user)
+    //     user.full_name = full_name;
+    //     console.log(user)
+    //     break;
+    //   }
+    // }
+
+    const updatedData = allUniqueUsers.map(user => {
+      if (user.id === id) {
+        const modified =  { ...user, full_name: full_name }
+        return modified;
+      }
+      return user;
+    });
+    setallUniqueUsers(updatedData);
+    // try {
+    //   const token = localStorage.getItem('token')
+    //   fetch(testURL + '/updateuser', {
+    //     method: 'PUT',
+    //     headers: {
+    //       "Access-Control-Allow-Origin": "*",
+    //       "Content-Type": "application/json",
+    //       "Authorization": token ? `${token}` : null
+    //     },
+    //     body: JSON.stringify({
+    //       full_name,
+    //       id,
+    //     })
+    //   })
+    //     .then(response => {
+    //       // window.location.reload();
+    //     })
+    // } catch (e) {
+    //   setDataLoadin(false)
+    // }
+  }
+
+  const UpdateFullNameDB = (e, username ) =>{
+    const full_name = e.target.value;
+    console.log(full_name)
+    const found = allUniqueUsers.filter(item => item.user_name === username);
+    const id = found[0].id;
+    const email = localStorage.getItem('userEmail')
+    
+    // for (let i = 0; i < allUniqueUsers.length; i++) {
+    //   if (array[i].id === id) {
+    //     array[i].full_name = full_name;
+    //     break;  // Assuming you only want to update the first occurrence with id
+    //   }
+    // }
+    
+    // let temp = [...allUniqueUsers];
+    // for (let user of temp) {
+    //   if (user.id === id) {
+    //     console.log(user)
+    //     user.full_name = full_name;
+    //     console.log(user)
+    //     break;
+    //   }
+    // }
     try {
       const token = localStorage.getItem('token')
       fetch(testURL + '/updateuser', {
@@ -662,13 +785,19 @@ const School = () => {
         },
         body: JSON.stringify({
           full_name,
-          user_name,
-          email_address
+          id,
         })
       })
-        .then(response => response.json())
         .then(response => {
-          setQuizesAverages(response.quizes.averages)
+          // window.location.reload();
+          const updatedData = allUniqueUsers.map(user => {
+            if (user.id === id) {
+              const modified =  { ...user, full_name: full_name }
+              return modified;
+            }
+            return user;
+          });
+          setallUniqueUsers(updatedData);
         })
     } catch (e) {
       setDataLoadin(false)
@@ -688,8 +817,9 @@ const School = () => {
     const studentAvg = DataToArrayOfMonths(filteredByStudent);
     const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
     // console.log(filteredByClass)
-    // console.log(`Final Data`, filteredByStudent);
+    console.log(`Final Data`, year, teacher, student,filteredByYear);
     setFilteredChartData(ToSingleObj);
+    
   }
 
   const DataToArrayOfMonths = (data) =>{
@@ -701,13 +831,13 @@ const School = () => {
     // Loop through the given data and store average scores for each month
     data.forEach(item => {
       const monthName = item.name[0];
-      const averageScore = item.averagescore;
+      const cohort = item.cohort;
 
       if (!monthsData[monthName]) {
-        monthsData[monthName] = averageScore;
+        monthsData[monthName] = cohort;
         monthOccurrences[monthName] = 1;
       } else {
-        monthsData[monthName] += averageScore;
+        monthsData[monthName] += cohort;
         monthOccurrences[monthName]++;
       }
     });
@@ -719,7 +849,7 @@ const School = () => {
       const occurrenceCount = monthOccurrences[month] || 0;
       return {
         name: month,
-        averageScore: occurrenceCount > 0 ? averageScore / occurrenceCount : 0
+        cohort: occurrenceCount > 0 ? averageScore / occurrenceCount : 0
       };
     });
 
@@ -732,12 +862,18 @@ const School = () => {
     const result = allMonths.map((month, index) => {
       return {
         month: month,
-        CohortAvg: CohortAvg[index].averageScore,
-        ClassAvg: ClassAvg[index].averageScore,
-        studentAvg: studentAvg[index].averageScore,
+        CohortAvg: CohortAvg[index].cohort,
+        ClassAvg: ClassAvg[index].cohort,
+        studentAvg: studentAvg[index].cohort,
       }
     });
     return result;
+  }
+
+  const getFullName = (username) => {
+    const found = allUniqueUsers.filter(item => item.user_name == username)
+    console.log(username , found[0]?.full_name)
+    return found[0]?.full_name
   }
 
   return (
@@ -1094,8 +1230,8 @@ quiz5: 35,
                 {Object.keys(users).map((student) => (
                   <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
                     <td className="p-3">{users[student][0]?.user_name}</td>
-                    <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td>
-                    {/* <td className="p-3">{users[student][0]?.email_address}</td> */}
+                    <td className="p-3"><input value={getFullName(users[student][0]?.user_name)} className="h-8" placeholder="Enter name here" onChange={(e) => UpdateFullName(e, users[student][0]?.user_name)} onBlur={(e) => UpdateFullNameDB(e, users[student][0]?.user_name)}/></td>
+                    {/* <td className="p-3">{users[student][0]?.full_name}</td> */}
                     <td className="p-3 text-center">{getStudentaverage(users[student][0]?.user_name)}</td>
                     <td className="p-3 text-center">{getStudentEffort(users[student][0]?.user_name)}</td>
                     {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
@@ -1104,6 +1240,34 @@ quiz5: 35,
               </tbody>
             </table>
           </div>}
+          {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+          <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
+            <thead className="text-xs text-white uppercase bg-[#17026b]">
+              <tr className="items-center">
+                <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
+                {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th> */}
+                <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Avg</th>
+                <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Effort Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* SMASH Maths Cohort  */}
+              <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
+                {/* <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td> */}
+                <td className="sticky left-40 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
+                <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
+                <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
+              </tr>
+
+              
+                <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
+                  {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
+                  <td className="p-3 text-center" rowSpan='3'>No Data Avaiable.</td>
+                  
+                </tr>
+            </tbody>
+          </table>
+        </div>}  
       </div>
       {/* table ends here */}
       {/* ----------------------------------------------------------- */}
