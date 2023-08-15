@@ -29,7 +29,6 @@ jobs:
         # execute commands on ssh
         script: |
           cd /root/dev.smashmath-frontend
-          git checkout dev
           git pull
           npm run build
           pm2 restart npm -- start
