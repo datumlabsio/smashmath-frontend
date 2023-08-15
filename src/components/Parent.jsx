@@ -256,14 +256,18 @@ const Parent = () => {
 
   useEffect(() => {
     try {
+      const email = localStorage.getItem('userEmail')
       const token = localStorage.getItem('token')
-      fetch(testURL + '/getuser', {
-        method: 'GET',
+      fetch(testURL + '/user', {
+        method: 'POST',
         headers: {
           "Access-Control-Allow-Origin": "*",
           "Content-Type": "application/json",
           "Authorization": token ? `${token}` : null
-        }
+        },
+        body: JSON.stringify({
+          email
+        })
       })
         .then(response => response.json())
         .then(response => {
@@ -732,13 +736,13 @@ const Parent = () => {
     // Loop through the given data and store average scores for each month
     data.forEach(item => {
       const monthName = item.name[0];
-      const averageScore = item.averagescore;
+      const cohort = item.cohort;
 
       if (!monthsData[monthName]) {
-        monthsData[monthName] = averageScore;
+        monthsData[monthName] = cohort;
         monthOccurrences[monthName] = 1;
       } else {
-        monthsData[monthName] += averageScore;
+        monthsData[monthName] += cohort;
         monthOccurrences[monthName]++;
       }
     });
@@ -750,7 +754,7 @@ const Parent = () => {
       const occurrenceCount = monthOccurrences[month] || 0;
       return {
         name: month,
-        averageScore: occurrenceCount > 0 ? averageScore / occurrenceCount : 0
+        cohort: occurrenceCount > 0 ? averageScore / occurrenceCount : 0
       };
     });
 
@@ -763,9 +767,9 @@ const Parent = () => {
     const result = allMonths.map((month, index) => {
       return {
         month: month,
-        CohortAvg: CohortAvg[index].averageScore,
-        ClassAvg: ClassAvg[index].averageScore,
-        studentAvg: studentAvg[index].averageScore,
+        CohortAvg: CohortAvg[index].cohort,
+        ClassAvg: ClassAvg[index].cohort,
+        studentAvg: studentAvg[index].cohort,
       }
     });
     return result;
@@ -1068,6 +1072,34 @@ quiz5: 35,
                   {tableHeaders?.map(({ quiz_name }) => (<td class="px-6 py-4 text-white w-8 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
                 </tr>
               ))}
+            </tbody>
+          </table>
+        </div>}
+        {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+          <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
+            <thead className="text-xs text-white uppercase bg-[#17026b]">
+              <tr className="items-center">
+                <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
+                {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th> */}
+                <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Avg</th>
+                <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Effort Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* SMASH Maths Cohort  */}
+              <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
+                {/* <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td> */}
+                <td className="sticky left-40 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
+                <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
+                <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
+              </tr>
+
+              
+                <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
+                  {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
+                  <td className="p-3 text-center" rowSpan='3'>No Data Avaiable.</td>
+                  
+                </tr>
             </tbody>
           </table>
         </div>}
