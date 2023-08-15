@@ -279,39 +279,39 @@ const Parent = () => {
 
   }, [])
 
-  useEffect(() => {
-    const email = localStorage.getItem('userEmail')
-    try {
-      const token = localStorage.getItem('token')
-      fetch(testURL + '/linechart', {
-        method: 'GET',
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-          "Authorization": token ? `${token}` : null
-        }
-      })
-        .then(response => response.json())
-        .then(response => {
-          // Get list of years for dropdown in choose year
-          const years = response?.data.map(item => item.name[1]);
-          const minYear = years.reduce((min, current) => (current < min ? current : min), years[0]);
-          const maxYear = years.reduce((max, current) => (current > max ? current : max), years[0]);
-          const allIntegersYear = [];
-          for (let i = parseInt(minYear, 10); i <= parseInt(maxYear, 10); i++) {
-            if (!isNaN(i)) {
-              allIntegersYear.push(i);
-            }
-          }
-          setChartYearList(allIntegersYear);
-          setChartsData(response?.data)
-          setDataLoadin(false)
-        })
-    } catch (e) {
-      setDataLoadin(false)
-    }
+  // useEffect(() => {
+  //   const email = localStorage.getItem('userEmail')
+  //   try {
+  //     const token = localStorage.getItem('token')
+  //     fetch(testURL + '/linechart', {
+  //       method: 'GET',
+  //       headers: {
+  //         "Access-Control-Allow-Origin": "*",
+  //         "Content-Type": "application/json",
+  //         "Authorization": token ? `${token}` : null
+  //       }
+  //     })
+  //       .then(response => response.json())
+  //       .then(response => {
+  //         // Get list of years for dropdown in choose year
+  //         const years = response?.data.map(item => item.name[1]);
+  //         const minYear = years.reduce((min, current) => (current < min ? current : min), years[0]);
+  //         const maxYear = years.reduce((max, current) => (current > max ? current : max), years[0]);
+  //         const allIntegersYear = [];
+  //         for (let i = parseInt(minYear, 10); i <= parseInt(maxYear, 10); i++) {
+  //           if (!isNaN(i)) {
+  //             allIntegersYear.push(i);
+  //           }
+  //         }
+  //         setChartYearList(allIntegersYear);
+  //         setChartsData(response?.data)
+  //         setDataLoadin(false)
+  //       })
+  //   } catch (e) {
+  //     setDataLoadin(false)
+  //   }
 
-  }, [])
+  // }, [])
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
@@ -345,6 +345,17 @@ const Parent = () => {
           setYearFilter(uniqueYearsFilters)
           setChartTeacherList(uniqueTeacherFilters)
 
+          // Filter Unique Year for chart
+          const uniqueYears = new Set();
+          quizes.forEach(item => {
+            const year = new Date(item.date_submitted).getFullYear();
+            uniqueYears.add(year);
+          });
+          const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
+          setChartYearList(sortedUniqueYears);
+          console.log(`Filtered yearssss` , sortedUniqueYears)
+
+
           let filterData = quizes?.map(({ quiz_name, year_name }, index) => {
             return {
               year_name,
@@ -354,9 +365,8 @@ const Parent = () => {
             }
           })
           setTableHeadersAll(filterData)
-          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes)
-
-
+          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes)  
+          setDataLoadin(false)
 
           return
 
@@ -716,15 +726,59 @@ const Parent = () => {
     filterChartaData ( childName, selectedChartTeacher, chartSelectedStudent)
   }
   const filterChartaData = ( year, teacher, student = "NotSelected") => {
-    const filteredByYear = chartsData.filter(item => item.name[1] === year);
+    // const filteredByYear = chartsData.filter(item => item.name[1] === year);
+    // const CohortAvg = DataToArrayOfMonths(filteredByYear);
+    // const filteredByClass = [];    
+    // const ClassAvg = DataToArrayOfMonths(filteredByClass);
+    // const filteredByStudent = filteredByYear.filter(item => item.username == teacher);    
+    // const studentAvg = DataToArrayOfMonths(filteredByStudent);
+    // const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
+    // // console.log(filteredByClass)
+    // console.log(`Final Data`, filteredByClass, ToSingleObj);
+    // setFilteredChartData(ToSingleObj);
+
+    // Test
+    const data = [...quizesData];
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const modifiedArray = data?.map(item => {
+      const [year, month] = item?.date_submitted.split('-');
+      return {
+        ...item,
+        date_submitted: [parseInt(year), months[parseInt(month) - 1]]
+      };
+    });
+    let filteredByYear = modifiedArray?.filter(item => item?.date_submitted[0] == year && item?.percentage_score > 0);
     const CohortAvg = DataToArrayOfMonths(filteredByYear);
-    const filteredByClass = [];    
-    const ClassAvg = DataToArrayOfMonths(filteredByClass);
-    const filteredByStudent = filteredByYear.filter(item => item.username == teacher);    
-    const studentAvg = DataToArrayOfMonths(filteredByStudent);
+    console.log(`year filter`, filteredByYear)
+    const filteredByClass = filteredByYear.filter(item => item.email_address === teacher);
+    // Get Only First Quiz from Same Quiz by User
+    const uniqueObjectsByQuiz = filteredByClass.reduce((acc, obj) => {
+      const key = `${obj.user_name}-${obj.quiz_name}`;
+      if (!acc[key]) {
+        acc[key] = obj;
+      }
+      return acc;
+    }, {});   
+    const filteredClassDataByOneQuiz = Object.values(uniqueObjectsByQuiz);
+    const ClassAvg = DataToArrayOfMonths(filteredClassDataByOneQuiz);
+
+    const filteredByStudent = filteredByYear.filter(item => item.user_name == student);
+    // Get Only First Quiz from Same Quiz by User
+    const uniqueObjectsById = filteredByStudent.reduce((acc, obj) => {
+      const key = `${obj.user_name}-${obj.quiz_name}`;
+      if (!acc[key]) {
+        acc[key] = obj;
+      }
+      return acc;
+    }, {});
+    const filteredStudentDataByOneQuiz = Object.values(uniqueObjectsById);
+    const studentAvg = DataToArrayOfMonths(filteredStudentDataByOneQuiz);
+
     const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
-    // console.log(filteredByClass)
-    console.log(`Final Data`, filteredByClass, ToSingleObj);
+    console.log(`Quzies` , ToSingleObj )
     setFilteredChartData(ToSingleObj);
   }
   const DataToArrayOfMonths = (data) =>{
@@ -735,8 +789,8 @@ const Parent = () => {
 
     // Loop through the given data and store average scores for each month
     data.forEach(item => {
-      const monthName = item.name[0];
-      const cohort = item.cohort;
+      const monthName = item?.date_submitted[1];
+      const cohort = item.percentage_score;
 
       if (!monthsData[monthName]) {
         monthsData[monthName] = cohort;
