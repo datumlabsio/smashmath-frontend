@@ -230,7 +230,6 @@ const School = () => {
   const [chartSelectedYear, setChartSelectedYear] = useState()
 
 
-
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
     try {
@@ -821,11 +820,35 @@ const School = () => {
 
 
     // Test
-    const data = [...quizesData];
     const months = [
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"
     ];
+    const data = [...quizesData];
+    // Change Object Key names of All Quizes Api
+    const AllQuizesData =  quizesAverages?.map(entry => {
+      const { average_score, datesubmitted, ...rest } = entry;
+      return {
+        ...rest,
+        percentage_score: average_score,
+        date_submitted: datesubmitted
+      };
+    });
+    // Get Month and year from Submitted Date
+    const GetYearMonth = AllQuizesData?.map(item => {
+      if( item?.date_submitted){
+        const [year, month] = item?.date_submitted?.split('-');
+        return {
+          ...item,
+          date_submitted: [parseInt(year), months[parseInt(month) - 1]]
+        };
+      }
+    });
+    // Corhrt AVG
+    let cohortAvgByYear = GetYearMonth?.filter(item => item?.date_submitted[0] == year);
+    const filteredData = cohortAvgByYear.filter(item => item.percentage_score > 0)
+    const CohortAvg = DataToArrayOfMonths(filteredData);
+    
     const modifiedArray = data?.map(item => {
       const [year, month] = item?.date_submitted.split('-');
       return {
@@ -833,9 +856,8 @@ const School = () => {
         date_submitted: [parseInt(year), months[parseInt(month) - 1]]
       };
     });
+    // Class Quize AVG
     let filteredByYear = modifiedArray?.filter(item => item?.date_submitted[0] == year);
-    const filteredData = filteredByYear.filter(item => item.percentage_score > 0)
-    const CohortAvg = DataToArrayOfMonths(filteredData);
     const filteredByClass = filteredByYear.filter(item => item.email_address === teacher);
     // Get Only First Quiz from Same Quiz by User
     const uniqueObjectsByQuiz = filteredByClass.reduce((acc, obj) => {
@@ -848,7 +870,7 @@ const School = () => {
     const filteredClassDataByOneQuiz = Object.values(uniqueObjectsByQuiz);
     const filteredClassData = filteredClassDataByOneQuiz.filter(item => item.percentage_score > 0)
     const ClassAvg = DataToArrayOfMonths(filteredClassData);
-
+    // Student AVG
     const filteredByStudent = filteredByYear.filter(item => item.user_name == student);
     // Get Only First Quiz from Same Quiz by User
     const uniqueObjectsById = filteredByStudent.reduce((acc, obj) => {
@@ -858,11 +880,12 @@ const School = () => {
       }
       return acc;
     }, {});
-    const filteredStudentDataByOneQuiz = Object.values(uniqueObjectsById);
+    let filteredStudentDataByOneQuiz = Object.values(uniqueObjectsById);
+    filteredStudentDataByOneQuiz = filteredStudentDataByOneQuiz.filter(item => item.percentage_score > 0)
     const studentAvg = DataToArrayOfMonths(filteredStudentDataByOneQuiz);
 
     const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
-    console.log(`Quzies` , filteredClassData )
+    // console.log(`Quzies -098` ,filteredData.length , filteredClassData.length, filteredStudentDataByOneQuiz.length )
     setFilteredChartData(ToSingleObj);
     
   }

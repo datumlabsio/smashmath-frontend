@@ -737,6 +737,7 @@ const Parent = () => {
     filterChartaData ( childName, selectedChartTeacher, chartSelectedStudent)
   }
   const filterChartaData = ( year, teacher, student = "NotSelected") => {
+    console.log(`Selected Student for Chart`, student)
     // const filteredByYear = chartsData.filter(item => item.name[1] === year);
     // const CohortAvg = DataToArrayOfMonths(filteredByYear);
     // const filteredByClass = [];    
@@ -749,11 +750,39 @@ const Parent = () => {
     // setFilteredChartData(ToSingleObj);
 
    // Test
-   const data = [...quizesData];
+
+   teacher = "No Teacher";  // Since there is no teacher
    const months = [
      "January", "February", "March", "April", "May", "June",
      "July", "August", "September", "October", "November", "December"
    ];
+  // Change Object Key names of All Quizes Api
+  const AllQuizesData =  quizesAverages?.map(entry => {
+    const { average_score, datesubmitted, ...rest } = entry;
+    return {
+      ...rest,
+      percentage_score: average_score,
+      date_submitted: datesubmitted
+    };
+  });
+  // Get Month and year from Submitted Date
+  const GetYearMonth = AllQuizesData?.map(item => {
+    if( item?.date_submitted){
+      const [year, month] = item?.date_submitted?.split('-');
+      return {
+        ...item,
+        date_submitted: [parseInt(year), months[parseInt(month) - 1]]
+      };
+    }
+  });
+  // Corhrt AVG
+  let cohortAvgByYear = GetYearMonth?.filter(item => item?.date_submitted[0] == year);
+  const filteredData = cohortAvgByYear.filter(item => item.percentage_score > 0)
+  const CohortAvg = DataToArrayOfMonths(filteredData);
+
+
+  //  Student Graph data
+   const data = [...quizesData];
    const modifiedArray = data?.map(item => {
      const [year, month] = item?.date_submitted.split('-');
      return {
@@ -762,18 +791,8 @@ const Parent = () => {
      };
    });
    let filteredByYear = modifiedArray?.filter(item => item?.date_submitted[0] == year);
-   const filteredData = filteredByYear.filter(item => item.percentage_score > 0)
-   const CohortAvg = DataToArrayOfMonths(filteredData);
-   const filteredByClass = filteredByYear.filter(item => item.email_address === teacher);
-   // Get Only First Quiz from Same Quiz by User
-   const uniqueObjectsByQuiz = filteredByClass.reduce((acc, obj) => {
-     const key = `${obj.user_name}-${obj.quiz_name}`;
-     if (!acc[key]) {
-       acc[key] = obj;
-     }
-     return acc;
-   }, {});   
-   const filteredClassDataByOneQuiz = Object.values(uniqueObjectsByQuiz);
+   const filteredByClass = filteredByYear.filter(item => item?.email_address === teacher);  
+   const filteredClassDataByOneQuiz = Object.values(filteredByClass);
    const filteredClassData = filteredClassDataByOneQuiz.filter(item => item.percentage_score > 0)
    const ClassAvg = DataToArrayOfMonths(filteredClassData);
 
@@ -790,7 +809,6 @@ const Parent = () => {
    const studentAvg = DataToArrayOfMonths(filteredStudentDataByOneQuiz);
 
    const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
-   console.log(`Quzies` , filteredClassData )
    setFilteredChartData(ToSingleObj);
   }
   const DataToArrayOfMonths = (data) =>{
@@ -1266,7 +1284,7 @@ quiz5: 35,
                             key={index}
                             onClick={() => {
                               setIsChildOpen2(!isChildOpen2)
-                              handleChartTeacherSelect(childName)
+                              handleChartStudentSelect(childName)
                             }}
                           >
                             <span
