@@ -698,7 +698,7 @@ const School = () => {
   }
 
   const getStudentEffort = (student) =>{
-    const studentData = quizesData.filter(item => item.user_name === student && item.year_name === selectedYear && item.percentage_score > 0);
+    const studentData = quizesData.filter(item => item.user_name === student && item.year_name === selectedYear);
     if(studentData?.length === 0) return '-';
     // Calculate the effort score for the student user_name
     // Filter Object with unique user_name and quiz_name
@@ -710,9 +710,9 @@ const School = () => {
       return acc;
     }, {});
     let filteredData = Object.values(uniqueObjectsById);
-    filteredData = filteredData.filter(item => item.percentage_score > 0)
-    const totalQuizzes = filteredData.length;
-    let completedQuizzes = filteredData.filter(item => item.status === 'submitted').length;
+    filteredData = filteredData?.filter(item => item?.percentage_score > 0)
+    const totalQuizzes = filteredData?.length;
+    let completedQuizzes = filteredData?.filter(item => item?.status === 'submitted')?.length;
     // completedQuizzes = completedQuizzes.filter(item => item.percentage_score > 0)
     const effortScore = (completedQuizzes / totalQuizzes) * 100;
     return effortScore === 0 ? '-' : effortScore.toFixed(2);
@@ -862,7 +862,7 @@ const School = () => {
     const studentAvg = DataToArrayOfMonths(filteredStudentDataByOneQuiz);
 
     const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
-    console.log(`Quzies` , filteredClassDataByOneQuiz )
+    console.log(`Quzies` , filteredClassData )
     setFilteredChartData(ToSingleObj);
     
   }

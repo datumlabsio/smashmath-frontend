@@ -544,9 +544,9 @@ const SchoolParent = () => {
         date_submitted: [parseInt(year), months[parseInt(month) - 1]]
       };
     });
-    let filteredByYear = modifiedArray?.filter(item => item?.date_submitted[0] == year && item?.percentage_score > 0);
-    const CohortAvg = DataToArrayOfMonths(filteredByYear);
-    console.log(`year filter`, filteredByYear)
+    let filteredByYear = modifiedArray?.filter(item => item?.date_submitted[0] == year);
+    const filteredData = filteredByYear.filter(item => item.percentage_score > 0)
+    const CohortAvg = DataToArrayOfMonths(filteredData);
     const filteredByClass = filteredByYear.filter(item => item.email_address === teacher);
     // Get Only First Quiz from Same Quiz by User
     const uniqueObjectsByQuiz = filteredByClass.reduce((acc, obj) => {
@@ -557,7 +557,8 @@ const SchoolParent = () => {
       return acc;
     }, {});   
     const filteredClassDataByOneQuiz = Object.values(uniqueObjectsByQuiz);
-    const ClassAvg = DataToArrayOfMonths(filteredClassDataByOneQuiz);
+    const filteredClassData = filteredClassDataByOneQuiz.filter(item => item.percentage_score > 0)
+    const ClassAvg = DataToArrayOfMonths(filteredClassData);
 
     const filteredByStudent = filteredByYear.filter(item => item.user_name == student);
     // Get Only First Quiz from Same Quiz by User
@@ -572,7 +573,7 @@ const SchoolParent = () => {
     const studentAvg = DataToArrayOfMonths(filteredStudentDataByOneQuiz);
 
     const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
-    console.log(`Quzies` , filteredClassDataByOneQuiz )
+    console.log(`Quzies` , filteredClassData )
     setFilteredChartData(ToSingleObj);
   }
   const DataToArrayOfMonths = (data) =>{
@@ -753,10 +754,10 @@ const SchoolParent = () => {
   const getStudentaverage = (student) =>{
     let filterQuizeTeacherYear;
     if(selectedYear != "Other"){
-      filterQuizeTeacherYear = quizesData.filter((record) => record.email_address == selectedTeacher  && record.year_name == selectedYear && record.user_name == student && record.percentage_score > 0);
+      filterQuizeTeacherYear = quizesData.filter((record) => record.email_address == selectedTeacher  && record.year_name == selectedYear && record.user_name == student);
     }
     else{
-      filterQuizeTeacherYear = quizesData.filter((record) => record.email_address == selectedTeacher  && !record.year_name.includes('Year')  && record.user_name == student && record.percentage_score > 0);
+      filterQuizeTeacherYear = quizesData.filter((record) => record.email_address == selectedTeacher  && !record.year_name.includes('Year')  && record.user_name == student);
     }
     // Filter Object with unique user_name and quiz_name
     const uniqueObjectsById = filterQuizeTeacherYear.reduce((acc, obj) => {
@@ -766,7 +767,8 @@ const SchoolParent = () => {
       }
       return acc;
     }, {});
-    const filteredData = Object.values(uniqueObjectsById);
+    let filteredData = Object.values(uniqueObjectsById);
+    filteredData = filteredData.filter(item => item.percentage_score > 0)
     const sumOfAllQuizes = filteredData.reduce((acc, item) => acc + item['percentage_score'], 0)
     return filterQuizeTeacherYear.length === 0 ? '-' :(sumOfAllQuizes / filteredData.length).toFixed(2);
   }
@@ -806,10 +808,21 @@ const SchoolParent = () => {
     else{
       studentData = quizesData.filter((record) => !record.year_name.includes('Year')  && record.user_name == student && record.percentage_score > 0);
     }
-    if(studentData.length === 0) return '-';
+    if(studentData?.length === 0) return '-';
+
+    const uniqueObjectsById = studentData?.reduce((acc, obj) => {
+      const key = `${obj.user_name}-${obj.quiz_name}`;
+      if (!acc[key]) {
+        acc[key] = obj;
+      }
+      return acc;
+    }, {});
+    let filteredData = Object.values(uniqueObjectsById);
+    filteredData = filteredData?.filter(item => item?.percentage_score > 0)
+
     // Calculate the effort score for the student user_name
-    const totalQuizzes = studentData.length;
-    const completedQuizzes = studentData.filter(item => item.status === 'submitted').length;
+    const totalQuizzes = filteredData?.length;
+    const completedQuizzes = filteredData?.filter(item => item?.status === 'submitted')?.length;
     const effortScore = (completedQuizzes / totalQuizzes) * 100;
     return effortScore === 0 ? '-' : effortScore.toFixed(2);
   }
