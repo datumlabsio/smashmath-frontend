@@ -572,7 +572,7 @@ const SchoolParent = () => {
     const studentAvg = DataToArrayOfMonths(filteredStudentDataByOneQuiz);
 
     const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
-    console.log(`Quzies` , ToSingleObj )
+    console.log(`Quzies` , filteredClassDataByOneQuiz )
     setFilteredChartData(ToSingleObj);
   }
   const DataToArrayOfMonths = (data) =>{
