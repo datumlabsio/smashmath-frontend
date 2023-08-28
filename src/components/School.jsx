@@ -605,7 +605,6 @@ const School = () => {
     const students = teacherFilters.map(x => x.user_name).sort();
     const uniqueStudents =  [...new Set(students)]
     setChartStudentList(uniqueStudents);
-    setReChartStudentList(uniqueStudents);
     filterChartaData ( chartSelectedYear, childName, chartSelectedStudent)
   }
 
@@ -637,6 +636,7 @@ const School = () => {
     const students = teacherFilters.map(x => x.user_name).sort();
     const uniqueStudents =  [...new Set(students)]
     setReChartStudentList(uniqueStudents);
+    console.log(uniqueStudents)
     console.log( rechartSelectedYear, childName, rechartSelectedStudent)
   }
   const handleReChartStudentSelect = (childName) => {
