@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CustomLoader } from "../components/Loader";
 import LineCharts from "./LineCharts";
+import MarkKey from "./MarkKey";
 
 const ChildNames = ["Ali", "Usama", "Omair", "Talha", "Agha", "Hassan"];
 const data = [
@@ -190,6 +191,11 @@ const Parent = () => {
   const dropdownRef3 = useRef(null);
   const dropdownRef4 = useRef(null);
   const dropdownRef5 = useRef(null);
+  // For Year (Like 2022) selection 
+  const [isDataYearOpen, setIsDataYearOpen] = useState();
+  const [dataYearList, setDataYearList] = useState([])
+  const [dataSelectedYear, setDataSelectedYear] = useState()
+  const dropdownRef6 = useRef(null);
 
   // Calculate the averages
   const numColumns = Object.keys(data[0]).length - 2;
@@ -253,6 +259,22 @@ const Parent = () => {
     }
 
   }, [])
+  useEffect(() => {
+    const years = [];
+    const startYear = 2022;
+    const currentYear = new Date().getFullYear();
+  
+    for (let year = startYear; year <= currentYear; year++) {
+      years.push(year);
+  
+      if (year < currentYear) {
+        years.push(year + 1);
+      } else if (new Date(year + 1, 8, 1) <= new Date()) {
+        years.push(year + 1);
+      }
+    }
+    setDataYearList([...new Set(years)]);
+  },[])
 
   useEffect(() => {
     try {
@@ -365,7 +387,7 @@ const Parent = () => {
             }
           })
           setTableHeadersAll(filterData)
-          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes)  
+          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, dataSelectedYear)  
           setDataLoadin(false)
 
           return
@@ -403,11 +425,11 @@ const Parent = () => {
   }, [])
 
   const handleYearSelect = (childName) => {
-    applyFilter(selectedDuraation, childName, tableHeadersAll, quizesData)
+    applyFilter(selectedDuraation, childName, tableHeadersAll, quizesData, dataSelectedYear)
   }
 
   const handleDurationSelect = (childName) => {
-    applyFilter(childName, selectedYear, tableHeadersAll, quizesData)
+    applyFilter(childName, selectedYear, tableHeadersAll, quizesData, dataSelectedYear)
   }
 
   const getWeekNumber = (quiz_name, i) => {
@@ -440,10 +462,17 @@ const Parent = () => {
 
   }
 
-  const applyFilter = (selectedDuraationParm, year, headers, data) => {
+  const handleDataYearSelect = (childName) =>{
+    setDataSelectedYear(childName)
+    applyFilter( selectedDuraation ,selectedYear, tableHeadersAll, quizesData ,childName)
+    // applyFilter ( childName, selectedChartTeacher, chartSelectedStudent)
+  }
+
+  const applyFilter = (selectedDuraationParm, year, headers, data, yearData) => {
 
     setSelectedYear(year)
     setSelectedDuraation(selectedDuraationParm)
+    const yearSelected = yearData;
     let filterHeader = headers.filter(({ year_name }) => year_name === year)
     let sortedHeader = filterHeader.sort((a, b) => b.week - a.week)
     const ids = sortedHeader.map(o => o.quiz_name)
@@ -452,16 +481,31 @@ const Parent = () => {
     // console.log(`Filter table Header `, filtered)
 
     let filterDurationlData = data
-    if (selectedDuraationParm === 'Since Last 52 Weeks') {
-      filterDurationlData = data.filter(({ date_submitted }) => new Date(date_submitted) >= addMilliseconds(new Date(), -364 * 24 * 60 * 60 * 1000, date_submitted))
-    }
-    else {
-      filterDurationlData = data.filter(({ date_submitted }) => new Date(date_submitted) <= new Date() && new Date(date_submitted) >= getFilterDate(date_submitted) )
-    }
+    // Commented Previous Data Since last 52 Weeks
+    // if (selectedDuraationParm === 'Since Last 52 Weeks') {
+    //   filterDurationlData = data.filter(({ date_submitted }) => new Date(date_submitted) >= addMilliseconds(new Date(), -364 * 24 * 60 * 60 * 1000, date_submitted))
+    // }
+    // else {
+    //   filterDurationlData = data.filter(({ date_submitted }) => new Date(date_submitted) <= new Date() && new Date(date_submitted) >= getFilterDate(date_submitted) )
+    // }
     let filterFinalData = filterDurationlData.filter(({ year_name }) => year_name == year)
+    filterFinalData = filterFinalData.filter(({ year_name }) => year_name == year)
+    // console.log('therer------>1', filterFinalData)
+    const filteredRecords = filterFinalData.filter(record => {
+      const submissionDate = new Date(record.date_submitted);
+      const year = submissionDate.getFullYear();
+      const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      if (yearSelected === year) {
+        if ( month < 9) {
+          return record;
+        }
+      } else if (yearSelected - 1 === year && month >= 9) {
+        return record;
+      }
+    });
 
     let usersObject = {}
-    filterFinalData.map((item) => {
+    filteredRecords.map((item) => {
       if (usersObject[item?.user_name]) {
         usersObject[item?.user_name] = [...usersObject[item?.user_name], item]
       }
@@ -621,6 +665,20 @@ const Parent = () => {
     };
   }, [dropdownRef5]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef6.current && !dropdownRef6.current.contains(event.target)) {
+        setIsDataYearOpen(false);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [dropdownRef6]);
+
   const handleToDateChange = (event) => {
     setToDate(event.target.value);
   };
@@ -660,7 +718,7 @@ const Parent = () => {
 
   const getMarks = (key, name) => {
     let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
-    return obj ? obj.percentage_score : ''
+    return obj ? obj.percentage_score.toFixed(1) : ''
   }
 
   const getStudentaverage = (student) =>{
@@ -860,7 +918,7 @@ const Parent = () => {
   }
 
   return (
-    <div className="md:mx-20 my-6">
+    <div className="md:mx-20 my-2">
       {dataLoadin && <CustomLoader />}
       {/* main bar starts */}
       <div className="sticky w-ful h-auto gap-4 md:h-[20vh] flex justify-between items-center flex-col md:flex-row ">
@@ -888,7 +946,7 @@ const Parent = () => {
                 onClick={() => setIsUserOpen(!isUserOpen)}
                 className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
               >
-                User
+                Logout
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
@@ -931,6 +989,20 @@ const Parent = () => {
             </div>
           </li>
         </ul>
+
+        
+      </div>
+      <div className="grid gap-1 float-right my-6">
+        <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+          <li className="mr-3">
+            <div className="inline-block" >
+              <button
+                className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
+                User Guide
+              </button>
+            </div>
+          </li>
+        </ul>
       </div>
 
       {/* main bar ends */}
@@ -938,94 +1010,36 @@ const Parent = () => {
       {/* ----------------------------------------------------------- */}
       {/* filter bar starts here */}
 
-      <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
-        {/* choose teacher dropdown */}
-        <div className="grid gap-1">
-          <label htmlFor="">Time interval</label>
-          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-            <li className="mr-3">
-              <div className="inline-block relative" ref={dropdownRef2}>
-                <button
-                  onClick={() => setIsChildOpen(!isChildOpen)}
-                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
-                >
-                  {selectedDuraation}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="white"
-                    className="inline w-4 h-4 ml-1"
+      <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
+      <div className="w-full flex justify-start items-center">
+        <div className="w-full flex justify-start items-center gap-4 flex-row mt-2">
+          {/* choose teacher dropdown */}
+          {/* <div className="grid gap-1">
+            <label htmlFor="">Time interval</label>
+            <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+              <li className="mr-3">
+                <div className="inline-block relative" ref={dropdownRef2}>
+                  <button
+                    onClick={() => setIsChildOpen(!isChildOpen)}
+                    className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-                {isChildOpen && (
-                  <ul className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-slate-800 shadow-md">
-                    {durationOption.map((childName, index) => {
-                      return (
-                        <>
-                          <li
-                            className={
-                              index !== childName.length - 1
-                                ? "border-b border-slate-400 cursor-pointer"
-                                : "cursor-pointer"
-
-                            }
-                            key={index}
-                            onClick={() => {
-                              setIsChildOpen(!isChildOpen)
-                              handleDurationSelect(childName)
-                            }}
-                          >
-                            <span
-                              className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
-                            >
-                              {childName}
-                            </span>
-                          </li>
-                        </>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
-            </li>
-          </ul>
-        </div>
-        {/* choose Time Frame dropdown */}
-        {/* choose Time Frame dropdown */}
-        <div className="grid gap-1">
-          <label htmlFor="">Year</label>
-          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-            <li className="mr-3">
-              <div className="inline-block relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsTimeFrameOpen(!isTimeFrameOpen)}
-                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
-                >
-                  {selectedYear ? selectedYear : "Choose Year"}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="white"
-                    className="inline w-4 h-4 ml-1"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-                {
-                  isTimeFrameOpen &&
-                  (
+                    {selectedDuraation}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="white"
+                      className="inline w-4 h-4 ml-1"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  {isChildOpen && (
                     <ul className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-slate-800 shadow-md">
-                      {yearFilter.map((childName, index) => {
+                      {durationOption.map((childName, index) => {
                         return (
                           <>
                             <li
@@ -1037,8 +1051,8 @@ const Parent = () => {
                               }
                               key={index}
                               onClick={() => {
-                                setIsTimeFrameOpen(!isTimeFrameOpen)
-                                handleYearSelect(childName)
+                                setIsChildOpen(!isChildOpen)
+                                handleDurationSelect(childName)
                               }}
                             >
                               <span
@@ -1050,33 +1064,150 @@ const Parent = () => {
                           </>
                         );
                       })}
-                      {/* <li className="">
-                      <input
-                        type="date"
-                        name="date-range"
-                        id="to-date"
-                        className="block w-full px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white focus:outline-none"
-                        value={toDate}
-                        onChange={handleToDateChange}
-                      />
-                    </li>
-                    <li>
-                      <input
-                        type="date"
-                        name="date-range"
-                        id="from-date"
-                        className="block px-4 w-full py-2 text-gray-800 hover:bg-indigo-500 hover:text-white focus:outline-none"
-                        value={fromDate}
-                        onChange={handleFromDateChange}
-                      />
-                    </li> */}
                     </ul>
                   )}
-              </div>
-            </li>
-          </ul>
+                </div>
+              </li>
+            </ul>
+          </div> */}
+          {/* Select Year like 2022 */}
+          <div className="grid gap-1">
+            <label htmlFor="">Year</label>
+            <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+              <li className="mr-3">
+                <div className="inline-block relative" ref={dropdownRef6}>
+                  <button
+                    onClick={() => setIsDataYearOpen(!isDataYearOpen)}
+                    className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                  >
+                    {dataSelectedYear ? dataSelectedYear : dataYearList[dataYearList.length - 1]}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="white"
+                      className="inline w-4 h-4 ml-1"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  {isDataYearOpen && (
+                    <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                      {dataYearList?.map((childName, index) => {
+                        return (
+                          <>
+                            <li
+                              className={
+                                index !== childName.length - 1
+                                  ? "border-b border-slate-400 cursor-pointer"
+                                  : "cursor-pointer"
+
+                              }
+                              key={index}
+                              onClick={() => {
+                                setIsDataYearOpen(!isDataYearOpen)
+                                handleDataYearSelect(childName)
+                              }}
+                            >
+                              <span
+                                className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                                {childName}
+                              </span>
+                            </li>
+                          </>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </li>
+            </ul>
+          </div>
+          {/* choose Time Frame dropdown */}
+          <div className="grid gap-1">
+            <label htmlFor="">Year (UK) / Grade (US)</label>
+            <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+              <li className="mr-3">
+                <div className="inline-block relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIsTimeFrameOpen(!isTimeFrameOpen)}
+                    className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                  >
+                    {selectedYear ? selectedYear : "Choose Year"}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="white"
+                      className="inline w-4 h-4 ml-1"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  {
+                    isTimeFrameOpen &&
+                    (
+                      <ul className="absolute right-0 mt-2 py-2 w-60 bg-white rounded-lg shadow-slate-800 shadow-md">
+                        {yearFilter.map((childName, index) => {
+                          return (
+                            <>
+                              <li
+                                className={
+                                  index !== childName.length - 1
+                                    ? "border-b border-slate-400 cursor-pointer"
+                                    : "cursor-pointer"
+
+                                }
+                                key={index}
+                                onClick={() => {
+                                  setIsTimeFrameOpen(!isTimeFrameOpen)
+                                  handleYearSelect(childName)
+                                }}
+                              >
+                                <span
+                                  className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
+                                >
+                                  {childName}
+                                </span>
+                              </li>
+                            </>
+                          );
+                        })}
+                        {/* <li className="">
+                        <input
+                          type="date"
+                          name="date-range"
+                          id="to-date"
+                          className="block w-full px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white focus:outline-none"
+                          value={toDate}
+                          onChange={handleToDateChange}
+                        />
+                      </li>
+                      <li>
+                        <input
+                          type="date"
+                          name="date-range"
+                          id="from-date"
+                          className="block px-4 w-full py-2 text-gray-800 hover:bg-indigo-500 hover:text-white focus:outline-none"
+                          value={fromDate}
+                          onChange={handleFromDateChange}
+                        />
+                      </li> */}
+                      </ul>
+                    )}
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
-      </div>
+        <MarkKey />
+     </div>
       {/* filter bar ends here */}
       {/* ----------------------------------------------------------- */}
 

@@ -37,12 +37,18 @@ body {
 
 .column-2-sticky tr th:first-child {position: sticky; z-index: 3;  width: 140px; left: 0; background: #17026B;}
 .column-2-sticky tr th:nth-child(2) {position: sticky; z-index: 3; left: 140px; background: #17026B;}
+.column-2-sticky tr th:nth-child(3) {position: sticky; z-index: 3; left: 280px; background: #17026B;}
+.column-2-sticky tr th:nth-child(4) {position: sticky; z-index: 3; left: 420px; background: #17026B;}
 
 .column-2-sticky tr td:first-child {position: sticky; z-index: 3; left: 0; background-color: #fff;}
 .column-2-sticky tr td:nth-child(2) {position: sticky; z-index: 3; left: 140px; background-color: #fff;}
+.column-2-sticky tr td:nth-child(3) {position: sticky; z-index: 3; left: 280px; background-color: #fff;}
+.column-2-sticky tr td:nth-child(4) {position: sticky; z-index: 3; left: 420px; background-color: #fff;}
 
 .column-1-sticky tr th:first-child {position: sticky; z-index: 3;  width: 200px; left: 0; background: #17026B;}
 .column-1-sticky tr td:first-child {position: sticky; z-index: 3; left: 0; background-color: #fff;}
 
 .column-2-sticky thead,
 .column-1-sticky thead {position: sticky; z-index: 9; top: 0;}
+
+

@@ -2,7 +2,10 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CustomLoader } from "../components/Loader";
 import LineCharts from "./LineCharts";
-import {datachartslinefromfile} from './lineChart'
+// import {datachartslinefromfile} from './lineChart'
+import MarkKey from "./MarkKey";
+import RevisedLineChart from "./RevisedLineChart";
+import { MYChartdata } from './lineChart'
 const ChildNames = ["Ali", "Usama", "Omair", "Talha", "Agha", "Hassan"];
 const data = [
   {
@@ -175,6 +178,7 @@ const School = () => {
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isChildOpen, setIsChildOpen] = useState(false);
   const [selectedChild, setSelectedChild] = useState("");
+  const [isDataYearOpen, setIsDataYearOpen] = useState();
   const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app';
   const testURL = 'https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api'
 
@@ -186,6 +190,7 @@ const School = () => {
   const [toDate, setToDate] = useState("");
   const dropdownRef = useRef(null);
   const dropdownRef1 = useRef(null);
+  const dropdownRef5 = useRef(null);
   // For Chart dfilter drop down
   const dropdownRef2 = useRef(null);
   const dropdownRef3 = useRef(null);
@@ -220,7 +225,9 @@ const School = () => {
   const [dataLoadin, setDataLoadin] = useState(true)
   const [quizesAverages, setQuizesAverages] = useState()
   const [allUniqueUsers, setallUniqueUsers] = useState([])
-  const [chartsData, setChartsData] = useState(datachartslinefromfile)
+  const [dataYearList, setDataYearList] = useState([])
+  const [dataSelectedYear, setDataSelectedYear] = useState()
+  // const [chartsData, setChartsData] = useState(datachartslinefromfile)
   const [filteredChartData, setFilteredChartData] = useState(initialChartData)
   const [chartTeacherList, setChartTeacherList] = useState([])
   const [selectedChartTeacher, setSelectedChartTeacher] = useState()
@@ -228,6 +235,21 @@ const School = () => {
   const [chartSelectedStudent, setChartSelectedStudent] = useState()
   const [chartYearList, setChartYearList] = useState([])
   const [chartSelectedYear, setChartSelectedYear] = useState()
+
+  // Revised Chart States 
+  const [chart, setChart] = useState([])
+  const dropdownRefYear = useRef(null);
+  const dropdownRefClass = useRef(null);
+  const dropdownRefStudent = useRef(null);
+  const [isYearChartOpen, setIsYearChartOpen] = useState(false);
+  const [isClassChartOpen, setIsClassChartOpen] = useState(false);
+  const [isStudentChartOpen, setIsStudentChartOpen] = useState(false);
+  const [rechartTeacherList, setReChartTeacherList] = useState([])
+  const [selectedReChartTeacher, setSelectedReChartTeacher] = useState('')
+  const [rechartStudentList, setReChartStudentList] = useState([])
+  const [rechartSelectedStudent, setReChartSelectedStudent] = useState('')
+  const [rechartYearList, setReChartYearList] = useState([ 2021, 2022])
+  const [rechartSelectedYear, setReChartSelectedYear] = useState('')
 
 
   useEffect(() => {
@@ -251,6 +273,56 @@ const School = () => {
     }
 
   }, [])
+
+  // Rolling Averages API
+  useEffect(() => {
+    setDataLoadin(true)
+    const year = rechartSelectedYear || 2022
+    const email =  selectedReChartTeacher || "";
+    const username = rechartSelectedStudent || "";
+    try {
+      const token = localStorage.getItem('token')
+      fetch(testURL + '/rollingaverage', {
+        method: 'POST',
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+          "Authorization": token ? `${token}` : null
+        },
+        body: JSON.stringify({
+          year,
+          email,
+          username
+        })
+      })
+        .then(response => response.json())
+        .then(response => {
+          console.log(`Api Response` , response?.rollingaverage)
+          setChart(response?.rollingaverage)
+          setDataLoadin(false)
+        })
+    } catch (e) {
+      setDataLoadin(false)
+    }
+    // console.log(`Api Data fetch`, rechartSelectedYear, selectedReChartTeacher, rechartSelectedStudent)
+  }, [rechartSelectedYear, selectedReChartTeacher, rechartSelectedStudent])
+
+
+  useEffect(() => {
+      const years = [];
+      const startYear = 2022;
+      const currentYear = new Date().getFullYear();
+    
+      for (let year = startYear; year <= currentYear; year++) {
+        years.push(year);
+        if (year < currentYear) {
+          years.push(year + 1);
+        } else if (new Date(year + 1, 8, 1) <= new Date()) {
+          years.push(year + 1);
+        }
+      }
+      setDataYearList([...new Set(years)]);
+    },[])
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
@@ -287,6 +359,7 @@ const School = () => {
           setYearFilter(uniqueYearsFilters)
           setTeacherFilter(uniqueTeacherFilters)
           setChartTeacherList(uniqueTeacherFilters)
+          setReChartTeacherList(uniqueTeacherFilters)
           
           // Filter Unique Year for chart
           const uniqueYears = new Set();
@@ -296,6 +369,7 @@ const School = () => {
           });
           const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
           setChartYearList(sortedUniqueYears);
+          // setReChartYearList(sortedUniqueYears);
 
           // console.log('bilal--->',"Year 4 - SP Autumn Term Week 14 - Christmas Practice 01"?.match(/WEEK (\d+)$/i)[1])
           let arr = "Year 4 - SP Autumn Term Week 14 - Christmas Practice 01".split(' ')
@@ -330,60 +404,6 @@ const School = () => {
       setDataLoadin(false)
     }
   }, [])
-
-  // useEffect(() => {
-  //   const email = localStorage.getItem('userEmail')
-  //   try {
-      
-  //     setDataLoadin(true)
-  //     const token = localStorage.getItem('token')
-  //     fetch(testURL + '/linechart', {
-  //       method: 'GET',
-  //       headers: {
-  //         "Access-Control-Allow-Origin": "*",
-  //         "Content-Type": "application/json",
-  //         "Authorization": token ? `${token}` : null
-  //       }
-  //     })
-  //       .then(response => response.json())
-  //       .then(response => {
-  //         // Get list of years for dropdown in choose year
-          
-  //         const years = response?.data.map(item => item.name[1]);
-  //         const minYear = years.reduce((min, current) => (current < min ? current : min), years[0]);
-  //         const maxYear = years.reduce((max, current) => (current > max ? current : max), years[0]);
-  //         const allIntegersYear = [];
-  //         for (let i = parseInt(minYear, 10); i <= parseInt(maxYear, 10); i++) {
-  //           if (!isNaN(i)) {
-  //             allIntegersYear.push(i);
-  //           }
-  //         }
-  //         setChartYearList(allIntegersYear);
-  //         setChartsData(response?.data)
-  //         setDataLoadin(false)
-  //       })
-  //       .then( response =>{
-  //         setDataLoadin(false)
-  //       }
-
-  //       )
-  //   } catch (e) {
-  //     setDataLoadin(false)
-  //   }
-
-  //   // Test Data.json code
-  //   // const years = chartsData.map(item => item.name[1]);
-  //   //       const minYear = years.reduce((min, current) => (current < min ? current : min), years[0]);
-  //   //       const maxYear = years.reduce((max, current) => (current > max ? current : max), years[0]);
-  //   //       const allIntegersYear = [];
-  //   //       for (let i = parseInt(minYear, 10); i <= parseInt(maxYear, 10); i++) {
-  //   //         if (!isNaN(i)) {
-  //   //           allIntegersYear.push(i);
-  //   //         }
-  //   //       }
-  //   //       setChartYearList(allIntegersYear);
-
-  // }, [])
 
   // Get User's Data from DB
   useEffect(() => {
@@ -426,6 +446,36 @@ const School = () => {
     return arr.length ? parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]) + _inc : []
   }
 
+  function generateCompleteWeeksData(data) {
+    const completeWeeksData = [];
+    // Runs 52 time and return zero if week is not present in data
+    for (let i = 1; i <= 52; i++) {
+      const entry = data?.find(item => item?.week == i);
+      const average = entry ? entry?.average : 0;
+      completeWeeksData.push({ Week: `${i}`, Average: average?.toFixed(2) });
+    }
+
+    return completeWeeksData;
+  }
+  function combineData(data1, data2, data3) {
+    console.log(`In data`, data1.length, data2.length, data3.length);
+    const combinedData = [];
+    for (let i = 1; i < 52; i++) {
+      const week = data1[i]?.Week || i;
+      const CohortAvg = data1[i]?.Average || 0; // Consider 0 if data1 is missing
+      const ClassAvg = data2[i]?.Average || 0;
+      const StudentAvg = data3[i]?.Average || 0;
+  
+      combinedData.push({
+        'Week': week,
+        'Smash Math Cohort Average': CohortAvg,
+        'Class Average': ClassAvg,
+        'Student Average': StudentAvg
+      });
+    }
+    return combinedData;
+  }
+  
   const setFilter = (dataSet, headers) => {
     let _yesrFilter = []
     let _teacherFilter = []
@@ -444,10 +494,12 @@ const School = () => {
     setTeacherFilter([...new Set(_teacherFilter)])
   }
 
-  const applyFilter = (email, year, headers, data) => {
+  const applyFilter = (email, year, headers, data , yearData) => {
 
     setSelectedYear(year)
     setSelectedTeacher(email)
+
+    const yearSelected = yearData;
 
     let filterHeader = headers.filter(({ year_name }) => year_name === year)
     let sortedHeader = filterHeader.sort((a, b) =>  b.week - a.week)
@@ -462,8 +514,20 @@ const School = () => {
     // console.log(`teacher Data in Quiz Dashboard`, filterEmailData);
     let filterFinalData = filterEmailData.filter(({ year_name }) => year_name == year)
     // console.log('therer------>1', filterFinalData)
+    const filteredRecords = filterFinalData.filter(record => {
+      const submissionDate = new Date(record.date_submitted);
+      const year = submissionDate.getFullYear();
+      const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      if (yearSelected === year) {
+        if ( month < 9) {
+          return record;
+        }
+      } else if (yearSelected - 1 === year && month >= 9) {
+        return record;
+      }
+    });
     let usersObject = {}
-    filterFinalData.map((item) => {
+    filteredRecords.map((item) => {
       // console.log('therer------>2', usersObject)
       if (usersObject[item?.user_name]) {
         usersObject[item?.user_name] = [...usersObject[item?.user_name], item]
@@ -517,11 +581,11 @@ const School = () => {
   }
 
   const handleYearSelect = (childName) => {
-    applyFilter(selectedTeacher, childName, tableHeadersAll, quizesData)
+    applyFilter(selectedTeacher, childName, tableHeadersAll, quizesData, dataSelectedYear)
   }
 
   const handleTeacherSelect = (childName) => {
-    applyFilter(childName, selectedYear, tableHeadersAll, quizesData)
+    applyFilter(childName, selectedYear, tableHeadersAll, quizesData, dataSelectedYear)
   }
 
   const handleChildSelect = (childName) => {
@@ -541,17 +605,43 @@ const School = () => {
     const students = teacherFilters.map(x => x.user_name).sort();
     const uniqueStudents =  [...new Set(students)]
     setChartStudentList(uniqueStudents);
+    setReChartStudentList(uniqueStudents);
     filterChartaData ( chartSelectedYear, childName, chartSelectedStudent)
   }
+
+
 
   const handleChartStudentSelect = (childName) => {
     setChartSelectedStudent(childName)
     filterChartaData ( chartSelectedYear, selectedChartTeacher, childName)
   }
 
+
   const handleChartYearSelect = (childName) => {
     setChartSelectedYear(childName)
-    filterChartaData ( childName, selectedChartTeacher, chartSelectedStudent)
+    filterChartaData ( childName, selectedChartTeacher, chartSelectedStudent, )
+  }
+
+  const handleDataYearSelect = (childName) =>{
+    setDataSelectedYear(childName)
+    applyFilter(selectedTeacher, selectedYear, tableHeadersAll, quizesData ,childName)
+    // applyFilter ( childName, selectedChartTeacher, chartSelectedStudent)
+  }
+  const handleReChartYearSelect = (childName) => {
+    setReChartSelectedYear(childName)
+    console.log( childName, selectedReChartTeacher, rechartSelectedStudent, )
+  }
+  const handleReChartTeacherSelect = (childName) => {
+    setSelectedReChartTeacher(childName)
+    const teacherFilters = quizesData.filter(x => x.email_address === childName)
+    const students = teacherFilters.map(x => x.user_name).sort();
+    const uniqueStudents =  [...new Set(students)]
+    setReChartStudentList(uniqueStudents);
+    console.log( rechartSelectedYear, childName, rechartSelectedStudent)
+  }
+  const handleReChartStudentSelect = (childName) => {
+    setReChartSelectedStudent(childName)
+    console.log( rechartSelectedYear, selectedReChartTeacher, childName)
   }
   
   useEffect(() => {
@@ -624,6 +714,63 @@ const School = () => {
     };
   }, [dropdownRef4]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef5.current && !dropdownRef5.current.contains(event.target)) {
+        setIsDataYearOpen(false);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [dropdownRef5]);
+
+  // Revised Charts
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRefYear.current && !dropdownRefYear.current.contains(event.target)) {
+        setIsYearChartOpen(false);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [dropdownRefYear]);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRefClass.current && !dropdownRefClass.current.contains(event.target)) {
+        setIsClassChartOpen(false);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [dropdownRefClass]);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRefStudent.current && !dropdownRefStudent.current.contains(event.target)) {
+        setIsStudentChartOpen(false);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [dropdownRefStudent]);
+
+
+
   const handleToDateChange = (event) => {
     setToDate(event.target.value);
   };
@@ -656,9 +803,23 @@ const School = () => {
   }
 
   const getClassAverage = (quiz) => {
+    // Filter Data on base of Teacher, Quiz Year and Quiz name
     const filterQuizeTeacherYear = quizesData.filter((record) => record.email_address == selectedTeacher  && record.year_name == selectedYear && record.quiz_name === quiz);
+    // Filter Data on base of Quize Submitted date
+    const finalData = filterQuizeTeacherYear?.filter(record => {
+      const submissionDate = new Date(record?.date_submitted);
+      const year = submissionDate.getFullYear();
+      const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      if (dataSelectedYear === year) {
+        if ( month < 9) {
+          return record;
+        }
+      } else if (dataSelectedYear - 1 === year && month >= 9) {
+        return record;
+      }
+    });
     // Filter Object with unique user_name and quiz_name
-    const uniqueObjectsById = filterQuizeTeacherYear.reduce((acc, obj) => {
+    const uniqueObjectsById = finalData?.reduce((acc, obj) => {
       const key = `${obj.user_name}-${obj.quiz_name}`;
       if (!acc[key]) {
         acc[key] = obj;
@@ -677,13 +838,27 @@ const School = () => {
   const getMarks = (key, name) => {
     let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
     // if(name == 'Year 6 - SP 2023 Summer Term Week 02') console.log(`Why Not Display`, obj)
-    return obj ? obj.percentage_score : ''
+    return obj ? obj?.percentage_score > 0 ? obj?.percentage_score.toFixed(1) : '' : ''
   }
 
   const getStudentaverage = (student) =>{
+    // Filter Data on base of Teacher, Quiz Year and Student
     const filterQuizeTeacherYear = quizesData.filter((record) => record.email_address == selectedTeacher  && record.year_name == selectedYear && record.user_name == student);
+    // Filter Data on base of Quize Submitted date
+    const finalData = filterQuizeTeacherYear?.filter(record => {
+      const submissionDate = new Date(record?.date_submitted);
+      const year = submissionDate.getFullYear();
+      const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      if (dataSelectedYear === year) {
+        if ( month < 9) {
+          return record;
+        }
+      } else if (dataSelectedYear - 1 === year && month >= 9) {
+        return record;
+      }
+    });
     // Filter Object with unique user_name and quiz_name
-    const uniqueObjectsById = filterQuizeTeacherYear.reduce((acc, obj) => {
+    const uniqueObjectsById = finalData.reduce((acc, obj) => {
       const key = `${obj.user_name}-${obj.quiz_name}`;
       if (!acc[key]) {
         acc[key] = obj;
@@ -940,7 +1115,7 @@ const School = () => {
 
   const getFullName = (username) => {
     const found = allUniqueUsers.filter(item => item.user_name == username)
-    return found[0]?.full_name
+    return found[0]?.full_name == username ? "" :  found[0]?.full_name
   }
 
   return (
@@ -973,7 +1148,7 @@ const School = () => {
                 onClick={() => setIsUserOpen(!isUserOpen)}
                 className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
               >
-                User
+                Logout
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
@@ -1017,97 +1192,69 @@ const School = () => {
           </li>
         </ul>
       </div>
-
+      
+      <div className="grid gap-1 float-right my-12">
+        <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+          <li className="mr-3">
+            <div className="inline-block" >
+              <button
+                onClick = {ToParentsDashboard}
+                className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
+                User Guide
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
       {/* main bar ends */}
       {/* ----------------------------------------------------------- */}
       {/* filter bar starts here */}
-
-      <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
-        {/* choose teacher dropdown */}
-        <div className="grid gap-1">
-          <label htmlFor="">Teacher</label>
-          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-            <li className="mr-3">
-              <div className="inline-block relative" ref={dropdownRef1}>
-                <button
-                  onClick={() => setIsChildOpen(!isChildOpen)}
-                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
-                >
-                  {selectedTeacher ? selectedTeacher : "Choose Teacher"}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="white"
-                    className="inline w-4 h-4 ml-1"
+      <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
+      <div className="w-full flex justify-start items-center">
+        <div className="w-full flex justify-start items-center gap-4 flex-row mt-6">
+          { (ProductStatus === "true") &&
+            <div className="grid gap-1 float-right">
+              <label htmlFor="">Package</label>
+              <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+                <li className="mr-3">
+                  <div className="inline-block relative" >
+                    <button
+                      onClick = {ToParentsDashboard}
+                      className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
+                      Premium Package
+                    </button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          }
+          {/* choose teacher dropdown */}
+          <div className="grid gap-1">
+            <label htmlFor="">Teacher</label>
+            <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+              <li className="mr-3">
+                <div className="inline-block relative" ref={dropdownRef1}>
+                  <button
+                    onClick={() => setIsChildOpen(!isChildOpen)}
+                    className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-                {isChildOpen && (
-                  <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
-                    {teacherFilter?.map((childName, index) => {
-                      return (
-                        <>
-                          <li
-                            className={
-                              index !== childName.length - 1
-                                ? "border-b border-slate-400 cursor-pointer"
-                                : "cursor-pointer"
-
-                            }
-                            key={index}
-                            onClick={() => {
-                              setIsChildOpen(!isChildOpen)
-                              handleTeacherSelect(childName)
-                            }}
-                          >
-                            <span
-                              className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
-                              {childName}
-                            </span>
-                          </li>
-                        </>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        {/* choose Time Frame dropdown */}
-        <div className="grid gap-1">
-          <label htmlFor="">Year</label>
-          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-            <li className="mr-3">
-              <div className="inline-block relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsTimeFrameOpen(!isTimeFrameOpen)}
-                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
-
-                  {selectedYear ? selectedYear : "Choose Year"}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="white"
-                    className="inline w-4 h-4 ml-1"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-                {isTimeFrameOpen &&
-                  (
-                    <ul className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-slate-800 shadow-md">
-                      {yearFilter?.map((childName, index) => {
+                    {selectedTeacher ? selectedTeacher : "Choose Teacher"}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="white"
+                      className="inline w-4 h-4 ml-1"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  {isChildOpen && (
+                    <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                      {teacherFilter?.map((childName, index) => {
                         return (
                           <>
                             <li
@@ -1119,80 +1266,182 @@ const School = () => {
                               }
                               key={index}
                               onClick={() => {
-                                setIsTimeFrameOpen(!isTimeFrameOpen)
-                                handleYearSelect(childName)
+                                setIsChildOpen(!isChildOpen)
+                                handleTeacherSelect(childName)
                               }}
                             >
                               <span
-                                className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
-                              >
+                                className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
                                 {childName}
                               </span>
                             </li>
                           </>
                         );
                       })}
-                      {/* <li className="">
-                      <input
-                        type="date"
-                        name="date-range"
-                        id="to-date"
-                        className="block w-full px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white focus:outline-none"
-                        value={toDate}
-                        onChange={handleToDateChange}
-                      />
-                    </li>
-                    <li>
-                      <input
-                        type="date"
-                        name="date-range"
-                        id="from-date"
-                        className="block px-4 w-full py-2 text-gray-800 hover:bg-indigo-500 hover:text-white focus:outline-none"
-                        value={fromDate}
-                        onChange={handleFromDateChange}
-                      />
-                    </li> */}
                     </ul>
                   )}
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        {/* Button  */}
-        { (ProductStatus === "true") &&
-          <div className="grid gap-1 float-right">
-          <label htmlFor="">Go-To</label>
-          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-            <li className="mr-3">
-              <div className="inline-block relative" >
-                <button
-                  onClick = {ToParentsDashboard}
-                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
-                  Parent Dashboard
-                </button>
-              </div>
-            </li>
-          </ul>
+                </div>
+              </li>
+            </ul>
           </div>
-        }
-        {/* <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-            <li className="mr-3">
-              <div className="inline-block relative">
-                <button
-                  onClick={() => setTableData(users)}
-                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
-                >
-                  Reset Filter
-                </button>
-              </div>
-            </li>
-        </ul> */}
-      </div>
-      {/* filter bar ends here */}
-      {/* ----------------------------------------------------------- */}
 
+          {/* choose Year dropdown */}
+          <div className="grid gap-1">
+            <label htmlFor="">Year</label>
+            <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+              <li className="mr-3">
+                <div className="inline-block relative" ref={dropdownRef5}>
+                  <button
+                    onClick={() => setIsDataYearOpen(!isDataYearOpen)}
+                    className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                  >
+                    {dataSelectedYear ? dataSelectedYear : dataYearList[dataYearList.length - 1]}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="white"
+                      className="inline w-4 h-4 ml-1"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  {isDataYearOpen && (
+                    <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                      {dataYearList?.map((childName, index) => {
+                        return (
+                          <>
+                            <li
+                              className={
+                                index !== childName.length - 1
+                                  ? "border-b border-slate-400 cursor-pointer"
+                                  : "cursor-pointer"
 
+                              }
+                              key={index}
+                              onClick={() => {
+                                setIsDataYearOpen(!isDataYearOpen)
+                                handleDataYearSelect(childName)
+                              }}
+                            >
+                              <span
+                                className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                                {childName}
+                              </span>
+                            </li>
+                          </>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          {/* choose Time Frame dropdown */}
+          <div className="grid gap-1">
+            <label htmlFor="">Year (UK) / Grade (US)</label>
+            <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+              <li className="mr-3">
+                <div className="inline-block relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIsTimeFrameOpen(!isTimeFrameOpen)}
+                    className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
+
+                    {selectedYear ? selectedYear : "Choose Year"}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="white"
+                      className="inline w-4 h-4 ml-1"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                  {isTimeFrameOpen &&
+                    (
+                      <ul className="absolute right-0 mt-2 py-2 w-60 bg-white rounded-lg shadow-slate-800 shadow-md">
+                        {yearFilter?.map((childName, index) => {
+                          return (
+                            <>
+                              <li
+                                className={
+                                  index !== childName.length - 1
+                                    ? "border-b border-slate-400 cursor-pointer"
+                                    : "cursor-pointer"
+
+                                }
+                                key={index}
+                                onClick={() => {
+                                  setIsTimeFrameOpen(!isTimeFrameOpen)
+                                  handleYearSelect(childName)
+                                }}
+                              >
+                                <span
+                                  className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white"
+                                >
+                                  {childName}
+                                </span>
+                              </li>
+                            </>
+                          );
+                        })}
+                        {/* <li className="">
+                        <input
+                          type="date"
+                          name="date-range"
+                          id="to-date"
+                          className="block w-full px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white focus:outline-none"
+                          value={toDate}
+                          onChange={handleToDateChange}
+                        />
+                      </li>
+                      <li>
+                        <input
+                          type="date"
+                          name="date-range"
+                          id="from-date"
+                          className="block px-4 w-full py-2 text-gray-800 hover:bg-indigo-500 hover:text-white focus:outline-none"
+                          value={fromDate}
+                          onChange={handleFromDateChange}
+                        />
+                      </li> */}
+                      </ul>
+                    )}
+                </div>
+              </li>
+            </ul>
+          </div>
+          
+          
+
+          {/* Button  */}
+          
+          {/* <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+              <li className="mr-3">
+                <div className="inline-block relative">
+                  <button
+                    onClick={() => setTableData(users)}
+                    className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                  >
+                    Reset Filter
+                  </button>
+                </div>
+              </li>
+          </ul> */}
+        </div>
+        {/* filter bar ends here */}
+        {/* ----------------------------------------------------------- */}
+        <MarkKey />
+     </div>
 
       {/* table starts here */}
       <div className="overflow-x-autoquiz5: 35,
@@ -1223,11 +1472,11 @@ quiz5: 35,
               <tbody>
                 {/* SMASH Maths Cohort  */}
                 <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
                   <td className="sticky left-40 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
+                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
                   {/* <td className="sticky left-0 z-10 px-1 py-1 w-40 font-bold"></td> */}
-                  <td className="sticky left-0 z-10 px-2 py-2font-bold"></td>
-                  <td className="sticky left-0 z-10 px-2 py-2 font-bold"></td>
+                  <td className="sticky left-0 z-10 px-6 py-3 font-bold"></td>
+                  <td className="sticky left-0 z-10 px-6 py-3 font-bold"></td>
                   {selectedChild === "" ? (
                     <>
                       {
@@ -1258,10 +1507,10 @@ quiz5: 35,
                   )}
                 </tr>
 
-                {/* SMASH Maths Class Avarage  */}
+                {/* Class Avarage  */}
                 <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
+                  <td className="sticky left-40 z-10 px-6 py-3 w-40 font-bold">Class Average</td>
                   <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
-                  <td className="sticky left-40 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Class Average</td>
                   {/* <td className="sticky left-0 z-10 px-1 py-1 w-40 font-bold"></td> */}
                   <td className="sticky left-0 z-10 px-2 py-2  font-bold"></td>
                   <td className="sticky left-0 z-10 px-2 py-2 font-bold"></td>
@@ -1297,7 +1546,7 @@ quiz5: 35,
                 {Object.keys(users).map((student) => (
                   <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
                     <td className="p-3">{users[student][0]?.user_name}</td>
-                    <td className="p-3"><input value={getFullName(users[student][0]?.user_name)} className="h-8" placeholder="Enter name here" onChange={(e) => UpdateFullName(e, users[student][0]?.user_name)} onBlur={(e) => UpdateFullNameDB(e, users[student][0]?.user_name)}/></td>
+                    <td className="p-3"><input value={getFullName(users[student][0]?.user_name)} className="h-8 text-[#f44236]" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, users[student][0]?.user_name)} onBlur={(e) => UpdateFullNameDB(e, users[student][0]?.user_name)}/></td>
                     {/* <td className="p-3">{users[student][0]?.full_name}</td> */}
                     <td className="p-3 text-center">{getStudentaverage(users[student][0]?.user_name)}</td>
                     <td className="p-3 text-center">{getStudentEffort(users[student][0]?.user_name)}</td>
@@ -1336,9 +1585,11 @@ quiz5: 35,
           </table>
         </div>}  
       </div>
+      
       {/* table ends here */}
       {/* ----------------------------------------------------------- */}
       
+      <h2 className="my-6 text-[#17026b] font-bold text-xl">CHART ANALYSIS</h2>
       <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
         {/* choose Year dropdown */}
         <div className="grid gap-1">
@@ -1507,6 +1758,174 @@ quiz5: 35,
         </div>        
       </div>
       {filteredChartData.length > 0 && <LineCharts chartsData={filteredChartData}/>}
+      <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
+        {/* choose Year dropdown */}
+        <div className="grid gap-1">
+          <label htmlFor="">Year</label>
+          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+            <li className="mr-3">
+              <div className="inline-block relative" ref={dropdownRefYear}>
+                <button
+                  onClick={() => setIsYearChartOpen(!isYearChartOpen)}
+                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                >
+                  {rechartSelectedYear ? rechartSelectedYear : 'Select Year'}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="white"
+                    className="inline w-4 h-4 ml-1"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                {isYearChartOpen && (
+                  <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                    {rechartYearList?.map((childName, index) => {
+                      return (
+                        <>
+                          <li
+                            className={
+                              index !== childName.length - 1
+                                ? "border-b border-slate-400 cursor-pointer"
+                                : "cursor-pointer"
+                            }
+                            key={index}
+                            onClick={() => {
+                              setIsYearChartOpen(!isYearChartOpen)
+                              handleReChartYearSelect(childName)
+                            }}
+                          >
+                            <span
+                              className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                              {childName}
+                            </span>
+                          </li>
+                        </>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </li>
+          </ul>
+        </div>
+        {/* choose teacher dropdown */}
+        <div className="grid gap-1">
+          <label htmlFor="">Teacher</label>
+          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+            <li className="mr-3">
+              <div className="inline-block relative" ref={dropdownRefClass}>
+                <button
+                  onClick={() => setIsClassChartOpen(!isClassChartOpen)}
+                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                >
+                  {selectedReChartTeacher ? selectedReChartTeacher : 'Select Teacher'}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="white"
+                    className="inline w-4 h-4 ml-1"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                {isClassChartOpen && (
+                  <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                    {rechartTeacherList?.map((childName, index) => {
+                      return (
+                        <>
+                          <li
+                            className={
+                              index !== childName.length - 1
+                                ? "border-b border-slate-400 cursor-pointer"
+                                : "cursor-pointer"
+                            }
+                            key={index}
+                            onClick={() => {
+                              setIsClassChartOpen(!isClassChartOpen)
+                              handleReChartTeacherSelect(childName)
+                            }}
+                          >
+                            <span
+                              className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                              {childName}
+                            </span>
+                          </li>
+                        </>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </li>
+          </ul>
+        </div>
+        {/* choose Student dropdown */}
+        <div className="grid gap-1">
+          <label htmlFor="">Student</label>
+          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+            <li className="mr-3">
+              <div className="inline-block relative" ref={dropdownRefStudent}>
+                <button
+                  onClick={() => setIsStudentChartOpen(!isStudentChartOpen)}
+                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                >
+                  {rechartSelectedStudent ? rechartSelectedStudent : 'Select Student'}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="white"
+                    className="inline w-4 h-4 ml-1"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                {isStudentChartOpen && (
+                  <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                    {rechartStudentList?.map((childName, index) => {
+                      return (
+                        <>
+                          <li
+                            className={
+                              index !== childName.length - 1
+                                ? "border-b border-slate-400 cursor-pointer"
+                                : "cursor-pointer"
+                            }
+                            key={index}
+                            onClick={() => {
+                              setIsStudentChartOpen(!isStudentChartOpen)
+                              handleReChartStudentSelect(childName)
+                            }}
+                          >
+                            <span
+                              className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                              {childName}
+                            </span>
+                          </li>
+                        </>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </li>
+          </ul>
+        </div>        
+      </div>
+      {chart.length > 0 && <RevisedLineChart chart={chart}/>}
     </div>
   );
 };
