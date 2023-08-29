@@ -280,6 +280,15 @@ const School = () => {
     const year = rechartSelectedYear || 2022
     const email =  selectedReChartTeacher || "";
     const username = rechartSelectedStudent || "";
+    let payload = { year };
+
+    if (email !== "" && username === "") {
+      payload = { year, email };
+    } else if (email === "" && username !== "") {
+      payload = { year, username };
+    } else if (email !== "" && username !== "") {
+      payload = { year, email, username };
+    }
     try {
       const token = localStorage.getItem('token')
       fetch(testURL + '/rollingaverage', {
@@ -289,14 +298,11 @@ const School = () => {
           "Content-Type": "application/json",
           "Authorization": token ? `${token}` : null
         },
-        body: JSON.stringify({
-          year,
-          email,
-          username
-        })
+        body: JSON.stringify(payload)
       })
         .then(response => response.json())
         .then(response => {
+          console.log(`Token `, token)
           console.log(`Api Response` , response?.rollingaverage)
           setChart(response?.rollingaverage)
           setDataLoadin(false)
