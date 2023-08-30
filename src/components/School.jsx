@@ -274,48 +274,11 @@ const School = () => {
 
   }, [])
 
-  // Rolling Averages API
-  useEffect(() => {
-    setDataLoadin(true)
-    const year = rechartSelectedYear || 2022
-    const email =  selectedReChartTeacher || "";
-    const username = rechartSelectedStudent || "";
-    let payload = { year };
 
-    if (email !== "" && username === "") {
-      payload = { year, email };
-    } else if (email === "" && username !== "") {
-      payload = { year, username };
-    } else if (email !== "" && username !== "") {
-      payload = { year, email, username };
-    }
-    try {
-      const token = localStorage.getItem('token')
-      fetch(testURL + '/rollingaverage', {
-        method: 'POST',
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-          "Authorization": token ? `${token}` : null
-        },
-        body: JSON.stringify(payload)
-      })
-        .then(response => response.json())
-        .then(response => {
-          console.log(`Token `, token)
-          console.log(`Api Response` , response?.rollingaverage)
-          setChart(response?.rollingaverage)
-          setDataLoadin(false)
-        })
-    } catch (e) {
-      setDataLoadin(false)
-    }
-    // console.log(`Api Data fetch`, rechartSelectedYear, selectedReChartTeacher, rechartSelectedStudent)
-  }, [rechartSelectedYear, selectedReChartTeacher, rechartSelectedStudent])
 
 
   useEffect(() => {
-      const years = [];
+      let years = [];
       const startYear = 2022;
       const currentYear = new Date().getFullYear();
     
@@ -327,6 +290,7 @@ const School = () => {
           years.push(year + 1);
         }
       }
+      years = years.map(item => item-1)
       setDataYearList([...new Set(years)]);
     },[])
 
@@ -366,6 +330,7 @@ const School = () => {
           setTeacherFilter(uniqueTeacherFilters)
           setChartTeacherList(uniqueTeacherFilters)
           setReChartTeacherList(uniqueTeacherFilters)
+          // setSelectedReChartTeacher(uniqueTeacherFilters[0])
           
           // Filter Unique Year for chart
           const uniqueYears = new Set();
@@ -437,6 +402,44 @@ const School = () => {
       setDataLoadin(false)
     }
   }, [selectedTeacher])
+  // Rolling Averages API
+  useEffect(() => {
+    setDataLoadin(true)
+    const year = rechartSelectedYear || rechartYearList[rechartYearList.length - 1]
+    const email =  selectedReChartTeacher || rechartTeacherList[0];
+    const username = rechartSelectedStudent || "";
+    const type = "teacher";
+    let payload = { year, type };
+    if (email !== "" && username === "") {
+      payload = { year, email, type };
+    } else if (email === "" && username !== "") {
+      payload = { year, username, type };
+    } else if (email !== "" && username !== "") {
+      payload = { year, email, username, type };
+    }
+    try {
+      const token = localStorage.getItem('token')
+      fetch(testURL + '/rollingaverage', {
+        method: 'POST',
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+          "Authorization": token ? `${token}` : null
+        },
+        body: JSON.stringify(payload)
+      })
+        .then(response => response.json())
+        .then(response => {
+          console.log(`Token `, token)
+          console.log(`Api Response` , response?.rollingaverage)
+          setChart(response?.rollingaverage)
+          setDataLoadin(false)
+        })
+    } catch (e) {
+      setDataLoadin(false)
+    }
+    // console.log(`Api Data fetch`, rechartSelectedYear, selectedReChartTeacher, rechartSelectedStudent)
+  }, [rechartSelectedYear, selectedReChartTeacher, rechartSelectedStudent])
 
   const getWeekNumber = (quiz_name, i) => {
     let _inc = 0
@@ -525,10 +528,10 @@ const School = () => {
       const year = submissionDate.getFullYear();
       const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
       if (yearSelected === year) {
-        if ( month < 9) {
+        if ( month >= 9) {
           return record;
         }
-      } else if (yearSelected - 1 === year && month >= 9) {
+      } else if (yearSelected - 1 === year && month < 9) {
         return record;
       }
     });
@@ -542,7 +545,7 @@ const School = () => {
         usersObject[item?.user_name] = [item]
       }
     })
-
+    console.log(`Filtered Data`,filteredRecords)
     const ordered = Object.keys(usersObject).sort().reduce(
       (obj, key) => {
         obj[key] = usersObject[key];
@@ -632,6 +635,7 @@ const School = () => {
     applyFilter(selectedTeacher, selectedYear, tableHeadersAll, quizesData ,childName)
     // applyFilter ( childName, selectedChartTeacher, chartSelectedStudent)
   }
+  // Revised Charts
   const handleReChartYearSelect = (childName) => {
     setReChartSelectedYear(childName)
     console.log( childName, selectedReChartTeacher, rechartSelectedStudent, )
@@ -817,10 +821,10 @@ const School = () => {
       const year = submissionDate.getFullYear();
       const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
       if (dataSelectedYear === year) {
-        if ( month < 9) {
+        if ( month >= 9) {
           return record;
         }
-      } else if (dataSelectedYear - 1 === year && month >= 9) {
+      } else if (dataSelectedYear - 1 === year && month < 9) {
         return record;
       }
     });
@@ -856,10 +860,10 @@ const School = () => {
       const year = submissionDate.getFullYear();
       const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
       if (dataSelectedYear === year) {
-        if ( month < 9) {
+        if ( month >= 9) {
           return record;
         }
-      } else if (dataSelectedYear - 1 === year && month >= 9) {
+      } else if (dataSelectedYear - 1 === year && month < 9) {
         return record;
       }
     });
@@ -1775,7 +1779,7 @@ quiz5: 35,
                   onClick={() => setIsYearChartOpen(!isYearChartOpen)}
                   className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                 >
-                  {rechartSelectedYear ? rechartSelectedYear : 'Select Year'}
+                  {rechartSelectedYear ? rechartSelectedYear : rechartYearList[rechartYearList.length - 1]}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
@@ -1830,7 +1834,7 @@ quiz5: 35,
                   onClick={() => setIsClassChartOpen(!isClassChartOpen)}
                   className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                 >
-                  {selectedReChartTeacher ? selectedReChartTeacher : 'Select Teacher'}
+                  {selectedReChartTeacher ? selectedReChartTeacher : "Select Teacher"}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"

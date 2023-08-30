@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { CustomLoader } from "../components/Loader";
 import LineCharts from "./LineCharts";
 import MarkKey from "./MarkKey";
+import RevisedLineChart from "./RevisedLineChart";
 
 const ChildNames = ["Ali", "Usama", "Omair", "Talha", "Agha", "Hassan"];
 const data = [
@@ -237,6 +238,25 @@ const Parent = () => {
   const [chartSelectedStudent, setChartSelectedStudent] = useState()
   const [chartYearList, setChartYearList] = useState([])
   const [chartSelectedYear, setChartSelectedYear] = useState()
+  // Revised Chart States 
+  const [chart, setChart] = useState([{
+    "Class Average": 0.0,
+    "SMASH Maths Cohort Average": 0.0,
+    "Student Average": 0.0,
+    "week": 0
+  }])
+  const dropdownRefYear = useRef(null);
+  const dropdownRefClass = useRef(null);
+  const dropdownRefStudent = useRef(null);
+  const [isYearChartOpen, setIsYearChartOpen] = useState(false);
+  const [isClassChartOpen, setIsClassChartOpen] = useState(false);
+  const [isStudentChartOpen, setIsStudentChartOpen] = useState(false);
+  const [rechartTeacherList, setReChartTeacherList] = useState([])
+  const [selectedReChartTeacher, setSelectedReChartTeacher] = useState('')
+  const [rechartStudentList, setReChartStudentList] = useState([])
+  const [rechartSelectedStudent, setReChartSelectedStudent] = useState('')
+  const [rechartYearList, setReChartYearList] = useState([ 2021, 2022])
+  const [rechartSelectedYear, setReChartSelectedYear] = useState('')
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
@@ -260,7 +280,7 @@ const Parent = () => {
 
   }, [])
   useEffect(() => {
-    const years = [];
+    let years = [];
     const startYear = 2022;
     const currentYear = new Date().getFullYear();
   
@@ -273,6 +293,23 @@ const Parent = () => {
         years.push(year + 1);
       }
     }
+    years = years.map(item => item-1)
+    setDataYearList([...new Set(years)]);
+  },[])
+  useEffect(() => {
+    let years = [];
+    const startYear = 2022;
+    const currentYear = new Date().getFullYear();
+  
+    for (let year = startYear; year <= currentYear; year++) {
+      years.push(year);
+      if (year < currentYear) {
+        years.push(year + 1);
+      } else if (new Date(year + 1, 8, 1) <= new Date()) {
+        years.push(year + 1);
+      }
+    }
+    years = years.map(item => item-1)
     setDataYearList([...new Set(years)]);
   },[])
 
@@ -366,6 +403,7 @@ const Parent = () => {
           const uniqueTeacherFilters = [...new Set(teacherFilters)]
           setYearFilter(uniqueYearsFilters)
           setChartTeacherList(uniqueTeacherFilters)
+          setReChartTeacherList(uniqueTeacherFilters)
 
           // Filter Unique Year for chart
           const uniqueYears = new Set();
@@ -423,6 +461,41 @@ const Parent = () => {
     }
 
   }, [])
+
+    // Rolling Averages API
+    useEffect(() => {
+      setDataLoadin(true)
+      const year = rechartSelectedYear || rechartYearList[rechartYearList.length - 1]
+      const username =  selectedReChartTeacher || rechartTeacherList[0];
+      // const username = rechartSelectedStudent || "";
+      const type = "parent";
+      let payload = { year, type };
+      if (username != "") {
+        payload = { year, username, type };
+      }
+      try {
+        const token = localStorage.getItem('token')
+        fetch(testURL + '/rollingaverage', {
+          method: 'POST',
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
+            "Authorization": token ? `${token}` : null
+          },
+          body: JSON.stringify(payload)
+        })
+          .then(response => response.json())
+          .then(response => {
+            console.log(`Token `, token)
+            console.log(`Api Response` , response?.rollingaverage)
+            setChart(response?.rollingaverage)
+            setDataLoadin(false)
+          })
+      } catch (e) {
+        setDataLoadin(false)
+      }
+      // console.log(`Api Data fetch`, rechartSelectedYear, selectedReChartTeacher, rechartSelectedStudent)
+    }, [rechartSelectedYear, selectedReChartTeacher, rechartSelectedStudent])
 
   const handleYearSelect = (childName) => {
     applyFilter(selectedDuraation, childName, tableHeadersAll, quizesData, dataSelectedYear)
@@ -496,10 +569,10 @@ const Parent = () => {
       const year = submissionDate.getFullYear();
       const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
       if (yearSelected === year) {
-        if ( month < 9) {
+        if ( month >= 9) {
           return record;
         }
-      } else if (yearSelected - 1 === year && month >= 9) {
+      } else if (yearSelected - 1 === year && month < 9) {
         return record;
       }
     });
@@ -916,6 +989,24 @@ const Parent = () => {
     });
     return result;
   }
+  // Revised Charts
+  const handleReChartYearSelect = (childName) => {
+    setReChartSelectedYear(childName)
+    console.log( childName, selectedReChartTeacher, rechartSelectedStudent, )
+  }
+  const handleReChartTeacherSelect = (childName) => {
+    setSelectedReChartTeacher(childName)
+    const teacherFilters = quizesData.filter(x => x.email_address === childName)
+    const students = teacherFilters.map(x => x.user_name).sort();
+    const uniqueStudents =  [...new Set(students)]
+    setReChartStudentList(uniqueStudents);
+    console.log(uniqueStudents)
+    console.log( rechartSelectedYear, childName, rechartSelectedStudent)
+  }
+  const handleReChartStudentSelect = (childName) => {
+    setReChartSelectedStudent(childName)
+    console.log( rechartSelectedYear, selectedReChartTeacher, childName)
+  }  
 
   return (
     <div className="md:mx-20 my-2">
@@ -1489,6 +1580,174 @@ quiz5: 35,
         </div>         */}
       </div>
       {filteredChartData.length > 0 && <LineCharts chartsData={filteredChartData}/>}
+      <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
+        {/* choose Year dropdown */}
+        <div className="grid gap-1">
+          <label htmlFor="">Year</label>
+          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+            <li className="mr-3">
+              <div className="inline-block relative" ref={dropdownRefYear}>
+                <button
+                  onClick={() => setIsYearChartOpen(!isYearChartOpen)}
+                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                >
+                  {rechartSelectedYear ? rechartSelectedYear : rechartYearList[rechartYearList.length - 1]}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="white"
+                    className="inline w-4 h-4 ml-1"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                {isYearChartOpen && (
+                  <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                    {rechartYearList?.map((childName, index) => {
+                      return (
+                        <>
+                          <li
+                            className={
+                              index !== childName.length - 1
+                                ? "border-b border-slate-400 cursor-pointer"
+                                : "cursor-pointer"
+                            }
+                            key={index}
+                            onClick={() => {
+                              setIsYearChartOpen(!isYearChartOpen)
+                              handleReChartYearSelect(childName)
+                            }}
+                          >
+                            <span
+                              className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                              {childName}
+                            </span>
+                          </li>
+                        </>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </li>
+          </ul>
+        </div>
+        {/* choose teacher dropdown */}
+        <div className="grid gap-1">
+          <label htmlFor="">Student</label>
+          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+            <li className="mr-3">
+              <div className="inline-block relative" ref={dropdownRefClass}>
+                <button
+                  onClick={() => setIsClassChartOpen(!isClassChartOpen)}
+                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                >
+                  {selectedReChartTeacher ? selectedReChartTeacher : rechartTeacherList[0]}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="white"
+                    className="inline w-4 h-4 ml-1"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                {isClassChartOpen && (
+                  <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                    {rechartTeacherList?.map((childName, index) => {
+                      return (
+                        <>
+                          <li
+                            className={
+                              index !== childName.length - 1
+                                ? "border-b border-slate-400 cursor-pointer"
+                                : "cursor-pointer"
+                            }
+                            key={index}
+                            onClick={() => {
+                              setIsClassChartOpen(!isClassChartOpen)
+                              handleReChartTeacherSelect(childName)
+                            }}
+                          >
+                            <span
+                              className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                              {childName}
+                            </span>
+                          </li>
+                        </>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </li>
+          </ul>
+        </div>
+        {/* choose Student dropdown */}
+        {/* <div className="grid gap-1">
+          <label htmlFor="">Student</label>
+          <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+            <li className="mr-3">
+              <div className="inline-block relative" ref={dropdownRefStudent}>
+                <button
+                  onClick={() => setIsStudentChartOpen(!isStudentChartOpen)}
+                  className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                >
+                  {rechartSelectedStudent ? rechartSelectedStudent : 'Select Student'}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="white"
+                    className="inline w-4 h-4 ml-1"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                {isStudentChartOpen && (
+                  <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                    {rechartStudentList?.map((childName, index) => {
+                      return (
+                        <>
+                          <li
+                            className={
+                              index !== childName.length - 1
+                                ? "border-b border-slate-400 cursor-pointer"
+                                : "cursor-pointer"
+                            }
+                            key={index}
+                            onClick={() => {
+                              setIsStudentChartOpen(!isStudentChartOpen)
+                              handleReChartStudentSelect(childName)
+                            }}
+                          >
+                            <span
+                              className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                              {childName}
+                            </span>
+                          </li>
+                        </>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            </li>
+          </ul>
+        </div>         */}
+      </div>
+      {chart.length > 0 && <RevisedLineChart chart={chart}/>}
     </div>
   );
 };
