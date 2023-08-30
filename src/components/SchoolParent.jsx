@@ -236,7 +236,12 @@ const SchoolParent = () => {
   const [chartSelectedYear, setChartSelectedYear] = useState()
 
     // Revised Chart States 
-    const [chart, setChart] = useState([])
+    const [chart, setChart] = useState([{
+      "Class Average": 0.0,
+      "SMASH Maths Cohort Average": 0.0,
+      "Student Average": 0.0,
+      "week": 0
+    }])
     const dropdownRefYear = useRef(null);
     const dropdownRefClass = useRef(null);
     const dropdownRefStudent = useRef(null);
@@ -574,7 +579,7 @@ const SchoolParent = () => {
   useEffect(() => {
     setDataLoadin(true)
     const year = rechartSelectedYear || rechartYearList[rechartYearList.length - 1]
-    const email =  selectedReChartTeacher || rechartTeacherList[0];
+    const email =  selectedReChartTeacher || "";
     const username = rechartSelectedStudent || "";
     const type = "teacherparent";
     let payload = { year, type };
@@ -1797,7 +1802,7 @@ quiz5: 35,
                   onClick={() => setIsClassChartOpen(!isClassChartOpen)}
                   className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                 >
-                  {selectedReChartTeacher ? selectedReChartTeacher : rechartTeacherList[0]}
+                  {selectedReChartTeacher ? selectedReChartTeacher : 'Select Teacher'}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"

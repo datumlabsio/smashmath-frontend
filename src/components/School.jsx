@@ -237,7 +237,12 @@ const School = () => {
   const [chartSelectedYear, setChartSelectedYear] = useState()
 
   // Revised Chart States 
-  const [chart, setChart] = useState([])
+  const [chart, setChart] = useState([{
+    "Class Average": 0.0,
+    "SMASH Maths Cohort Average": 0.0,
+    "Student Average": 0.0,
+    "week": 0
+  }])
   const dropdownRefYear = useRef(null);
   const dropdownRefClass = useRef(null);
   const dropdownRefStudent = useRef(null);
@@ -406,7 +411,7 @@ const School = () => {
   useEffect(() => {
     setDataLoadin(true)
     const year = rechartSelectedYear || rechartYearList[rechartYearList.length - 1]
-    const email =  selectedReChartTeacher || rechartTeacherList[0];
+    const email =  selectedReChartTeacher || "";
     const username = rechartSelectedStudent || "";
     const type = "teacher";
     let payload = { year, type };
@@ -430,8 +435,6 @@ const School = () => {
       })
         .then(response => response.json())
         .then(response => {
-          console.log(`Token `, token)
-          console.log(`Api Response` , response?.rollingaverage)
           setChart(response?.rollingaverage)
           setDataLoadin(false)
         })

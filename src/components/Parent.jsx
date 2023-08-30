@@ -466,7 +466,7 @@ const Parent = () => {
     useEffect(() => {
       setDataLoadin(true)
       const year = rechartSelectedYear || rechartYearList[rechartYearList.length - 1]
-      const username =  selectedReChartTeacher || rechartTeacherList[0];
+      const username =  selectedReChartTeacher || '';
       // const username = rechartSelectedStudent || "";
       const type = "parent";
       let payload = { year, type };
@@ -1646,7 +1646,7 @@ quiz5: 35,
                   onClick={() => setIsClassChartOpen(!isClassChartOpen)}
                   className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                 >
-                  {selectedReChartTeacher ? selectedReChartTeacher : rechartTeacherList[0]}
+                  {selectedReChartTeacher ? selectedReChartTeacher : 'Select Student'}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
