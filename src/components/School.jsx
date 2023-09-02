@@ -195,6 +195,11 @@ const School = () => {
   const dropdownRef2 = useRef(null);
   const dropdownRef3 = useRef(null);
   const dropdownRef4 = useRef(null);
+  // Package Dropdown
+  const [packageSelected, setPackageSelected] = useState();
+  const [packageList, setPackageList] = useState(['Premium Package']);
+  const [packageOpen, setPackageOpen] = useState(false);
+  const dropdownRefPackage = useRef(null);
 
   // Calculate the averages
   const numColumns = Object.keys(data[0]).length - 2;
@@ -238,6 +243,7 @@ const School = () => {
   const [classAverageAVG, setClassAverageAVG] = useState('-')
   const [cohortAverageAVG, setCohortAverageAVG] = useState('-')
   const [allUniqueChartUsers, setallUniqueChartUsers] = useState([])
+  const [chartDataLoading, setChartDataLoading] = useState(true)
 
   // Revised Chart States 
   const [chart, setChart] = useState([{
@@ -256,7 +262,7 @@ const School = () => {
   const [selectedReChartTeacher, setSelectedReChartTeacher] = useState('')
   const [rechartStudentList, setReChartStudentList] = useState([])
   const [rechartSelectedStudent, setReChartSelectedStudent] = useState('')
-  const [rechartYearList, setReChartYearList] = useState([ 2021, 2022])
+  const [rechartYearList, setReChartYearList] = useState([ 2021, 2022, 2023])
   const [rechartSelectedYear, setReChartSelectedYear] = useState('')
 
 
@@ -303,7 +309,7 @@ const School = () => {
     },[])
       // Rolling Averages API
   useEffect(() => {
-    setDataLoadin(true)
+    setChartDataLoading(true)
     const year = rechartSelectedYear || rechartYearList[rechartYearList.length - 1]
     const email =  selectedReChartTeacher || "";
     const username = rechartSelectedStudent || "";
@@ -330,10 +336,10 @@ const School = () => {
         .then(response => response.json())
         .then(response => {
           setChart(response?.rollingaverage)
-          setDataLoadin(false)
+          setChartDataLoading(false)
         })
     } catch (e) {
-      setDataLoadin(false)
+      setChartDataLoading(false)
     }
     // console.log(`Api Data fetch`, rechartSelectedYear, selectedReChartTeacher, rechartSelectedStudent)
   }, [rechartSelectedYear, selectedReChartTeacher, rechartSelectedStudent])
@@ -646,6 +652,13 @@ const School = () => {
     applyFilter(childName, selectedYear, tableHeadersAll, quizesData, dataSelectedYear)
   }
 
+  const handlePackageSelect = (childName) => {
+    setPackageSelected(childName)
+    if(childName == 'Premium Package'){
+      ToParentsDashboard()
+    }
+  }
+
   const handleChildSelect = (childName) => {
     setSelectedChild(childName);
     setIsChildOpen(false);
@@ -828,6 +841,20 @@ const School = () => {
     };
   }, [dropdownRefStudent]);
 
+  // Package DropDown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRefPackage.current && !dropdownRefPackage.current.contains(event.target)) {
+        setPackageOpen(false);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [dropdownRefPackage]);
 
 
   const handleToDateChange = (event) => {
@@ -943,7 +970,6 @@ const School = () => {
       }
       return acc;
     }, {});
-    console.log(`Get Effort Score Complete Data`, tableHeaders.length)
     let filteredData = Object.values(uniqueObjectsById);
     filteredData = filteredData?.filter(item => item?.percentage_score > 0)
     const totalQuizzes = filteredData?.length;
@@ -1197,7 +1223,7 @@ const School = () => {
  
   return (
     <div className="md:mx-20 my-6">
-      {dataLoadin && <CustomLoader />}
+      {dataLoadin && chartDataLoading && <CustomLoader />}
 
       {/* main bar starts */}
       <div className="sticky w-ful h-auto gap-4 flex justify-between items-center flex-col md:flex-row ">
@@ -1289,22 +1315,77 @@ const School = () => {
       <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
       <div className="w-full flex justify-start items-center mb-10">
         <div className="w-full flex justify-start items-center gap-4 flex-row mt-6">
-          { (ProductStatus === "true") &&
-            <div className="grid gap-1 float-right">
-              <label htmlFor="">Package</label>
-              <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+          { (ProductStatus === "true") && (
+            // <div className="grid gap-1 float-right">
+            //   <label htmlFor="">Package</label>
+            //   <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
+            //     <li className="mr-3">
+            //       <div className="inline-block relative" >
+            //         <button
+            //           onClick = {ToParentsDashboard}
+            //           className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
+            //           Premium Package
+            //         </button>
+            //       </div>
+            //     </li>
+            //   </ul>
+            // </div>
+            <div className="grid gap-1">
+              <label htmlFor="">Goto Package</label>
+              <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20 h-16">
                 <li className="mr-3">
-                  <div className="inline-block relative" >
+                  <div className="inline-block relative" ref={dropdownRefPackage}>
                     <button
-                      onClick = {ToParentsDashboard}
-                      className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
-                      Premium Package
+                      onClick={() => setPackageOpen(!packageOpen)}
+                      className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                    >
+                      {packageSelected ? packageSelected : "Choose Package"}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="white"
+                        className="inline w-4 h-4 ml-1"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
                     </button>
+                    {packageOpen && (
+                      <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                        {packageList?.map((childName, index) => {
+                          return (
+                            <>
+                              <li
+                                className={
+                                  index !== childName.length - 1
+                                    ? "border-b border-slate-400 cursor-pointer"
+                                    : "cursor-pointer"
+
+                                }
+                                key={index}
+                                onClick={() => {
+                                  setPackageOpen(!packageOpen)
+                                  handlePackageSelect(childName)
+                                }}
+                              >
+                                <span
+                                  className="block px-4 py-1 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                                  {childName}
+                                </span>
+                              </li>
+                            </>
+                          );
+                        })}
+                      </ul>
+                    )}
                   </div>
                 </li>
               </ul>
             </div>
-          }
+          )}
           {/* choose teacher dropdown */}
           <div className="grid gap-1">
             <label htmlFor="">Teacher</label>
@@ -1534,7 +1615,7 @@ quiz5: 35,
 }</td> shadow-md sm:rounded-sm  lg:mx-auto sm:w-full mt-5">
 
         {
-          Boolean(tableHeaders?.length) && true && <div className="overflow-scroll " style={{  minHeight: '100px', maxHeight: 'calc(100vh - 250px)' }}>
+          Boolean(tableHeaders?.length) && true && <div className="overflow-scroll " style={{ minHeight: '100px', maxHeight: 'calc(100vh - 250px)' }}>
             <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
               <thead className="text-xs text-white uppercase bg-[#17026b] h-32">
                 <tr className="items-center">
@@ -1642,7 +1723,7 @@ quiz5: 35,
           </div>}
           {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ minHeight: '100px',  maxHeight: 'calc(100vh - 250px)' }}>
           <table className="min-h-74 w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
-            <thead className="text-xs text-white uppercase bg-[#17026b]">
+            <thead className="text-xs text-white uppercase bg-[#17026b] h-32">
               <tr className="items-center">
                 <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
                 {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th> */}
@@ -1658,13 +1739,10 @@ quiz5: 35,
                 <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
                 <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
               </tr>
-
-              
-                <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
-                  {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
-                  <td className="p-3 text-center" rowSpan='3'>No Data Avaiable.</td>
-                  
-                </tr>
+              <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
+                {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
+                <td className="p-3 text-center" rowSpan='3'>No Data Avaiable.</td>    
+              </tr>
             </tbody>
           </table>
         </div>}  
@@ -1845,7 +1923,7 @@ quiz5: 35,
       <div className="w-full flex justify-start items-center gap-4 flex-row mt-06">
         {/* choose Year dropdown */}
         <div className="grid gap-1">
-          <label htmlFor="">Year</label>
+          <label htmlFor="">Academic Year</label>
           <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
               <div className="inline-block relative" ref={dropdownRefYear}>
@@ -1853,7 +1931,7 @@ quiz5: 35,
                   onClick={() => setIsYearChartOpen(!isYearChartOpen)}
                   className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                 >
-                  {rechartSelectedYear ? rechartSelectedYear : rechartYearList[rechartYearList.length - 1]}
+                  {rechartSelectedYear ? `September ${rechartSelectedYear} - August ${rechartSelectedYear+1}` : `September ${rechartYearList[rechartYearList.length - 1]} - August ${rechartYearList[rechartYearList.length - 1]+1}`}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
@@ -1886,7 +1964,7 @@ quiz5: 35,
                           >
                             <span
                               className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
-                              {childName}
+                              {`September ${childName} - August ${childName+1}`}
                             </span>
                           </li>
                         </>

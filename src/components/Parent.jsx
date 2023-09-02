@@ -255,8 +255,11 @@ const Parent = () => {
   const [selectedReChartTeacher, setSelectedReChartTeacher] = useState('')
   const [rechartStudentList, setReChartStudentList] = useState([])
   const [rechartSelectedStudent, setReChartSelectedStudent] = useState('')
-  const [rechartYearList, setReChartYearList] = useState([ 2021, 2022])
+  const [rechartYearList, setReChartYearList] = useState([ 2021, 2022, 2023])
   const [rechartSelectedYear, setReChartSelectedYear] = useState('')
+  const [classAverageAVG, setClassAverageAVG] = useState('-')
+  const [cohortAverageAVG, setCohortAverageAVG] = useState('-')
+  const [allUniqueChartUsers, setallUniqueChartUsers] = useState([])
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
@@ -280,37 +283,30 @@ const Parent = () => {
 
   }, [])
   useEffect(() => {
-    let years = [];
-    const startYear = 2022;
+    // Get the current year
     const currentYear = new Date().getFullYear();
-  
-    for (let year = startYear; year <= currentYear; year++) {
-      years.push(year);
-  
-      if (year < currentYear) {
-        years.push(year + 1);
-      } else if (new Date(year + 1, 8, 1) <= new Date()) {
-        years.push(year + 1);
+
+    // Set the start year
+    let year = 2021;
+
+    // Create an array to store the years
+    const yearList = [];
+
+    while (year <= currentYear) {
+      yearList.push(year);
+
+      // Increment the year by 1
+      year++;
+
+      // Check if it's September 1st of the next year
+      if (year <= currentYear && new Date().getMonth() >= 8) {
+        yearList.push(year);
+        year++;
       }
     }
-    years = years.map(item => item-1)
-    setDataYearList([...new Set(years)]);
-  },[])
-  useEffect(() => {
-    let years = [];
-    const startYear = 2022;
-    const currentYear = new Date().getFullYear();
-  
-    for (let year = startYear; year <= currentYear; year++) {
-      years.push(year);
-      if (year < currentYear) {
-        years.push(year + 1);
-      } else if (new Date(year + 1, 8, 1) <= new Date()) {
-        years.push(year + 1);
-      }
-    }
-    years = years.map(item => item-1)
-    setDataYearList([...new Set(years)]);
+
+    // years = years.map(item => item-1)
+    setDataYearList(yearList);
   },[])
 
   useEffect(() => {
@@ -425,7 +421,7 @@ const Parent = () => {
             }
           })
           setTableHeadersAll(filterData)
-          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, dataSelectedYear)  
+          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, sortedUniqueYears[sortedUniqueYears.length-1] - 1)  
           setDataLoadin(false)
 
           return
@@ -586,6 +582,12 @@ const Parent = () => {
         usersObject[item?.user_name] = [item]
       }
     })
+    // Calculate Cohort average Avg
+    const QuizName = filterHeader.map(item => item.quiz_name)    
+    const filteredQuizes = quizesAverages.filter(quiz => QuizName.includes(quiz.quiz_name));
+    const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj.average_score, 0);
+    const AVGCohort = (sumCohort / (filteredQuizes.length *100)) * 100;
+    setCohortAverageAVG(AVGCohort ? `${AVGCohort.toFixed(1)} %` : '-')
 
     const ordered = Object.keys(usersObject).sort().reduce(
       (obj, key) => {
@@ -786,12 +788,12 @@ const Parent = () => {
 
   const getAverage = (item) => {
     let _avg = quizesAverages?.find(({ quiz_name }) => quiz_name === item)
-    return _avg ? _avg.average_score.toFixed(2) : 0
+    return _avg ? `${_avg.average_score.toFixed(1)} %` : 0
   }
 
   const getMarks = (key, name) => {
     let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
-    return obj ? obj.percentage_score.toFixed(1) : ''
+    return obj ? `${obj.percentage_score.toFixed(1)} %` : ''
   }
 
   const getStudentaverage = (student) =>{
@@ -807,7 +809,7 @@ const Parent = () => {
     }, {});
     const filteredData = Object.values(uniqueObjectsById);
     const sumOfAllQuizes = filteredData.reduce((acc, item) => acc + item['percentage_score'], 0)
-    return filterQuizeTeacherYear.length === 0 ? '-' :(sumOfAllQuizes / filteredData.length).toFixed(2);
+    return filterQuizeTeacherYear.length === 0 ? '-' : `${(sumOfAllQuizes / filteredData.length).toFixed(1)} %`;
   }
 
   const getStudentEffort = (student) =>{
@@ -827,8 +829,9 @@ const Parent = () => {
     // Calculate the effort score for the student user_name
     const totalQuizzes = filteredData.length;
     const completedQuizzes = filteredData.filter(item => item.status === 'submitted').length;
-    const effortScore = (completedQuizzes / totalQuizzes) * 100;
-    return effortScore === 0 ? '-' : effortScore.toFixed(2);
+    // const effortScore = (completedQuizzes / totalQuizzes) * 100;
+    const effortScore = ( totalQuizzes / tableHeaders.length ) * 100;
+    return effortScore === 0 ? '-' : `${effortScore.toFixed(1)} %`;
   }
 
   const getFilterDate = (date) => {
@@ -1163,7 +1166,7 @@ const Parent = () => {
           </div> */}
           {/* Select Year like 2022 */}
           <div className="grid gap-1">
-            <label htmlFor="">Year</label>
+            <label htmlFor="">Academic Year</label>
             <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
               <li className="mr-3">
                 <div className="inline-block relative" ref={dropdownRef6}>
@@ -1171,7 +1174,7 @@ const Parent = () => {
                     onClick={() => setIsDataYearOpen(!isDataYearOpen)}
                     className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                   >
-                    {dataSelectedYear ? dataSelectedYear : dataYearList[dataYearList.length - 1]}
+                    {dataSelectedYear ? `September ${dataSelectedYear} - August ${dataSelectedYear+1}` : `September ${dataYearList[dataYearList.length - 1]} - August ${dataYearList[dataYearList.length - 1]+1}`}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
@@ -1205,7 +1208,7 @@ const Parent = () => {
                             >
                               <span
                                 className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
-                                {childName}
+                                {`September ${childName} - August ${childName+1}`}
                               </span>
                             </li>
                           </>
@@ -1316,7 +1319,7 @@ quiz5: 35,
 }</td> shadow-md sm:rounded-sm  lg:mx-auto sm:w-full mt-10">
         {Boolean(tableHeaders?.length) && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
           <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-1-sticky">
-            <thead className="text-xs text-white uppercase bg-[#17026b]">
+            <thead className="text-xs text-white uppercase bg-[#17026b]  h-32">
               <tr className="items-center">
                 <th scope="col" className="px-6 py-3 bg-[#17026b] text-white w-96">Email</th>
                 <th scope="col" className="px-6 py-3 bg-[#17026b] text-white w-40">Student AVG</th>
@@ -1327,8 +1330,8 @@ quiz5: 35,
             <tbody>
               
               <tr class="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-                  <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
-                  <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
+                  <td class="sticky left-0 z-10 px-3 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
+                  <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold">{cohortAverageAVG}</td>
                   <td class="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
                   {/* <td class="sticky left-40 z-10 px-6 py-3 w-40"></td> */}
                   {selectedChild === "" ? (
@@ -1412,9 +1415,10 @@ quiz5: 35,
       </div>
       {/* table ends here */}
       {/* ----------------------------------------------------------- */}
+      <h2 className="my-6 mt-20 text-[#17026b] font-bold text-xl">CHART ANALYSIS</h2>
       <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
         {/* choose Year dropdown */}
-        <div className="grid gap-1">
+        {/* <div className="grid gap-1">
           <label htmlFor="">Year</label>
           <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
@@ -1467,9 +1471,9 @@ quiz5: 35,
               </div>
             </li>
           </ul>
-        </div>
+        </div> */}
         {/* choose teacher dropdown */}
-        <div className="grid gap-1">
+        {/* <div className="grid gap-1">
           <label htmlFor="">Student</label>
           <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
@@ -1522,7 +1526,7 @@ quiz5: 35,
               </div>
             </li>
           </ul>
-        </div>
+        </div> */}
         {/* choose Student dropdown */}
         {/* <div className="grid gap-1">
           <label htmlFor="">Student</label>
@@ -1579,11 +1583,11 @@ quiz5: 35,
           </ul>
         </div>         */}
       </div>
-      {filteredChartData.length > 0 && <LineCharts chartsData={filteredChartData}/>}
+      {/* {filteredChartData.length > 0 && <LineCharts chartsData={filteredChartData}/>} */}
       <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
         {/* choose Year dropdown */}
         <div className="grid gap-1">
-          <label htmlFor="">Year</label>
+          <label htmlFor="">Academice Year</label>
           <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
               <div className="inline-block relative" ref={dropdownRefYear}>
@@ -1591,7 +1595,7 @@ quiz5: 35,
                   onClick={() => setIsYearChartOpen(!isYearChartOpen)}
                   className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                 >
-                  {rechartSelectedYear ? rechartSelectedYear : rechartYearList[rechartYearList.length - 1]}
+                  {rechartSelectedYear ? `September ${rechartSelectedYear} - August ${rechartSelectedYear+1}` : `September ${rechartYearList[rechartYearList.length - 1]} - August ${rechartYearList[rechartYearList.length - 1]+1}`}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
@@ -1624,7 +1628,7 @@ quiz5: 35,
                           >
                             <span
                               className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
-                              {childName}
+                              {`September ${childName} - August ${childName+1}`}
                             </span>
                           </li>
                         </>

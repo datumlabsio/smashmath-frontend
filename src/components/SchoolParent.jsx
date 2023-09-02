@@ -195,6 +195,11 @@ const SchoolParent = () => {
   const [dataYearList, setDataYearList] = useState([])
   const [dataSelectedYear, setDataSelectedYear] = useState()
   const dropdownRef5 = useRef(null);
+  // Package Dropdown
+  const [packageSelected, setPackageSelected] = useState();
+  const [packageList, setPackageList] = useState(['Free Package']);
+  const [packageOpen, setPackageOpen] = useState(false);
+  const dropdownRefPackage = useRef(null);
 
   // Calculate the averages
   const numColumns = Object.keys(data[0]).length - 2;
@@ -234,6 +239,9 @@ const SchoolParent = () => {
   const [chartSelectedStudent, setChartSelectedStudent] = useState()
   const [chartYearList, setChartYearList] = useState([])
   const [chartSelectedYear, setChartSelectedYear] = useState()
+  const [classAverageAVG, setClassAverageAVG] = useState('-')
+  const [cohortAverageAVG, setCohortAverageAVG] = useState('-')
+  const [allUniqueChartUsers, setallUniqueChartUsers] = useState([])
 
     // Revised Chart States 
     const [chart, setChart] = useState([{
@@ -252,7 +260,7 @@ const SchoolParent = () => {
     const [selectedReChartTeacher, setSelectedReChartTeacher] = useState('')
     const [rechartStudentList, setReChartStudentList] = useState([])
     const [rechartSelectedStudent, setReChartSelectedStudent] = useState('')
-    const [rechartYearList, setReChartYearList] = useState([ 2021, 2022])
+    const [rechartYearList, setReChartYearList] = useState([ 2021, 2022, 2023])
     const [rechartSelectedYear, setReChartSelectedYear] = useState('')
 
 
@@ -415,7 +423,7 @@ const SchoolParent = () => {
           })
 
           setTableHeadersAll(filterData)
-          applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes)
+          applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1] - 1)
           if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
           
           setDataLoadin(false)
@@ -462,6 +470,33 @@ const SchoolParent = () => {
       setDataLoadin(false)
     }
   }, [selectedTeacher])
+
+  // Get User's Data For Charts from DB
+  useEffect(() => {
+    setDataLoadin(true)
+    try {
+      const token = localStorage.getItem('token')
+      const email = selectedReChartTeacher;
+      fetch(testURL + '/user', {
+        method: 'POST',
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+          "Authorization": token ? `${token}` : null
+        },
+        body: JSON.stringify({
+          email
+        })
+      })
+        .then(response => response.json())
+        .then(response => {
+          setallUniqueChartUsers(response.data)
+          setDataLoadin(false)
+        })
+    } catch (e) {
+      setDataLoadin(false)
+    }
+  }, [selectedReChartTeacher])
 
   const getWeekNumber = (quiz_name, i) => {
     let _inc = 0
@@ -546,6 +581,18 @@ const SchoolParent = () => {
         usersObject[item?.user_name] = [item]
       }
     })
+    // Calculate Cohort average Avg
+    const QuizName = filterHeader.map(item => item.quiz_name)    
+    const filteredQuizes = quizesAverages.filter(quiz => QuizName.includes(quiz.quiz_name));
+    const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj.average_score, 0);
+    const AVGCohort = (sumCohort / (filteredQuizes.length *100)) * 100;
+    setCohortAverageAVG(AVGCohort ? `${AVGCohort.toFixed(1)} %` : '-')
+    
+    // Calculate Class average Avg
+    const sum = filteredRecords.reduce((accumulator, currentObj) => accumulator + currentObj.percentage_score, 0);
+    const AVG = (sum / (filteredRecords.length *100)) * 100;
+    setClassAverageAVG( AVG ? `${AVG.toFixed(1)} %`: "-") 
+    console.log(`Filtered Data`,filteredRecords)
 
     const ordered = Object.keys(usersObject).sort().reduce(
       (obj, key) => {
@@ -666,6 +713,13 @@ const SchoolParent = () => {
   const handleChartYearSelect = (childName) => {
     setChartSelectedYear(childName)
     filterChartaData ( childName, selectedChartTeacher, chartSelectedStudent)
+  }
+
+  const handlePackageSelect = (childName) => {
+    setPackageSelected(childName)
+    if(childName == 'Free Package'){
+      ToParentsDashboard()
+    }
   }
   const filterChartaData = ( year, teacher, student = "NotSelected") => {
     // const filteredByYear = chartsData.filter(item => item.name[1] === year);
@@ -907,6 +961,21 @@ const SchoolParent = () => {
     };
   }, [dropdownRefStudent]);
 
+  // Package DropDown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRefPackage.current && !dropdownRefPackage.current.contains(event.target)) {
+        setPackageOpen(false);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+
+    return () => {
+      window.removeEventListener("click", handleClickOutside);
+    };
+  }, [dropdownRefPackage]);
+
   const handleToDateChange = (event) => {
     setToDate(event.target.value);
   };
@@ -969,12 +1038,12 @@ const SchoolParent = () => {
     const filteredData = Object.values(uniqueObjectsById);
     const sumOfAllQuizes = filteredData.reduce((acc, item) => acc + item['percentage_score'], 0)
     console.log(`Data Avg`,sumOfAllQuizes, filteredData?.length)
-    return filteredData?.length === 0 ? '-' : (sumOfAllQuizes / filteredData?.length).toFixed(2);
+    return filteredData?.length === 0 ? '-' : `${(sumOfAllQuizes / filteredData?.length).toFixed(1)} %`;
   }
 
   const getMarks = (key, name) => {
     let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
-    return obj ? obj.percentage_score.toFixed(1) : ''
+    return obj ? `${obj.percentage_score.toFixed(1)} %` : ''
   }
 
   const getStudentaverage = (student) =>{
@@ -1009,7 +1078,7 @@ const SchoolParent = () => {
     let filteredData = Object.values(uniqueObjectsById);
     filteredData = filteredData?.filter(item => item?.percentage_score > 0)
     const sumOfAllQuizes = filteredData?.reduce((acc, item) => acc + item['percentage_score'], 0)
-    return filteredData?.length === 0 ? '-' :(sumOfAllQuizes / filteredData?.length).toFixed(2);
+    return filteredData?.length === 0 ? '-' : `${(sumOfAllQuizes / filteredData?.length).toFixed(1)} %`;
   }
   
   // const UpdateFullName = (e, user_name) =>{
@@ -1042,6 +1111,16 @@ const SchoolParent = () => {
     const found = allUniqueUsers.filter(item => item.user_name == username)
     return found[0]?.full_name == username ? "" :  found[0]?.full_name
   }
+  const getStudentName = (username) =>{
+    const found = allUniqueUsers.filter(item => item.user_name == username)
+    if(!found) return `${username} - Enter Name`;
+    return found[0]?.full_name == username ? `${username} - Enter Name` :  `${username} - ${found[0]?.full_name}`
+  }
+  const getStudentNameForChart = (username) =>{
+    const found = allUniqueChartUsers.filter(item => item.user_name == username)
+    if(!found) return `${username} - Enter Name`;
+    return found[0]?.full_name == username ? `${username} - Enter Name` :  `${username} - ${found[0]?.full_name}`
+  }
 
   const getStudentEffort = (student) =>{
     let studentData = [];
@@ -1066,8 +1145,9 @@ const SchoolParent = () => {
     // Calculate the effort score for the student user_name
     const totalQuizzes = filteredData?.length;
     const completedQuizzes = filteredData?.filter(item => item?.status === 'submitted')?.length;
-    const effortScore = (completedQuizzes / totalQuizzes) * 100;
-    return effortScore === 0 ? '-' : effortScore.toFixed(2);
+    // const effortScore = (completedQuizzes / totalQuizzes) * 100;
+    const effortScore = ( totalQuizzes / tableHeaders.length ) * 100;
+    return effortScore === 0 ? '-' : `${effortScore.toFixed(1)} %`;
   }
 
   const ToParentsDashboard = () =>{
@@ -1190,7 +1270,7 @@ const SchoolParent = () => {
       <div className="w-full flex justify-start items-center">
         <div className="w-full flex justify-start items-center gap-4 flex-row mt-1">
             {/* Button  */}
-            <div className="grid gap-1 float-right">
+            {/* <div className="grid gap-1 float-right">
             <label htmlFor="">Package</label>
             <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
               <li className="mr-3">
@@ -1203,7 +1283,62 @@ const SchoolParent = () => {
                 </div>
               </li>
             </ul>
-          </div>
+            </div> */}
+              <div className="grid gap-1">
+              <label htmlFor="">Goto Package</label>
+              <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20 h-16">
+                <li className="mr-3">
+                  <div className="inline-block relative" ref={dropdownRefPackage}>
+                    <button
+                      onClick={() => setPackageOpen(!packageOpen)}
+                      className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                    >
+                      {packageSelected ? packageSelected : "Choose Package"}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="white"
+                        className="inline w-4 h-4 ml-1"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                    {packageOpen && (
+                      <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                        {packageList?.map((childName, index) => {
+                          return (
+                            <>
+                              <li
+                                className={
+                                  index !== childName.length - 1
+                                    ? "border-b border-slate-400 cursor-pointer"
+                                    : "cursor-pointer"
+
+                                }
+                                key={index}
+                                onClick={() => {
+                                  setPackageOpen(!packageOpen)
+                                  handlePackageSelect(childName)
+                                }}
+                              >
+                                <span
+                                  className="block px-4 py-1 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                                  {childName}
+                                </span>
+                              </li>
+                            </>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </div>
+                </li>
+              </ul>
+            </div>
           {/* choose teacher dropdown */}
           <div className="grid gap-1">
             <label htmlFor="">Teacher</label>
@@ -1247,7 +1382,7 @@ const SchoolParent = () => {
                               }}
                             >
                               <span
-                                className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                                className="block px-4 py-1 text-gray-800 hover:bg-indigo-500 hover:text-white">
                                 {childName}
                               </span>
                             </li>
@@ -1263,7 +1398,7 @@ const SchoolParent = () => {
 
           {/* choose Year dropdown */}
           <div className="grid gap-1">
-            <label htmlFor="">Year</label>
+            <label htmlFor="">Academic Year</label>
             <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
               <li className="mr-3">
                 <div className="inline-block relative" ref={dropdownRef5}>
@@ -1271,7 +1406,7 @@ const SchoolParent = () => {
                     onClick={() => setIsDataYearOpen(!isDataYearOpen)}
                     className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                   >
-                    {dataSelectedYear ? dataSelectedYear : dataYearList[dataYearList.length - 1]}
+                    {dataSelectedYear ? `September ${dataSelectedYear} - August ${dataSelectedYear+1}` : `September ${dataYearList[dataYearList.length - 1]} - August ${dataYearList[dataYearList.length - 1]+1}`}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 20 20"
@@ -1305,7 +1440,7 @@ const SchoolParent = () => {
                             >
                               <span
                                 className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
-                                {childName}
+                                {`September ${childName} - August ${childName+1}`}
                               </span>
                             </li>
                           </>
@@ -1345,7 +1480,7 @@ const SchoolParent = () => {
                   {
                     isTimeFrameOpen &&
                     (
-                      <ul className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-lg shadow-slate-800 shadow-md">
+                      <ul className="absolute right-0 mt-2 py-2 w-60 bg-white rounded-lg shadow-slate-800 shadow-md">
                         {yearFilter?.map((childName, index) => {
                           return (
                             <>
@@ -1436,7 +1571,7 @@ quiz5: 35,
         {
           Boolean(tableHeaders?.length) && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
             <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
-              <thead className="text-xs text-white uppercase bg-[#17026b]">
+              <thead className="text-xs text-white uppercase bg-[#17026b] h-32">
                 <tr className="items-center">
                   <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
                   <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th>
@@ -1450,9 +1585,9 @@ quiz5: 35,
                 {/* SMASH Maths Cohort  */}
                 <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
                   {/* <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td> */}
-                  <td className="sticky left-40 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
+                  <td className="sticky left-40 z-10 px-3 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
                   <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
-                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
+                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold text-center" >{cohortAverageAVG}</td>
                   <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
                   {selectedChild === "" ? (
                     <>
@@ -1487,10 +1622,10 @@ quiz5: 35,
                 {/* Class Average */}
                 {/* Class Avarage  */}
                 <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-                  <td className="sticky left-40 z-10 px-6 py-3 w-40 font-bold">Class Average</td>
+                  <td className="sticky left-40 z-10 px-3 py-3 w-40 font-bold">Class Average</td>
                   <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
                   {/* <td className="sticky left-0 z-10 px-1 py-1 w-40 font-bold"></td> */}
-                  <td className="sticky left-0 z-10 px-2 py-2  font-bold"></td>
+                  <td className="sticky left-0 z-10 px-2 py-2  font-bold text-center">{classAverageAVG}</td>
                   <td className="sticky left-0 z-10 px-2 py-2 font-bold"></td>
                   {selectedChild === "" ? (
                     <>
@@ -1521,14 +1656,21 @@ quiz5: 35,
                     </>
                   )}
                 </tr>
+                {Object.keys(users)?.length === 0 && 
+                <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
+                  {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
+                  <td className="p-5 text-center w-98s" rowSpan='3'></td> 
+                  <td className="p-5 text-center w-98s" rowSpan='3'>No Data Avaiable.</td> 
+                  <td className="p-5 text-center w-98s" rowSpan='3'></td>                  
+                </tr> }
                 {Object.keys(users).map((student) => (
-                  <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
+                  <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
                     <td className="p-3">{users[student][0]?.user_name}</td>
                     {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
                     {/* <td className="p-3">{users[student][0]?.email_address}</td> */}
                     <td className="p-3 text-[#f44236]">{getFullName(users[student][0]?.user_name)}</td>
-                    <td className="p-3 w-40 font-bold">{getStudentaverage(users[student][0]?.user_name)}</td>
-                    <td className="p-3 w-40 font-bold">{getStudentEffort(users[student][0]?.user_name)}</td>
+                    <td className="p-3 w-40 font-bold text-center">{getStudentaverage(users[student][0]?.user_name)}</td>
+                    <td className="p-3 w-40 font-bold text-center">{getStudentEffort(users[student][0]?.user_name)}</td>
                     {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
                   </tr>
                 ))}
@@ -1570,7 +1712,7 @@ quiz5: 35,
       <h2 className="my-6 mt-20 text-[#17026b] font-bold text-xl">CHART ANALYSIS</h2>
       <div className="w-full flex justify-start items-center gap-4 flex-row ">
         {/* choose Year dropdown */}
-        <div className="grid gap-1">
+        {/* <div className="grid gap-1">
           <label htmlFor="">Year</label>
           <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
@@ -1623,9 +1765,9 @@ quiz5: 35,
               </div>
             </li>
           </ul>
-        </div>
+        </div> */}
         {/* choose teacher dropdown */}
-        <div className="grid gap-1">
+        {/* <div className="grid gap-1">
           <label htmlFor="">Teacher</label>
           <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
@@ -1678,9 +1820,9 @@ quiz5: 35,
               </div>
             </li>
           </ul>
-        </div>
+        </div> */}
         {/* choose Student dropdown */}
-        <div className="grid gap-1">
+        {/* <div className="grid gap-1">
           <label htmlFor="">Student</label>
           <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
@@ -1733,13 +1875,13 @@ quiz5: 35,
               </div>
             </li>
           </ul>
-        </div>        
+        </div>         */}
       </div>
-      {filteredChartData.length > 0 && <LineCharts chartsData={filteredChartData}/>}
+      {/* {filteredChartData.length > 0 && <LineCharts chartsData={filteredChartData}/>} */}
       <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
         {/* choose Year dropdown */}
-        <div className="grid gap-1">
-          <label htmlFor="">Year</label>
+        <div className="grid gap-1"> 
+          <label htmlFor="">Academice Year</label>
           <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
               <div className="inline-block relative" ref={dropdownRefYear}>
@@ -1747,7 +1889,7 @@ quiz5: 35,
                   onClick={() => setIsYearChartOpen(!isYearChartOpen)}
                   className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                 >
-                  {rechartSelectedYear ? rechartSelectedYear : rechartYearList[rechartYearList.length - 1]}
+                  {rechartSelectedYear ? `September ${rechartSelectedYear} - August ${rechartSelectedYear+1}` : `September ${rechartYearList[rechartYearList.length - 1]} - August ${rechartYearList[rechartYearList.length - 1]+1}`}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
@@ -1780,7 +1922,7 @@ quiz5: 35,
                           >
                             <span
                               className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
-                              {childName}
+                              {`September ${childName} - August ${childName+1}`}
                             </span>
                           </li>
                         </>
@@ -1857,7 +1999,7 @@ quiz5: 35,
                   onClick={() => setIsStudentChartOpen(!isStudentChartOpen)}
                   className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                 >
-                  {rechartSelectedStudent ? rechartSelectedStudent : 'Select Student'}
+                  {rechartSelectedStudent ? getStudentName(rechartSelectedStudent) : 'Select Student'}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
@@ -1890,7 +2032,7 @@ quiz5: 35,
                           >
                             <span
                               className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
-                              {childName}
+                              {getStudentNameForChart(childName)}
                             </span>
                           </li>
                         </>
