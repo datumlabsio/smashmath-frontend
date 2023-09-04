@@ -196,8 +196,8 @@ const SchoolParent = () => {
   const [dataSelectedYear, setDataSelectedYear] = useState()
   const dropdownRef5 = useRef(null);
   // Package Dropdown
-  const [packageSelected, setPackageSelected] = useState();
-  const [packageList, setPackageList] = useState(['Free Package']);
+  const [packageSelected, setPackageSelected] = useState('Premium Package');
+  const [packageList, setPackageList] = useState(['Free Package', 'Premium Package']);
   const [packageOpen, setPackageOpen] = useState(false);
   const dropdownRefPackage = useRef(null);
 
@@ -288,20 +288,25 @@ const SchoolParent = () => {
     // applyFilter ( childName, selectedChartTeacher, chartSelectedStudent)
   }
   useEffect(() => {
-    let years = [];
-    const startYear = 2022;
+    // Get the current year
     const currentYear = new Date().getFullYear();
-  
-    for (let year = startYear; year <= currentYear; year++) {
-      years.push(year);
-      if (year < currentYear) {
-        years.push(year + 1);
-      } else if (new Date(year + 1, 8, 1) <= new Date()) {
-        years.push(year + 1);
+    // Set the start year
+    let year = 2021;
+    // Create an array to store the years
+    const yearList = [];
+    while (year <= currentYear) {
+      yearList.push(year);
+      // Increment the year by 1
+      year++;
+      // Check if it's September 1st of the next year
+      if (year <= currentYear && new Date().getMonth() >= 8) {
+        yearList.push(year);
+        year++;
       }
     }
-    years = years.map(item => item-1)
-    setDataYearList([...new Set(years)]);
+
+    // years = years.map(item => item-1)
+    setDataYearList(yearList);
   },[])
 
   useEffect(() => {
@@ -1574,7 +1579,7 @@ quiz5: 35,
               <thead className="text-xs text-white uppercase bg-[#17026b] h-32">
                 <tr className="items-center">
                   <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
-                  <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th>
+                  <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Name</th>
                   {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th> */}
                   <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Avg</th>
                   <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Effort Score</th>
@@ -1587,7 +1592,7 @@ quiz5: 35,
                   {/* <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td> */}
                   <td className="sticky left-40 z-10 px-3 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
                   <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
-                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold text-center" >{cohortAverageAVG}</td>
+                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold" >{cohortAverageAVG}</td>
                   <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
                   {selectedChild === "" ? (
                     <>
@@ -1625,8 +1630,8 @@ quiz5: 35,
                   <td className="sticky left-40 z-10 px-3 py-3 w-40 font-bold">Class Average</td>
                   <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
                   {/* <td className="sticky left-0 z-10 px-1 py-1 w-40 font-bold"></td> */}
-                  <td className="sticky left-0 z-10 px-2 py-2  font-bold text-center">{classAverageAVG}</td>
-                  <td className="sticky left-0 z-10 px-2 py-2 font-bold"></td>
+                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold">{classAverageAVG}</td>
+                  <td className="sticky left-0 z-10 px-2 py-2 w-40 font-bold"></td>
                   {selectedChild === "" ? (
                     <>
                       {
@@ -1669,8 +1674,8 @@ quiz5: 35,
                     {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
                     {/* <td className="p-3">{users[student][0]?.email_address}</td> */}
                     <td className="p-3 text-[#f44236]">{getFullName(users[student][0]?.user_name)}</td>
-                    <td className="p-3 w-40 font-bold text-center">{getStudentaverage(users[student][0]?.user_name)}</td>
-                    <td className="p-3 w-40 font-bold text-center">{getStudentEffort(users[student][0]?.user_name)}</td>
+                    <td className="p-3 w-40 font-bold">{getStudentaverage(users[student][0]?.user_name)}</td>
+                    <td className="p-3 w-40 font-bold">{getStudentEffort(users[student][0]?.user_name)}</td>
                     {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
                   </tr>
                 ))}
