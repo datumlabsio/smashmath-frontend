@@ -484,7 +484,17 @@ const Parent = () => {
           .then(response => {
             console.log(`Token `, token)
             console.log(`Api Response` , response?.rollingaverage)
-            setChart(response?.rollingaverage)
+            if(response?.rollingaverage.length === 0){
+              setChart([{
+                "SMASH Maths Cohort Average": 0.0,
+                "Class Average": 0.0,
+                "Student Average": 0.0,
+                "week": 'Week 1'
+              }])
+            }
+            else{
+              setChart(response?.rollingaverage)
+            }
             setDataLoadin(false)
           })
       } catch (e) {
@@ -557,22 +567,22 @@ const Parent = () => {
     // else {
     //   filterDurationlData = data.filter(({ date_submitted }) => new Date(date_submitted) <= new Date() && new Date(date_submitted) >= getFilterDate(date_submitted) )
     // }
-    let filterFinalData = filterDurationlData.filter(({ year_name }) => year_name == year)
-    filterFinalData = filterFinalData.filter(({ year_name }) => year_name == year)
+    let filterFinalData = filterDurationlData?.filter(({ year_name }) => year_name == year)
+    filterFinalData = filterFinalData?.filter(({ year_name }) => year_name == year)
     // console.log('therer------>1', filterFinalData)
-    const filteredRecords = filterFinalData.filter(record => {
-      const submissionDate = new Date(record.date_submitted);
+    const filteredRecords = filterFinalData?.filter(record => {
+      const submissionDate = new Date(record?.date_submitted);
       const year = submissionDate.getFullYear();
       const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
       if (yearSelected === year) {
         if ( month >= 9) {
           return record;
         }
-      } else if (yearSelected - 1 === year && month < 9) {
+      } else if (yearSelected + 1 === year && month < 9) {
         return record;
       }
     });
-
+    console.log(`filteredRecords`,filteredRecords)
     let usersObject = {}
     filteredRecords.map((item) => {
       if (usersObject[item?.user_name]) {
@@ -583,11 +593,11 @@ const Parent = () => {
       }
     })
     // Calculate Cohort average Avg
-    const QuizName = filterHeader.map(item => item.quiz_name)    
-    const filteredQuizes = quizesAverages.filter(quiz => QuizName.includes(quiz.quiz_name));
-    const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj.average_score, 0);
-    const AVGCohort = (sumCohort / (filteredQuizes.length *100)) * 100;
-    setCohortAverageAVG(AVGCohort ? `${AVGCohort.toFixed(1)} %` : '-')
+    const QuizName = filterHeader?.map(item => item.quiz_name)    
+    const filteredQuizes = quizesAverages?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
+    const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj?.average_score, 0);
+    const AVGCohort = (sumCohort / (filteredQuizes?.length *100)) * 100;
+    setCohortAverageAVG(AVGCohort ? `${AVGCohort?.toFixed(1)} %` : '-')
 
     const ordered = Object.keys(usersObject).sort().reduce(
       (obj, key) => {
@@ -792,8 +802,16 @@ const Parent = () => {
   }
 
   const getMarks = (key, name) => {
+    console.log(`users[key]`, users[key])
     let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
-    return obj ? `${obj.percentage_score.toFixed(1)} %` : ''
+    if(!obj) return ''
+    return `${obj.percentage_score.toFixed(1)} %`
+  }
+  const getMarkColor = (key, name) => {
+    console.log(`users[key]`, users[key])
+    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
+    if(!obj) return ''
+    return obj.percentage_score.toFixed(1)
   }
 
   const getStudentaverage = (student) =>{
@@ -815,8 +833,20 @@ const Parent = () => {
   const getStudentEffort = (student) =>{
     const studentData = quizesData.filter(item => item.user_name === student && item.year_name === selectedYear);
     if(studentData?.length === 0) return '-';
-
-    const uniqueObjectsById = studentData?.reduce((acc, obj) => {
+    const finalData = studentData?.filter(record => {
+      const submissionDate = new Date(record?.date_submitted);
+      const year = submissionDate.getFullYear();
+      const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      if (dataSelectedYear === year) {
+        if ( month >= 9) {
+          return record;
+        }
+      } else if (dataSelectedYear + 1 === year && month < 9) {
+        return record;
+      }
+    });
+    console.log(`finalData`,finalData);
+    const uniqueObjectsById = finalData?.reduce((acc, obj) => {
       const key = `${obj.user_name}-${obj.quiz_name}`;
       if (!acc[key]) {
         acc[key] = obj;
@@ -825,12 +855,12 @@ const Parent = () => {
     }, {});
     let filteredData = Object.values(uniqueObjectsById);
     filteredData = filteredData?.filter(item => item?.percentage_score > 0)
-
+    
     // Calculate the effort score for the student user_name
     const totalQuizzes = filteredData.length;
     const completedQuizzes = filteredData.filter(item => item.status === 'submitted').length;
     // const effortScore = (completedQuizzes / totalQuizzes) * 100;
-    const effortScore = ( totalQuizzes / tableHeaders.length ) * 100;
+    const effortScore = ( completedQuizzes / tableHeaders.length ) * 100;
     return effortScore === 0 ? '-' : `${effortScore.toFixed(1)} %`;
   }
 
@@ -1384,7 +1414,7 @@ quiz5: 35,
                   <td class="px-6 py-4 text-center">{users[student][0]?.user_name}</td>
                   <td className="p-3 text-center">{getStudentaverage(users[student][0]?.user_name)}</td>
                   <td className="p-3 text-center">{getStudentEffort(users[student][0]?.user_name)}</td>
-                  {tableHeaders?.map(({ quiz_name }) => (<td class="px-6 py-4 text-white w-8 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
+                  {tableHeaders?.map(({ quiz_name }) => (<td class="px-6 py-4 text-white w-8 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
                 </tr>
               ))}
             </tbody>
@@ -1422,7 +1452,7 @@ quiz5: 35,
       {/* table ends here */}
       {/* ----------------------------------------------------------- */}
       <h2 className="my-6 mt-20 text-[#17026b] font-bold text-xl">CHART ANALYSIS</h2>
-      <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
+      <div className="w-full flex justify-start items-center gap-4 flex-row mt-10 my-5 mb-5">
         {/* choose Year dropdown */}
         {/* <div className="grid gap-1">
           <label htmlFor="">Year</label>

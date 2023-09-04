@@ -156,20 +156,6 @@ const data = [
     quiz7: 37,
   },
 ];
-const initialChartData = [
-  { month: 'January', CohortAvg: 0, ClassAvg: 0, studentAvg: 0 },
-  { month: 'February', CohortAvg: 0, ClassAvg: 0, studentAvg: 0 },
-  { month: 'March', CohortAvg: 0, ClassAvg: 0, studentAvg: 0 },
-  { month: 'April', CohortAvg: 0, ClassAvg: 0, studentAvg: 0 },
-  { month: 'May', CohortAvg: 0, ClassAvg: 0, studentAvg: 0 },
-  { month: 'June', CohortAvg: 0, ClassAvg: 0, studentAvg: 0 },
-  { month: 'July', CohortAvg: 0, ClassAvg: 0, studentAvg: 0 },
-  { month: 'August', CohortAvg: 0, ClassAvg: 0, studentAvg: 0 },
-  { month: 'September', CohortAvg: 0, ClassAvg: 0, studentAvg: 0 },
-  { month: 'October', CohortAvg: 0, ClassAvg: 0, studentAvg: 0 },
-  { month: 'November', CohortAvg: 0, ClassAvg: 0, studentAvg: 0 },
-  { month: 'December', CohortAvg: 0, ClassAvg: 0, studentAvg: 0 }
-]
 
 const School = () => {
   
@@ -233,7 +219,7 @@ const School = () => {
   const [dataYearList, setDataYearList] = useState([])
   const [dataSelectedYear, setDataSelectedYear] = useState()
   // const [chartsData, setChartsData] = useState(datachartslinefromfile)
-  const [filteredChartData, setFilteredChartData] = useState(initialChartData)
+  // const [filteredChartData, setFilteredChartData] = useState(initialChartData)
   const [chartTeacherList, setChartTeacherList] = useState([])
   const [selectedChartTeacher, setSelectedChartTeacher] = useState()
   const [chartStudentList, setChartStudentList] = useState([])
@@ -246,11 +232,11 @@ const School = () => {
   const [chartDataLoading, setChartDataLoading] = useState(true)
 
   // Revised Chart States 
-  const [chart, setChart] = useState([{
-    "Class Average": 0.0,
+  const [chartRevisedData, setChartRevisedData] = useState([{
     "SMASH Maths Cohort Average": 0.0,
+    "Class Average": 0.0,
     "Student Average": 0.0,
-    "week": 0
+    "week": 'Week 1'
   }])
   const dropdownRefYear = useRef(null);
   const dropdownRefClass = useRef(null);
@@ -357,7 +343,17 @@ const School = () => {
       })
         .then(response => response.json())
         .then(response => {
-          setChart(response?.rollingaverage)
+          if(response?.rollingaverage.length === 0){
+            setChartRevisedData([{
+              "SMASH Maths Cohort Average": 0.0,
+              "Class Average": 0.0,
+              "Student Average": 0.0,
+              "week": 'Week 1'
+            }])
+          }
+          else{
+            setChartRevisedData(response?.rollingaverage)
+          }
           setChartDataLoading(false)
         })
     } catch (e) {
@@ -597,7 +593,7 @@ const School = () => {
         if ( month >= 9) {
           return record;
         }
-      } else if (yearSelected - 1 === year && month < 9) {
+      } else if (yearSelected + 1 === year && month < 9) {
         return record;
       }
     });
@@ -894,7 +890,7 @@ const School = () => {
   }
 
   const checkMarksColor = (mark) => {
-    if (mark == '')
+    if (mark == '' || mark == 0)
       return backGroundColor['draft']
     else if (mark <= 40)
       return backGroundColor['red']
@@ -924,7 +920,7 @@ const School = () => {
         if ( month >= 9) {
           return record;
         }
-      } else if (dataSelectedYear - 1 === year && month < 9) {
+      } else if (dataSelectedYear + 1 === year && month < 9) {
         return record;
       }
     });
@@ -950,6 +946,12 @@ const School = () => {
     // if(name == 'Year 6 - SP 2023 Summer Term Week 02') console.log(`Why Not Display`, obj)
     return obj ? obj?.percentage_score > 0 ? obj?.percentage_score.toFixed(1) : '' : ''
   }
+  const getMarkColor = (key, name) => {
+    console.log(`users[key]`, users[key])
+    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
+    if(!obj) return ''
+    return obj.percentage_score.toFixed(1)
+  }
 
   const getStudentaverage = (student) =>{
     // Filter Data on base of Teacher, Quiz Year and Student
@@ -963,7 +965,7 @@ const School = () => {
         if ( month >= 9) {
           return record;
         }
-      } else if (dataSelectedYear - 1 === year && month < 9) {
+      } else if (dataSelectedYear + 1 === year && month < 9) {
         return record;
       }
     });
@@ -1246,9 +1248,7 @@ const School = () => {
  
   return (
     <div className="md:mx-20 my-6">
-       {dataLoadin && <CustomLoader /> } 
-       {<div>
-       {/* {chartDataLoading && <CustomLoader />} */}
+       {dataLoadin && chartDataLoading && <CustomLoader /> }
         {/* main bar starts */}
         <div className="sticky w-ful h-auto gap-4 flex justify-between items-center flex-col md:flex-row ">
           {/* logo */}
@@ -1739,7 +1739,7 @@ const School = () => {
                       {/* <td className="p-3">{users[student][0]?.full_name}</td> */}
                       <td className="p-3 text-center">{getStudentaverage(users[student][0]?.user_name)}</td>
                       <td className="p-3 text-center">{getStudentEffort(users[student][0]?.user_name)}</td>
-                      {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{`${getMarks(student, quiz_name)} %`}</td>))}
+                      {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{`${getMarks(student, quiz_name)} %`}</td>))}
                     </tr>
                   ))}
                 </tbody>
@@ -1776,175 +1776,7 @@ const School = () => {
         {/* ----------------------------------------------------------- */}
         
         <h2 className="my-6 text-[#17026b] font-bold text-xl mt-24">CHART ANALYSIS</h2>
-        <div className="w-full flex justify-start items-center gap-4 flex-row mt-2">
-          {/* choose Year dropdown */}
-          {/* <div className="grid gap-1">
-            <label htmlFor="">Year</label>
-            <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-              <li className="mr-3">
-                <div className="inline-block relative" ref={dropdownRef4}>
-                  <button
-                    onClick={() => setYearOpen(!yearOpen)}
-                    className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
-                  >
-                    {chartSelectedYear ? chartSelectedYear : 'Select Year'}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="white"
-                      className="inline w-4 h-4 ml-1"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                  {yearOpen && (
-                    <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
-                      {chartYearList?.map((childName, index) => {
-                        return (
-                          <>
-                            <li
-                              className={
-                                index !== childName.length - 1
-                                  ? "border-b border-slate-400 cursor-pointer"
-                                  : "cursor-pointer"
-                              }
-                              key={index}
-                              onClick={() => {
-                                setYearOpen(!yearOpen)
-                                handleChartYearSelect(childName)
-                              }}
-                            >
-                              <span
-                                className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
-                                {childName}
-                              </span>
-                            </li>
-                          </>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-              </li>
-            </ul>
-          </div> */}
-          {/* choose teacher dropdown */}
-          {/* <div className="grid gap-1">
-            <label htmlFor="">Teacher</label>
-            <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-              <li className="mr-3">
-                <div className="inline-block relative" ref={dropdownRef2}>
-                  <button
-                    onClick={() => setIsChildOpen2(!isChildOpen2)}
-                    className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
-                  >
-                    {selectedChartTeacher ? selectedChartTeacher : 'Select Teacher'}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="white"
-                      className="inline w-4 h-4 ml-1"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                  {isChildOpen2 && (
-                    <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
-                      {chartTeacherList?.map((childName, index) => {
-                        return (
-                          <>
-                            <li
-                              className={
-                                index !== childName.length - 1
-                                  ? "border-b border-slate-400 cursor-pointer"
-                                  : "cursor-pointer"
-                              }
-                              key={index}
-                              onClick={() => {
-                                setIsChildOpen2(!isChildOpen2)
-                                handleChartTeacherSelect(childName)
-                              }}
-                            >
-                              <span
-                                className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
-                                {childName}
-                              </span>
-                            </li>
-                          </>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-              </li>
-            </ul>
-          </div> */}
-          {/* choose Student dropdown */}
-          {/* <div className="grid gap-1">
-            <label htmlFor="">Student</label>
-            <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-              <li className="mr-3">
-                <div className="inline-block relative" ref={dropdownRef3}>
-                  <button
-                    onClick={() => setStudentOpen(!studentOpen)}
-                    className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
-                  >
-                    {chartSelectedStudent ? chartSelectedStudent : 'Select Student'}
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="white"
-                      className="inline w-4 h-4 ml-1"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5 7a1 1 0 011.707-.707l3.586 3.586 3.586-3.586A1 1 0 1115 7l-4 4a1 1 0 01-1.414 0l-4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-                  {studentOpen && (
-                    <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
-                      {chartStudentList?.map((childName, index) => {
-                        return (
-                          <>
-                            <li
-                              className={
-                                index !== childName.length - 1
-                                  ? "border-b border-slate-400 cursor-pointer"
-                                  : "cursor-pointer"
-                              }
-                              key={index}
-                              onClick={() => {
-                                setStudentOpen(!studentOpen)
-                                handleChartStudentSelect(childName)
-                              }}
-                            >
-                              <span
-                                className="block px-4 py-2 text-gray-800 hover:bg-indigo-500 hover:text-white">
-                                {childName}
-                              </span>
-                            </li>
-                          </>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-              </li>
-            </ul>
-          </div>         */}
-        </div>
-        {/* {filteredChartData.length > 0 && <LineCharts chartsData={filteredChartData}/>} */}
-        <div className="w-full flex justify-start items-center gap-4 flex-row mt-06">
+        <div className="w-full flex justify-start items-center gap-4 flex-row m-5">
           {/* choose Year dropdown */}
           <div className="grid gap-1">
             <label htmlFor="">Academic Year</label>
@@ -2111,9 +1943,7 @@ const School = () => {
             </ul>
           </div>        
         </div>
-        {chart.length > 0 && <RevisedLineChart chart={chart}/>}
-        </div>
-      }
+        {chartRevisedData?.length > 0 && <RevisedLineChart chart={chartRevisedData}/>}
     </div>
   );
 };

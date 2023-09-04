@@ -538,7 +538,9 @@ const SchoolParent = () => {
   const applyFilter = (email, year, headers, data, yearData ) => {
     setSelectedYear(year)
     setSelectedTeacher(email)
+    setDataSelectedYear(yearData)
     const yearSelected = yearData;
+    console.log(`selectedYear`, yearSelected)
     let filterHeader;
     if(year != "Other"){
       filterHeader = headers.filter(({ year_name }) => year_name === year)
@@ -571,7 +573,7 @@ const SchoolParent = () => {
         if ( month >= 9) {
           return record;
         }
-      } else if (yearSelected - 1 === year && month < 9) {
+      } else if (yearSelected + 1 === year && month < 9) {
         return record;
       }
     });
@@ -587,16 +589,16 @@ const SchoolParent = () => {
       }
     })
     // Calculate Cohort average Avg
-    const QuizName = filterHeader.map(item => item.quiz_name)    
-    const filteredQuizes = quizesAverages.filter(quiz => QuizName.includes(quiz.quiz_name));
-    const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj.average_score, 0);
-    const AVGCohort = (sumCohort / (filteredQuizes.length *100)) * 100;
-    setCohortAverageAVG(AVGCohort ? `${AVGCohort.toFixed(1)} %` : '-')
+    const QuizName = filterHeader?.map(item => item?.quiz_name)    
+    const filteredQuizes = quizesAverages?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
+    const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj?.average_score, 0);
+    const AVGCohort = (sumCohort / (filteredQuizes?.length *100)) * 100;
+    setCohortAverageAVG(AVGCohort ? `${AVGCohort?.toFixed(1)} %` : '-')
     
     // Calculate Class average Avg
-    const sum = filteredRecords.reduce((accumulator, currentObj) => accumulator + currentObj.percentage_score, 0);
-    const AVG = (sum / (filteredRecords.length *100)) * 100;
-    setClassAverageAVG( AVG ? `${AVG.toFixed(1)} %`: "-") 
+    const sum = filteredRecords.reduce((accumulator, currentObj) => accumulator + currentObj?.percentage_score, 0);
+    const AVG = (sum / (filteredRecords?.length *100)) * 100;
+    setClassAverageAVG( AVG ? `${AVG?.toFixed(1)} %`: "-") 
     console.log(`Filtered Data`,filteredRecords)
 
     const ordered = Object.keys(usersObject).sort().reduce(
@@ -656,8 +658,17 @@ const SchoolParent = () => {
         .then(response => response.json())
         .then(response => {
           console.log(`Token `, token)
-          console.log(`Api Response` , response?.rollingaverage)
-          setChart(response?.rollingaverage)
+          if(response?.rollingaverage.length === 0){
+            setChart([{
+              "SMASH Maths Cohort Average": 0.0,
+              "Class Average": 0.0,
+              "Student Average": 0.0,
+              "week": 'Week 1'
+            }])
+          }
+          else{
+            setChart(response?.rollingaverage)
+          }
           setDataLoadin(false)
         })
     } catch (e) {
@@ -1028,7 +1039,7 @@ const SchoolParent = () => {
         if ( month >= 9) {
           return record;
         }
-      } else if (dataSelectedYear - 1 === year && month < 9) {
+      } else if (dataSelectedYear + 1 === year && month < 9) {
         return record;
       }
     });
@@ -1068,7 +1079,7 @@ const SchoolParent = () => {
         if ( month >= 9) {
           return record;
         }
-      } else if (dataSelectedYear - 1 === year && month < 9) {
+      } else if (dataSelectedYear + 1 === year && month < 9) {
         return record;
       }
     });
@@ -1176,7 +1187,13 @@ const SchoolParent = () => {
   const handleReChartStudentSelect = (childName) => {
     setReChartSelectedStudent(childName)
     console.log( rechartSelectedYear, selectedReChartTeacher, childName)
-  }  
+  } 
+  const getMarkColor = (key, name) => {
+    console.log(`users[key]`, users[key])
+    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
+    if(!obj) return ''
+    return obj.percentage_score.toFixed(1)
+  } 
 
   return (
     <div className="md:mx-20 my-6">
@@ -1676,7 +1693,7 @@ quiz5: 35,
                     <td className="p-3 text-[#f44236]">{getFullName(users[student][0]?.user_name)}</td>
                     <td className="p-3 w-40 font-bold">{getStudentaverage(users[student][0]?.user_name)}</td>
                     <td className="p-3 w-40 font-bold">{getStudentEffort(users[student][0]?.user_name)}</td>
-                    {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarks(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
+                    {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
                   </tr>
                 ))}
               </tbody>
@@ -1883,7 +1900,7 @@ quiz5: 35,
         </div>         */}
       </div>
       {/* {filteredChartData.length > 0 && <LineCharts chartsData={filteredChartData}/>} */}
-      <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
+      <div className="w-full flex justify-start items-center gap-4 flex-row mt-10 mb-5 my-5">
         {/* choose Year dropdown */}
         <div className="grid gap-1"> 
           <label htmlFor="">Academice Year</label>
@@ -2050,7 +2067,7 @@ quiz5: 35,
           </ul>
         </div>        
       </div>
-      {chart.length > 0 && <RevisedLineChart chart={chart}/>}
+      {chart.length > 0 && <RevisedLineChart chart={chart}/>} 
     </div>
   );
 };
