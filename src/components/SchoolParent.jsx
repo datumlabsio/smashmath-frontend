@@ -242,6 +242,7 @@ const SchoolParent = () => {
   const [classAverageAVG, setClassAverageAVG] = useState('-')
   const [cohortAverageAVG, setCohortAverageAVG] = useState('-')
   const [allUniqueChartUsers, setallUniqueChartUsers] = useState([])
+  const [chartDataLoading, setChartDataLoading] = useState(true)
 
     // Revised Chart States 
     const [chart, setChart] = useState([{
@@ -326,46 +327,10 @@ const SchoolParent = () => {
           setQuizesAverages(response.quizes.averages)
         })
     } catch (e) {
-      setDataLoadin(false)
     }
 
   }, [])
 
-
-
-  // useEffect(() => {
-  //   const email = localStorage.getItem('userEmail')
-  //   try {
-  //     const token = localStorage.getItem('token')
-  //     fetch(testURL + '/linechart', {
-  //       method: 'GET',
-  //       headers: {
-  //         "Access-Control-Allow-Origin": "*",
-  //         "Content-Type": "application/json",
-  //         "Authorization": token ? `${token}` : null
-  //       }
-  //     })
-  //       .then(response => response.json())
-  //       .then(response => {
-  //         // Get list of years for dropdown in choose year
-  //         const years = response?.data.map(item => item.name[1]);
-  //         const minYear = years.reduce((min, current) => (current < min ? current : min), years[0]);
-  //         const maxYear = years.reduce((max, current) => (current > max ? current : max), years[0]);
-  //         const allIntegersYear = [];
-  //         for (let i = parseInt(minYear, 10); i <= parseInt(maxYear, 10); i++) {
-  //           if (!isNaN(i)) {
-  //             allIntegersYear.push(i);
-  //           }
-  //         }
-  //         setChartYearList(allIntegersYear);
-  //         setChartsData(response?.data)          
-  //         setDataLoadin(false)
-  //       })
-  //   } catch (e) {
-  //     setDataLoadin(false)
-  //   }
-
-  // }, [])
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
@@ -431,7 +396,7 @@ const SchoolParent = () => {
           applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1] - 1)
           if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
           
-          setDataLoadin(false)
+          // setDataLoadin(false)
           return
 
           // let { headers, users } = response?.quizes || [[], {}]
@@ -445,13 +410,15 @@ const SchoolParent = () => {
           if (users != null) { setSchoolNama(Object.values(users)[0]?.school_name_small) }
 
         })
+        .then(()=>{
+          setDataLoadin(false)
+        })
     } catch (e) {
       setDataLoadin(false)
     }
   }, [])
 
   useEffect(() => {
-    setDataLoadin(true)
     try {
       const token = localStorage.getItem('token')
       const email = selectedTeacher;
@@ -469,16 +436,13 @@ const SchoolParent = () => {
         .then(response => response.json())
         .then(response => {
           setallUniqueUsers(response.data)
-          setDataLoadin(false)
         })
     } catch (e) {
-      setDataLoadin(false)
     }
   }, [selectedTeacher])
 
   // Get User's Data For Charts from DB
   useEffect(() => {
-    setDataLoadin(true)
     try {
       const token = localStorage.getItem('token')
       const email = selectedReChartTeacher;
@@ -496,10 +460,9 @@ const SchoolParent = () => {
         .then(response => response.json())
         .then(response => {
           setallUniqueChartUsers(response.data)
-          setDataLoadin(false)
         })
     } catch (e) {
-      setDataLoadin(false)
+      // setDataLoadin(false)
     }
   }, [selectedReChartTeacher])
 
@@ -631,7 +594,7 @@ const SchoolParent = () => {
   }
   // Rolling Averages API
   useEffect(() => {
-    setDataLoadin(true)
+    setChartDataLoading(true)
     const year = rechartSelectedYear || rechartYearList[rechartYearList.length - 1]
     const email =  selectedReChartTeacher || "";
     const username = rechartSelectedStudent || "";
@@ -669,10 +632,10 @@ const SchoolParent = () => {
           else{
             setChart(response?.rollingaverage)
           }
-          setDataLoadin(false)
+          setChartDataLoading(false)
         })
     } catch (e) {
-      setDataLoadin(false)
+      setChartDataLoading(false)
     }
     // console.log(`Api Data fetch`, rechartSelectedYear, selectedReChartTeacher, rechartSelectedStudent)
   }, [rechartSelectedYear, selectedReChartTeacher, rechartSelectedStudent])
@@ -1004,7 +967,7 @@ const SchoolParent = () => {
 
   }
   const checkMarksColor = (mark) => {
-    if (mark == '')
+    if (mark == '' || mark == 0)
       return backGroundColor['draft']
     else if (mark <= 40)
       return backGroundColor['red']
@@ -1019,7 +982,7 @@ const SchoolParent = () => {
 
   const getAverage = (item) => {
     let _avg = quizesAverages?.find(({ quiz_name }) => quiz_name === item)
-    return _avg ? _avg.average_score.toFixed(2) : 0
+    return _avg ? `${_avg.average_score.toFixed(1)} %` : 0
   }
   const getClassAverage = (quiz) => {
     // const filterQuizeTeacherYear = quizesData.filter((record) => record.email_address == selectedTeacher  && record.year_name == selectedYear && record.quiz_name === quiz );
@@ -1146,9 +1109,21 @@ const SchoolParent = () => {
     else{
       studentData = quizesData.filter((record) => !record.year_name.includes('Year')  && record.user_name == student && record.percentage_score > 0);
     }
-    if(studentData?.length === 0) return '-';
+    const finalData = studentData?.filter(record => {
+      const submissionDate = new Date(record?.date_submitted);
+      const year = submissionDate.getFullYear();
+      const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      if (dataSelectedYear === year) {
+        if ( month >= 9) {
+          return record;
+        }
+      } else if (dataSelectedYear + 1 === year && month < 9) {
+        return record;
+      }
+    });
+    if(finalData?.length === 0) return '-';
 
-    const uniqueObjectsById = studentData?.reduce((acc, obj) => {
+    const uniqueObjectsById = finalData?.reduce((acc, obj) => {
       const key = `${obj.user_name}-${obj.quiz_name}`;
       if (!acc[key]) {
         acc[key] = obj;
@@ -1198,6 +1173,7 @@ const SchoolParent = () => {
   return (
     <div className="md:mx-20 my-6">
       {dataLoadin && <CustomLoader />}
+      {chartDataLoading && <CustomLoader /> }
 
       {/* main bar starts */}
       <div className="sticky w-ful h-auto gap-4 flex justify-between items-center flex-col md:flex-row ">
@@ -1690,7 +1666,7 @@ quiz5: 35,
                     <td className="p-3">{users[student][0]?.user_name}</td>
                     {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
                     {/* <td className="p-3">{users[student][0]?.email_address}</td> */}
-                    <td className="p-3 text-[#f44236]">{getFullName(users[student][0]?.user_name)}</td>
+                    <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td>
                     <td className="p-3 w-40 font-bold">{getStudentaverage(users[student][0]?.user_name)}</td>
                     <td className="p-3 w-40 font-bold">{getStudentEffort(users[student][0]?.user_name)}</td>
                     {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
@@ -2021,7 +1997,7 @@ quiz5: 35,
                   onClick={() => setIsStudentChartOpen(!isStudentChartOpen)}
                   className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                 >
-                  {rechartSelectedStudent ? getStudentName(rechartSelectedStudent) : 'Select Student'}
+                  {rechartSelectedStudent ? getStudentNameForChart(rechartSelectedStudent) : 'Select Student'}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"

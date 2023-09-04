@@ -425,7 +425,7 @@ const School = () => {
           setTableHeadersAll(filterData)
           applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1] - 1)
           if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
-          setDataLoadin(false)
+          // setDataLoadin(false)
           return
 
           // let { headers, users } = response?.quizes || [[], {}]
@@ -985,10 +985,22 @@ const School = () => {
 
   const getStudentEffort = (student) =>{
     const studentData = quizesData.filter(item => item.user_name === student && item.year_name === selectedYear);
-    if(studentData?.length === 0) return '-';
+    const finalData = studentData?.filter(record => {
+      const submissionDate = new Date(record?.date_submitted);
+      const year = submissionDate.getFullYear();
+      const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      if (dataSelectedYear === year) {
+        if ( month >= 9) {
+          return record;
+        }
+      } else if (dataSelectedYear + 1 === year && month < 9) {
+        return record;
+      }
+    });
+    if(finalData?.length === 0) return '-';
     // Calculate the effort score for the student user_name
     // Filter Object with unique user_name and quiz_name
-    const uniqueObjectsById = studentData?.reduce((acc, obj) => {
+    const uniqueObjectsById = finalData?.reduce((acc, obj) => {
       const key = `${obj.user_name}-${obj.quiz_name}`;
       if (!acc[key]) {
         acc[key] = obj;
@@ -1173,7 +1185,7 @@ const School = () => {
 
     const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
     // console.log(`Quzies -098` ,filteredData.length , filteredClassData.length, filteredStudentDataByOneQuiz.length )
-    setFilteredChartData(ToSingleObj);
+    // setFilteredChartData(ToSingleObj);
     
   }
 
@@ -1248,7 +1260,8 @@ const School = () => {
  
   return (
     <div className="md:mx-20 my-6">
-       {dataLoadin && chartDataLoading && <CustomLoader /> }
+       {dataLoadin && <CustomLoader /> }
+       {chartDataLoading && <CustomLoader /> }
         {/* main bar starts */}
         <div className="sticky w-ful h-auto gap-4 flex justify-between items-center flex-col md:flex-row ">
           {/* logo */}

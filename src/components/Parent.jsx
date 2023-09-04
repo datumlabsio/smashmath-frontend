@@ -817,8 +817,20 @@ const Parent = () => {
   const getStudentaverage = (student) =>{
     const filterQuizeTeacherYear = quizesData.filter((record) => record.year_name == selectedYear && record.user_name == student );
     console.log(`Avg Student `, student, filterQuizeTeacherYear)
+    const finalData = filterQuizeTeacherYear?.filter(record => {
+      const submissionDate = new Date(record?.date_submitted);
+      const year = submissionDate.getFullYear();
+      const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      if (dataSelectedYear === year) {
+        if ( month >= 9) {
+          return record;
+        }
+      } else if (dataSelectedYear + 1 === year && month < 9) {
+        return record;
+      }
+    });
     // Filter Object with unique user_name and quiz_name
-    const uniqueObjectsById = filterQuizeTeacherYear.reduce((acc, obj) => {
+    const uniqueObjectsById = finalData.reduce((acc, obj) => {
       const key = `${obj.user_name}-${obj.quiz_name}`;
       if (!acc[key]) {
         acc[key] = obj;
@@ -832,7 +844,6 @@ const Parent = () => {
 
   const getStudentEffort = (student) =>{
     const studentData = quizesData.filter(item => item.user_name === student && item.year_name === selectedYear);
-    if(studentData?.length === 0) return '-';
     const finalData = studentData?.filter(record => {
       const submissionDate = new Date(record?.date_submitted);
       const year = submissionDate.getFullYear();
@@ -845,6 +856,7 @@ const Parent = () => {
         return record;
       }
     });
+    if(finalData?.length === 0) return '-';
     console.log(`finalData`,finalData);
     const uniqueObjectsById = finalData?.reduce((acc, obj) => {
       const key = `${obj.user_name}-${obj.quiz_name}`;
