@@ -1060,32 +1060,90 @@ const SchoolParent = () => {
     return filteredData?.length === 0 ? '-' : `${(sumOfAllQuizes / filteredData?.length).toFixed(1)} %`;
   }
   
-  // const UpdateFullName = (e, user_name) =>{
-  //   const full_name = e.target.value;
-  //   const email = localStorage.getItem('userEmail')
-  //   try {
-  //     const token = localStorage.getItem('token')
-  //     fetch(testURL + '/updateuser', {
-  //       method: 'PUT',
-  //       headers: {
-  //         "Access-Control-Allow-Origin": "*",
-  //         "Content-Type": "application/json",
-  //         "Authorization": token ? `${token}` : null
-  //       },
-  //       body: JSON.stringify({
-  //         full_name,
-  //         user_name,
-  //       })
-  //     })
-  //       .then(response => response.json())
-  //       .then(response => {
-  //         // console.log()
-  //         // setQuizesAverages(response.quizes.averages)
-  //       })
-  //   } catch (e) {
-  //     setDataLoadin(false)
-  //   }
-  // }
+  const UpdateFullName = (e, username ) =>{
+    const full_name = e.target.value;
+    const found = allUniqueUsers.filter(item => item.user_name === username);
+    const id = found[0].id;
+    const email = localStorage.getItem('userEmail')
+    
+    // for (let i = 0; i < allUniqueUsers.length; i++) {
+    //   if (array[i].id === id) {
+    //     array[i].full_name = full_name;
+    //     break;  // Assuming you only want to update the first occurrence with id
+    //   }
+    // }
+    
+    // let temp = [...allUniqueUsers];
+    // for (let user of temp) {
+    //   if (user.id === id) {
+    //     console.log(user)
+    //     user.full_name = full_name;
+    //     console.log(user)
+    //     break;
+    //   }
+    // }
+
+    const updatedData = allUniqueUsers.map(user => {
+      if (user.id === id) {
+        const modified =  { ...user, full_name: full_name }
+        return modified;
+      }
+      return user;
+    });
+    setallUniqueUsers(updatedData);
+  }
+
+  const UpdateFullNameDB = (e, username ) =>{
+    const full_name = e.target.value;
+    const found = allUniqueUsers.filter(item => item.user_name === username);
+    const id = found[0].id;
+    const email = localStorage.getItem('userEmail')
+    
+    // for (let i = 0; i < allUniqueUsers.length; i++) {
+    //   if (array[i].id === id) {
+    //     array[i].full_name = full_name;
+    //     break;  // Assuming you only want to update the first occurrence with id
+    //   }
+    // }
+    
+    // let temp = [...allUniqueUsers];
+    // for (let user of temp) {
+    //   if (user.id === id) {
+    //     console.log(user)
+    //     user.full_name = full_name;
+    //     console.log(user)
+    //     break;
+    //   }
+    // }
+    try {
+      const token = localStorage.getItem('token')
+      fetch(testURL + '/updateuser', {
+        method: 'PUT',
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+          "Authorization": token ? `${token}` : null
+        },
+        body: JSON.stringify({
+          full_name,
+          id,
+        })
+      })
+        .then(response => {
+          // window.location.reload();
+          const updatedData = allUniqueUsers.map(user => {
+            if (user.id === id) {
+              const modified =  { ...user, full_name: full_name }
+              return modified;
+            }
+            return user;
+          });
+          setallUniqueUsers(updatedData);
+        })
+    } catch (e) {
+      // setDataLoadin(false)
+    }
+  }
   const getFullName = (username) => {
     const found = allUniqueUsers.filter(item => item.user_name == username)
     return found[0]?.full_name == username ? "" :  found[0]?.full_name
@@ -1664,9 +1722,8 @@ quiz5: 35,
                 {Object.keys(users).map((student) => (
                   <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
                     <td className="p-3">{users[student][0]?.user_name}</td>
-                    {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
-                    {/* <td className="p-3">{users[student][0]?.email_address}</td> */}
-                    <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td>
+                    <td className="p-3"><input value={getFullName(users[student][0]?.user_name)} className="h-8 placeholder-red-600" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, users[student][0]?.user_name)} onBlur={(e) => UpdateFullNameDB(e, users[student][0]?.user_name)}/></td>
+                    {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
                     <td className="p-3 text-center w-40 font-bold">{getStudentaverage(users[student][0]?.user_name)}</td>
                     <td className="p-3 text-center w-40 font-bold">{getStudentEffort(users[student][0]?.user_name)}</td>
                     {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
