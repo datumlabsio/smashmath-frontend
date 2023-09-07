@@ -1956,7 +1956,9 @@ const School = () => {
             </ul>
           </div>        
         </div>
-        {chartRevisedData?.length > 0 && <RevisedLineChart chart={chartRevisedData}/>}
+        <div className="mb-24">
+          {chartRevisedData?.length > 0 && <RevisedLineChart chart={chartRevisedData}/>}
+        </div>
     </div>
   );
 };

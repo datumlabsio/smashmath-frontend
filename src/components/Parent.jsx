@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { CustomLoader } from "../components/Loader";
 import LineCharts from "./LineCharts";
 import MarkKey from "./MarkKey";
-import RevisedLineChart from "./RevisedLineChart";
 
 const ChildNames = ["Ali", "Usama", "Omair", "Talha", "Agha", "Hassan"];
 const data = [
@@ -1363,9 +1362,9 @@ quiz5: 35,
           <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-1-sticky">
             <thead className="text-xs text-white uppercase bg-[#17026b]  h-32">
               <tr className="items-center">
-                <th scope="col" className="px-6 py-3 bg-[#17026b] text-white w-96">Email</th>
-                <th scope="col" className="px-6 py-3 bg-[#17026b] text-white w-40">Student AVG</th>
-                <th scope="col" className="px-6 py-3 bg-[#17026b] text-white w-40">Effort Score</th>
+                <th scope="col" className="p-3 bg-[#17026b] text-white w-96">Email</th>
+                <th scope="col" className="p-3 bg-[#17026b] text-white w-40">Student AVG</th>
+                <th scope="col" className="p-3 bg-[#17026b] text-white w-40">Effort Score</th>
                 {tableHeaders?.map(({ quiz_name }) => (<th scope="col" className="px-6 py-3 bg-[#17026b] text-white w-40">{quiz_name}</th>))}
               </tr>
             </thead>
@@ -1823,7 +1822,9 @@ quiz5: 35,
           </ul>
         </div>         */}
       </div>
-      {chart.length > 0 && <RevisedLineChart chart={chart}/>}
+      <div className="mb-24">
+        {chart.length > 0 && <LineCharts chart={chart}/>}
+      </div>
     </div>
   );
 };

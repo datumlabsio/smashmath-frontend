@@ -2043,7 +2043,9 @@ quiz5: 35,
           </ul>
         </div>        
       </div>
-      {chart.length > 0 && <RevisedLineChart chart={chart}/>} 
+      <div className="mb-24">
+        {chart.length > 0 && <RevisedLineChart chart={chart}/>} 
+      </div>
     </div>
   );
 };

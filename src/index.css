@@ -47,6 +47,10 @@ body {
 
 .column-1-sticky tr th:first-child {position: sticky; z-index: 3;  width: 200px; left: 0; background: #17026B;}
 .column-1-sticky tr td:first-child {position: sticky; z-index: 3; left: 0; background-color: #fff;}
+.column-1-sticky tr th:nth-child(2) {position: sticky; z-index: 3; left: 200px; background: #17026B;}
+.column-1-sticky tr td:nth-child(2) {position: sticky; z-index: 3; left: 200px; background-color: #fff;}
+.column-1-sticky tr th:nth-child(3) {position: sticky; z-index: 3; left: 320px; background: #17026B;}
+.column-1-sticky tr td:nth-child(3) {position: sticky; z-index: 3; left: 320px; background-color: #fff;}
 
 .column-2-sticky thead,
 .column-1-sticky thead {position: sticky; z-index: 9; top: 0;}

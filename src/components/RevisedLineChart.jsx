@@ -4,7 +4,9 @@ import './Charts.css'
 const RevisedLineChart = ({chart}) => {
   return (
     <LineChart width={1100} height={400} data={chart} margin={{ top: 25, right: 0, bottom: 5, left: 0 }}>
-      <Tooltip />
+      <Tooltip wrapperStyle={{
+        
+    }}/>
       <Legend wrapperStyle={{position: 'relative', marginTop: '15px'}}/>
       <Line type="monotone" dataKey="SMASH Maths Cohort Average" stroke="#8884d8" />
       <Line type="monotone" dataKey="Class Average" stroke="#82ca9d" />
