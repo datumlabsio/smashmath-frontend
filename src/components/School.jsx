@@ -1659,8 +1659,8 @@ const School = () => {
                     <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
                     <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Name</th>
                     {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Email</th> */}
-                    <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Avg</th>
-                    <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Effort Score</th>
+                    <th scope="col" className="z-10 p-3 text-center bg-[#17026b] text-white w-40">Student Avg</th>
+                    <th scope="col" className="z-10 p-3 text-center bg-[#17026b] text-white w-40">Effort Score</th>
                     {tableHeaders?.map(({ quiz_name }) => (<th scope="col" className="p-3 bg-[#17026b] text-white w-40"> {quiz_name}</th>))}
                   </tr>
                 </thead>
@@ -1670,7 +1670,7 @@ const School = () => {
                     <td className="sticky left-40 z-10 px-3 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
                     <td className="sticky left-0 z-10 px-3 py-3 w-40 font-bold text-center"></td>
                     {/* <td className="sticky left-0 z-10 px-1 py-1 w-40 font-bold"></td> */}
-                    <td className="sticky left-0 z-10 px-6 py-3 font-bold text-center">{cohortAverageAVG}</td>
+                    <td className="sticky left-0 z-10 p-3 font-bold text-center">{cohortAverageAVG}</td>
                     <td className="sticky left-0 z-10 px-6 py-3 font-bold"></td>
                     {selectedChild === "" ? (
                       <>
@@ -1707,7 +1707,7 @@ const School = () => {
                     <td className="sticky left-40 z-10 px-3 py-3 w-40 font-bold">Class Average</td>
                     <td className="sticky left-0 z-10 px-3 py-3 w-40 font-bold"></td>
                     {/* <td className="sticky left-0 z-10 px-1 py-1 w-40 font-bold"></td> */}
-                    <td className="sticky left-0 z-10 px-2 py-2  font-bold text-center">{classAverageAVG}</td>
+                    <td className="sticky left-0 z-10 p-3 font-bold text-center">{classAverageAVG}</td>
                     <td className="sticky left-0 z-10 px-2 py-2 font-bold"></td>
                     {selectedChild === "" ? (
                       <>

@@ -1585,7 +1585,7 @@ quiz5: 35,
                   {/* <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td> */}
                   <td className="sticky left-40 z-10 px-3 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
                   <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
-                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold" >{cohortAverageAVG}</td>
+                  <td className="sticky left-0 z-10 p-3 w-40 font-bold text-center" >{cohortAverageAVG}</td>
                   <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
                   {selectedChild === "" ? (
                     <>
@@ -1623,7 +1623,7 @@ quiz5: 35,
                   <td className="sticky left-40 z-10 px-3 py-3 w-40 font-bold">Class Average</td>
                   <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
                   {/* <td className="sticky left-0 z-10 px-1 py-1 w-40 font-bold"></td> */}
-                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold">{classAverageAVG}</td>
+                  <td className="sticky left-0 z-10 p-3 w-40 font-bold text-center">{classAverageAVG}</td>
                   <td className="sticky left-0 z-10 px-2 py-2 w-40 font-bold"></td>
                   {selectedChild === "" ? (
                     <>
@@ -1667,8 +1667,8 @@ quiz5: 35,
                     {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
                     {/* <td className="p-3">{users[student][0]?.email_address}</td> */}
                     <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td>
-                    <td className="p-3 w-40 font-bold">{getStudentaverage(users[student][0]?.user_name)}</td>
-                    <td className="p-3 w-40 font-bold">{getStudentEffort(users[student][0]?.user_name)}</td>
+                    <td className="p-3 text-center w-40 font-bold">{getStudentaverage(users[student][0]?.user_name)}</td>
+                    <td className="p-3 text-center w-40 font-bold">{getStudentEffort(users[student][0]?.user_name)}</td>
                     {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
                   </tr>
                 ))}
