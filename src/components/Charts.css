@@ -1,0 +1,8 @@
+.chart-container .recharts-x-axis .recharts-cartesian-axis-tick-value {
+    transform: rotate(-45deg);
+    transform-origin: center;
+  }
+  
+  .chart-container .recharts-x-axis .recharts-cartesian-axis-tick {
+    white-space: nowrap;
+  }

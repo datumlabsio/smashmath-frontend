@@ -10,7 +10,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [selectedButton, setSelectedButton] = useState("School");
   const [showPassword, setShowPassword] = useState(false);
-  const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app'
+  // const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app'
+  const TestURL = "https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api"
   const [loading, setLoading] = useState(false)
 
 
@@ -37,7 +38,7 @@ const Login = () => {
 
   const loginService = () => {
     try {
-      fetch(API_URL + '/api/login', {
+      fetch(TestURL + '/login', {
         method: 'POST',
         headers: { "Content-Type": "application/json", },
         body: JSON.stringify({ "email": email, "password": password })
@@ -45,7 +46,6 @@ const Login = () => {
       .then(response => response.json())
       .then(response => {
         setLoading(false)
-        console.log('res--->', response.data[0]?.jwt_token)
         if (response.data[1] != 200) {
           toast.error(response.data[0]?.error)
           return
@@ -53,6 +53,7 @@ const Login = () => {
 
         toast.success("Login successful");
         localStorage.setItem('userEmail', email)
+        localStorage.setItem('Status', response.data[0]?.buy)
         localStorage.setItem('token', response.data[0]?.jwt_token)
         if (selectedButton === "School") {
           navigate("/school-dashboard");

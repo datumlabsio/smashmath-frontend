@@ -2,7 +2,8 @@ name: remote ssh command
 on: 
   push:
     branches:
-      - main
+      - dev
+
 jobs:
 
   build:
@@ -27,7 +28,7 @@ jobs:
         connect_timeout: 30
         # execute commands on ssh
         script: |
-          cd /root/smashmath-frontend
+          cd /root/dev.smashmath-frontend
           git pull
           npm run build
           pm2 restart npm -- start
