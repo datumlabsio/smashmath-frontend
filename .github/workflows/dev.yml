@@ -35,7 +35,6 @@ jobs:
           git checkout dev
           npm install --include=dev
           npm run build
-          pm2 delete dev
-          pm2 start 'npm start' --name dev
+          pm2 delete dev || pm2 start 'npm start' --name dev
 
 
