@@ -33,6 +33,7 @@ jobs:
           git clone https://github.com/TechLev/smashmath-frontend dev.smashmath-frontend
           cd dev.smashmath-frontend
           git checkout dev
+          npm install --include=dev
           npm run build
           pm2 delete dev
           pm2 start 'npm start' --name dev
