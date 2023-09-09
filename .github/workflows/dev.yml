@@ -28,9 +28,13 @@ jobs:
         connect_timeout: 30
         # execute commands on ssh
         script: |
-          cd /root/dev.smashmath-frontend
-          git pull
+          cd /root/
+          rm -rf dev.smashmath-frontend
+          git clone https://github.com/TechLev/smashmath-frontend dev.smashmath-frontend
+          cd dev.smashmath-frontend
+          git checkout dev
           npm run build
-          pm2 restart npm -- start
+          pm2 delete dev
+          pm2 start 'npm start' --name dev
 
 
