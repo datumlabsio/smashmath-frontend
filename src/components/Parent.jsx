@@ -1856,63 +1856,63 @@ quiz5: 35,
         style={{ overflow: "auto" }}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
-      > 
-        <Box> 
-          <Box sx={style}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' , marginBottom: 2 }}>
-              <Box >
-                <Typography id="modal-modal-title" variant="h3" component="h2" sx={{color: '#17026b'}}>
-                  User Guide For Parent Dashboard
-                </Typography>
-              </Box>
-              <Box>
-                <Button onClick={handleClose}>
-                  <CloseIcon />
-                </Button>
-                
-              </Box>
+      >
+        <Box sx={style}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' , marginBottom: 2 }}>
+            <Box >
+              <Typography id="modal-modal-title" variant="h3" component="h2" sx={{color: '#17026b'}}>
+                User Guide For Parent Dashboard
+              </Typography>
             </Box>
-            <hr />
-            <Box sx={{ marginTop: 2 }}>
-              <Typography id="modal-modal-title" variant="h4" component="h2" sx={{color: '#17026b'}}>              
-                DATA ANALYSIS
+            <Box>
+              <Button onClick={handleClose}>
+                <CloseIcon />
+              </Button>              
+            </Box>
+          </Box>
+          <hr />
+          <Box sx={{ marginTop: 2 }}>
+            <u>
+              <Typography id="modal-modal-title" variant="h4" component="h2" sx={{color: '#17026b', margin:1}}>              
+              DATA ANALYSIS
+            </Typography>
+            </u>
+            <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+              To view your child’s data, please choose from the following options from the drop-down buttons.
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+                <b style={{ fontSize: '16px' }}>Academic Year:- </b> Choose the academic year, beginning in September. If you choose 2023 for example, this will relate to data for the academic year September 2023 to September 2024.
+                </Typography>
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+                <b style={{ fontSize: '16px' }}>Year (UK) / Grade (US):– </b> Choose the Year/Grade of your child. The Year/Grade will relate to the academic year beginning in September, through to the end of August the next year.
+              </Typography>
+              Once you have chosen your options, the data table will show your child’s scores for SMASH Maths Practices that are set each week. Here are some tips for using the table.
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+              <strong style={{ fontSize: '16px' }}>Student Average:– </strong> This is the average score of all Practices that your child has completed.
               </Typography>
               <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                To view your child’s data, please choose from the following options from the drop-down buttons.
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                  <b>Academic Year beginning September: -</b> Choose the academic year, beginning in September. If you choose 2023 for example, this will relate to data for the academic year September 2023 to September 2024.</Typography>
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                  <b style={{ fontSize: '16px' }}>Year (UK) / Grade (US) –</b> Choose the Year/Grade of your child. The Year/Grade will relate to the academic year beginning in September, through to the end of August the next year.
-                </Typography>
-
-                Once you have chosen your options, the data table will show your child’s scores for SMASH Maths Practices that are set each week. Here are some tips for using the table.
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                <strong style={{ fontSize: '16px' }}>Student Average –</strong> This is the average score of all Practices that your child has completed.
-                </Typography>
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                <strong style={{ fontSize: '16px' }}>Effort Score –</strong> This is the percentage of Practices completed divided by the number of Practices set.
-                </Typography>
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                <strong style={{ fontSize: '16px' }}>SMASH Maths Cohort Average –</strong> You can see this average in the top row of the table. This Cohort Average is the average score of all children that have taken the Practice (across all schools, and also all children doing SMASH Maths at Home). Use this average to see how well your child is performing versus the entire SMASH Maths cohort.
-                </Typography>
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                <strong style={{ fontSize: '16px' }}>Colour Coding –</strong> In the top right, you can see the key for how the scores have been colour coded. Scores above 80% are coloured blue. Scores between 60-80% are coloured green. Scores between 40-60% are coloured orange. Scores below 40% are coloured red.
-                </Typography>
-                
-                <Typography id="modal-modal-title" variant="h3" component="h4" sx={{color: '#17026b'}}>
-                  CHART ANALYSIS
-                </Typography>            
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                  Below the Data Table, you can view the Chart Analysis.
-                </Typography>
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                  <strong style={{ fontSize: '16px' }}>Academic Year beginning in September.</strong> If you choose 2023 for example, this will relate to data for the academic year September 2023 to September 2024.
-                </Typography>
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                  <strong style={{ fontSize: '16px' }}>Year (UK) / Grade (US)</strong> Choose the Year/Grade of your child.          
-                </Typography>
+              <strong style={{ fontSize: '16px' }}>Effort Score:– </strong> This is the percentage of Practices completed divided by the number of Practices set.
               </Typography>
-              </Box>
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+              <strong style={{ fontSize: '16px' }}>SMASH Maths Cohort Average:– </strong> You can see this average in the top row of the table. This Cohort Average is the average score of all children that have taken the Practice (across all schools, and also all children doing SMASH Maths at Home). Use this average to see how well your child is performing versus the entire SMASH Maths cohort.
+              </Typography>
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+              <strong style={{ fontSize: '16px' }}>Colour Coding:– </strong> In the top right, you can see the key for how the scores have been colour coded. Scores above 80% are coloured blue. Scores between 60-80% are coloured green. Scores between 40-60% are coloured orange. Scores below 40% are coloured red.
+              </Typography>
+            </Typography>
+            <u>   
+              <Typography id="modal-modal-title" variant="h4" component="h4" sx={{color: '#17026b', margin:1}}>
+                CHART ANALYSIS
+              </Typography>
+            </u>            
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+                Below the Data Table, you can view the Chart Analysis.
+              </Typography>
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+                <strong style={{ fontSize: '16px' }}>Academic Year:- </strong> If you choose 2023 for example, this will relate to data for the academic year September 2023 to September 2024.
+              </Typography>
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+                <strong style={{ fontSize: '16px' }}>Year (UK) / Grade (US):- </strong> Choose the Year/Grade of your child.          
+              </Typography>
           </Box>
         </Box>
     </Modal>
