@@ -10,7 +10,7 @@ const RevisedLineChart = ({chart}) => {
       <Line type="monotone" dataKey="Student Average" stroke="#FF0000" />
       <CartesianGrid stroke="#ccc" strokeDasharray="1 1" />
       <XAxis angle={-45} textAnchor='end' dataKey="week" />
-      <text x="500" y="0" dominantBaseline="hanging" fontSize="36" fontWeight="bold">6-weeks rolling averages</text>
+      <text x="500" y="0" dominantBaseline="hanging" fontSize="36" fontWeight="bold">6-week rolling averages</text>
       <YAxis tickFormatter={tick => `${tick}%`}/>
   </LineChart>
   )
