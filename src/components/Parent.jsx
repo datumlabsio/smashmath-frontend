@@ -442,7 +442,7 @@ const Parent = () => {
             }
           })
           setTableHeadersAll(filterData)
-          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, sortedUniqueYears[sortedUniqueYears.length-1] - 1)  
+          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, sortedUniqueYear[sortedUniqueYears.length-1])  
           setDataLoadin(false)
 
           return
