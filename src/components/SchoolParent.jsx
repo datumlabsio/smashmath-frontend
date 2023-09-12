@@ -414,7 +414,7 @@ const SchoolParent = () => {
           })
 
           setTableHeadersAll(filterData)
-          applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1] - 1)
+          applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1])
           if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
           
           // setDataLoadin(false)
@@ -1777,8 +1777,7 @@ quiz5: 35,
               
                 <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
                   {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
-                  <td className="p-3 text-center" rowSpan='3'>No Data Avaiable.</td>
-                  
+                  <td className="p-3 text-center" rowSpan='3'>No Data Avaiable.</td>   
                 </tr>
             </tbody>
           </table>

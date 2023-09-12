@@ -435,17 +435,19 @@ const School = () => {
           let arr = "Year 4 - SP Autumn Term Week 14 - Christmas Practice 01".split(' ')
           // console.log('bilal--->', parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]))
 
-          let filterData = quizes?.map(({ quiz_name, year_name }, index) => {
+          let filterData = quizes?.map(({ quiz_name, year_name, date_submitted }, index) => {
             return {
               year_name,
               quiz_name,
               index,
+              year : new Date(date_submitted).getFullYear(),
+              month : new Date(date_submitted).getMonth(),
               week: getWeekNumber(quiz_name)
             }
           })
-
           setTableHeadersAll(filterData)
-          applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1] - 1)
+          console.log(`Yearssss`, filterData)
+          applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1])
           if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
           // setDataLoadin(false)
           return
@@ -600,7 +602,7 @@ const School = () => {
     // sortedHeader = [new Set(sortedHeader)]
     const ids = sortedHeader.map(o => o.quiz_name)
     const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
-    // console.log('therer------>2', filtered)
+    console.log('therer------>2', filtered)
     setTableHeaders(filtered)
 
     let filterEmailData = data.filter(({ email_address }) => email_address == email)
