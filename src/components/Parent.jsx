@@ -4,6 +4,24 @@ import { CustomLoader } from "../components/Loader";
 import LineCharts from "./LineCharts";
 import MarkKey from "./MarkKey";
 
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import Modal from '@mui/material/Modal';
+import CloseIcon from '@mui/icons-material/Close';
+
+const style = {
+  position: 'absolute',
+  top:'60%',
+  left:'50%',
+  transform: 'translate(-50%, -50%)',
+  width: 1100,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
+
 const ChildNames = ["Ali", "Usama", "Omair", "Talha", "Agha", "Hassan"];
 const data = [
   {
@@ -259,6 +277,10 @@ const Parent = () => {
   const [classAverageAVG, setClassAverageAVG] = useState('-')
   const [cohortAverageAVG, setCohortAverageAVG] = useState('-')
   const [allUniqueChartUsers, setallUniqueChartUsers] = useState([])
+  // Modal
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
@@ -1053,6 +1075,7 @@ const Parent = () => {
   }  
 
   return (
+    <>
     <div className="md:mx-20 my-2">
       {dataLoadin && <CustomLoader />}
       {/* main bar starts */}
@@ -1132,6 +1155,7 @@ const Parent = () => {
           <li className="mr-3">
             <div className="inline-block" >
               <button
+                onClick = {handleOpen}
                 className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
                 User Guide
               </button>
@@ -1826,6 +1850,73 @@ quiz5: 35,
         {chart.length > 0 && <LineCharts chart={chart}/>}
       </div>
     </div>
+        <Modal
+        open={open}
+        onClose={handleClose}
+        style={{ overflow: "auto" }}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' , marginBottom: 2 }}>
+            <Box >
+              <Typography id="modal-modal-title" variant="h3" component="h2" sx={{color: '#17026b'}}>
+                User Guide For Parent Dashboard
+              </Typography>
+            </Box>
+            <Box>
+              <Button onClick={handleClose}>
+                <CloseIcon />
+              </Button>              
+            </Box>
+          </Box>
+          <hr />
+          <Box sx={{ marginTop: 2 }}>
+            <u>
+              <Typography id="modal-modal-title" variant="h4" component="h2" sx={{color: '#17026b', margin:1}}>              
+              DATA ANALYSIS
+            </Typography>
+            </u>
+            <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+              To view your child’s data, please choose from the following options from the drop-down buttons.
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+                <b style={{ fontSize: '16px' }}>Academic Year:- </b> Choose the academic year, beginning in September. If you choose 2023 for example, this will relate to data for the academic year September 2023 to September 2024.
+                </Typography>
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+                <b style={{ fontSize: '16px' }}>Year (UK) / Grade (US):– </b> Choose the Year/Grade of your child. The Year/Grade will relate to the academic year beginning in September, through to the end of August the next year.
+              </Typography>
+              Once you have chosen your options, the data table will show your child’s scores for SMASH Maths Practices that are set each week. Here are some tips for using the table.
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+              <strong style={{ fontSize: '16px' }}>Student Average:– </strong> This is the average score of all Practices that your child has completed.
+              </Typography>
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+              <strong style={{ fontSize: '16px' }}>Effort Score:– </strong> This is the percentage of Practices completed divided by the number of Practices set.
+              </Typography>
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+              <strong style={{ fontSize: '16px' }}>SMASH Maths Cohort Average:– </strong> You can see this average in the top row of the table. This Cohort Average is the average score of all children that have taken the Practice (across all schools, and also all children doing SMASH Maths at Home). Use this average to see how well your child is performing versus the entire SMASH Maths cohort.
+              </Typography>
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+              <strong style={{ fontSize: '16px' }}>Colour Coding:– </strong> In the top right, you can see the key for how the scores have been colour coded. Scores above 80% are coloured blue. Scores between 60-80% are coloured green. Scores between 40-60% are coloured orange. Scores below 40% are coloured red.
+              </Typography>
+            </Typography>
+            <u>   
+              <Typography id="modal-modal-title" variant="h4" component="h4" sx={{color: '#17026b', margin:1}}>
+                CHART ANALYSIS
+              </Typography>
+            </u>            
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+                Below the Data Table, you can view the Chart Analysis.
+              </Typography>
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+                <strong style={{ fontSize: '16px' }}>Academic Year:- </strong> If you choose 2023 for example, this will relate to data for the academic year September 2023 to September 2024.
+              </Typography>
+              <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
+                <strong style={{ fontSize: '16px' }}>Year (UK) / Grade (US):- </strong> Choose the Year/Grade of your child.          
+              </Typography>
+          </Box>
+        </Box>
+    </Modal>
+    </>
   );
 };
 
