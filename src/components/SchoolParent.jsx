@@ -404,11 +404,13 @@ const SchoolParent = () => {
           // console.log('bilal--->', parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]))
 
 
-          let filterData = quizes?.map(({ quiz_name, year_name }, index) => {
+          let filterData = quizes?.map(({ quiz_name, year_name, date_submitted}, index) => {
             return {
               year_name,
               quiz_name,
               index,
+              year : new Date(date_submitted).getFullYear(),
+              month : new Date(date_submitted).getMonth(),
               week: getWeekNumber(quiz_name)
             }
           })
@@ -537,8 +539,17 @@ const SchoolParent = () => {
     // sortedHeader = [new Set(sortedHeader)]
     const ids = sortedHeader.map(o => o.quiz_name)
     const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1)).sort()
-    console.log('therer------>2', filtered)
-    setTableHeaders(filtered)
+    const finalHeader = filtered.filter(record => {
+      if (yearSelected === record.year) {
+        if ( record.month >= 9) {
+          return record;
+        }
+      } else if (yearSelected + 1 === record.year && record.month < 9) {
+        return record;
+      }
+    })
+    // console.log('therer------>2', filtered)
+    setTableHeaders(finalHeader)
 
     let filterEmailData = data.filter(({ email_address }) => email_address == email)
     let filterFinalData;
@@ -1755,9 +1766,9 @@ quiz5: 35,
             </table>
           </div>
         }
-        {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
-          <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
-            <thead className="text-xs text-white uppercase bg-[#17026b]">
+        {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ minHeight: '100px', maxHeight: 'calc(100vh - 250px)' }}>
+          <table className="min-h-74 w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
+            <thead className="text-xs text-white uppercase bg-[#17026b] h-32">
               <tr className="items-center">
                 <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
                 {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th> */}

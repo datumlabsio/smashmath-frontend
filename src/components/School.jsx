@@ -602,8 +602,17 @@ const School = () => {
     // sortedHeader = [new Set(sortedHeader)]
     const ids = sortedHeader.map(o => o.quiz_name)
     const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
-    console.log('therer------>2', filtered)
-    setTableHeaders(filtered)
+    const finalHeader = filtered.filter(record => {
+      if (yearSelected === record.year) {
+        if ( record.month >= 9) {
+          return record;
+        }
+      } else if (yearSelected + 1 === record.year && record.month < 9) {
+        return record;
+      }
+    })
+    // console.log('therer------>2', finalHeader)
+    setTableHeaders(finalHeader)
 
     let filterEmailData = data.filter(({ email_address }) => email_address == email)
     // console.log(`teacher Data in Quiz Dashboard`, filterEmailData);
