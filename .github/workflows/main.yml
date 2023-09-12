@@ -31,7 +31,6 @@ jobs:
           rm -rf smashmath-frontend
           git clone https://github.com/TechLev/smashmath-frontend smashmath-frontend
           cd smashmath-frontend
-          git checkout master
           npm install --include=dev
           npm run build
           pm2 delete prod || pm2 start 'npm start' --name prod
