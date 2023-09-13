@@ -325,7 +325,7 @@ const Parent = () => {
         year++;
       }
     }
-
+    setDataSelectedYear(yearList[yearList.length-1])
     // years = years.map(item => item-1)
     setDataYearList(yearList);
   },[])
@@ -430,7 +430,6 @@ const Parent = () => {
           });
           const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
           setChartYearList(sortedUniqueYears);
-          console.log(`Filtered yearssss` , sortedUniqueYears)
 
 
           let filterData = quizes?.map(({ quiz_name, year_name, date_submitted }, index) => {
@@ -439,12 +438,12 @@ const Parent = () => {
               quiz_name,
               index,
               year : new Date(date_submitted).getFullYear(),
-              month : new Date(date_submitted).getMonth(),
+              month : new Date(date_submitted).getMonth() + 1,
               week: getWeekNumber(quiz_name)
             }
           })
           setTableHeadersAll(filterData)
-          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, sortedUniqueYear[sortedUniqueYears.length-1])  
+          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, sortedUniqueYears[sortedUniqueYears.length-1])  
           setDataLoadin(false)
 
           return
@@ -580,6 +579,7 @@ const Parent = () => {
     const ids = sortedHeader.map(o => o.quiz_name)
     const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
     const finalHeader = filtered.filter(record => {
+      console.log(`Filter table Header3`, record)
       if (yearSelected === record.year) {
         if ( record.month >= 9) {
           return record;
@@ -589,7 +589,8 @@ const Parent = () => {
       }
     })
     setTableHeaders(finalHeader)
-    // console.log(`Filter table Header `, filtered)
+    console.log(`Filter table Header`, yearData, filtered)
+    console.log(`Filter table Header2`, yearData, finalHeader)
 
     let filterDurationlData = data
     // Commented Previous Data Since last 52 Weeks
@@ -625,7 +626,7 @@ const Parent = () => {
       }
     })
     // Calculate Cohort average Avg
-    const QuizName = filterHeader?.map(item => item.quiz_name)    
+    const QuizName = finalHeader?.map(item => item.quiz_name)    
     const filteredQuizes = quizesAverages?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
     const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj?.average_score, 0);
     const AVGCohort = (sumCohort / (filteredQuizes?.length *100)) * 100;

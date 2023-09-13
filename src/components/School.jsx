@@ -441,7 +441,7 @@ const School = () => {
               quiz_name,
               index,
               year : new Date(date_submitted).getFullYear(),
-              month : new Date(date_submitted).getMonth(),
+              month : new Date(date_submitted).getMonth() + 1,
               week: getWeekNumber(quiz_name)
             }
           })
@@ -589,7 +589,6 @@ const School = () => {
   }
 
   const applyFilter = (email, year, headers, data , yearData) => {
-
     setSelectedYear(year)
     setSelectedTeacher(email)
     setDataSelectedYear(yearData)
@@ -611,7 +610,7 @@ const School = () => {
         return record;
       }
     })
-    // console.log('therer------>2', finalHeader)
+    console.log('therer------>2', finalHeader)
     setTableHeaders(finalHeader)
 
     let filterEmailData = data.filter(({ email_address }) => email_address == email)
@@ -641,9 +640,10 @@ const School = () => {
       }
     })
     // Calculate Cohort average Avg
-    const QuizName = filterHeader?.map(item => item?.quiz_name)    
+    const QuizName = finalHeader?.map(item => item?.quiz_name)    
     const filteredQuizes = quizesAverages?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
     const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj?.average_score, 0);
+    console.log(`SUMIS`, filteredQuizes)
     const AVGCohort = (sumCohort / (filteredQuizes?.length *100)) * 100;
     setCohortAverageAVG(AVGCohort ? `${AVGCohort?.toFixed(1)} %` : '-')
     

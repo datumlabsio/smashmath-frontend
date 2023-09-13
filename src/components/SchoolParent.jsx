@@ -302,6 +302,7 @@ const SchoolParent = () => {
       }
     }
     years = years.map(item => item-1)
+    
     setDataYearList([...new Set(years)]);
   },[])
   const handleDataYearSelect = (childName) =>{
@@ -326,7 +327,7 @@ const SchoolParent = () => {
         year++;
       }
     }
-
+    setDataSelectedYear(yearList[yearList.length-1])
     // years = years.map(item => item-1)
     setDataYearList(yearList);
   },[])
@@ -410,7 +411,7 @@ const SchoolParent = () => {
               quiz_name,
               index,
               year : new Date(date_submitted).getFullYear(),
-              month : new Date(date_submitted).getMonth(),
+              month : new Date(date_submitted).getMonth() + 1,
               week: getWeekNumber(quiz_name)
             }
           })
@@ -584,7 +585,7 @@ const SchoolParent = () => {
       }
     })
     // Calculate Cohort average Avg
-    const QuizName = filterHeader?.map(item => item?.quiz_name)    
+    const QuizName = finalHeader?.map(item => item?.quiz_name)    
     const filteredQuizes = quizesAverages?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
     const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj?.average_score, 0);
     const AVGCohort = (sumCohort / (filteredQuizes?.length *100)) * 100;
