@@ -1665,8 +1665,8 @@ quiz5: 35,
                   <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
                   <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Name</th>
                   {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th> */}
-                  <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Avg</th>
-                  <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Effort Score</th>
+                  <th scope="col" className="z-10 p-3 text-center bg-[#17026b] text-white w-40">Student Avg</th>
+                  <th scope="col" className="z-10 p-3 text-center bg-[#17026b] text-white w-40">Effort Score</th>
                   {tableHeaders?.map(({ quiz_name }) => (<th scope="col" className="p-3 bg-[#17026b] text-white w-40"> {quiz_name}</th>))}
                 </tr>
               </thead>
