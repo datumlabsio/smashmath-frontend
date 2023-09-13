@@ -439,6 +439,7 @@ const Parent = () => {
               index,
               year : new Date(date_submitted).getFullYear(),
               month : new Date(date_submitted).getMonth() + 1,
+              day : new Date(date_submitted).getDate(),
               week: getWeekNumber(quiz_name)
             }
           })
@@ -582,7 +583,22 @@ const Parent = () => {
       console.log(`Filter table Header3`, record)
       if (yearSelected === record.year) {
         if ( record.month >= 9) {
-          return record;
+          if(record.month == 9){
+            const firstDayOfMonth = new Date(yearSelected, record.month - 1, 1); // Month is zero-based
+            // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
+            const firstDayOfWeek = firstDayOfMonth.getDay();
+            // Calculate the number of days to add to reach the first Monday (if it's not already Monday)
+            const daysToAdd = (8 - firstDayOfWeek) % 7;
+            // Create a new date by adding the days to the first day of the month
+            const firstMondayOfMonth = new Date(yearSelected, record.month - 1, 1 + daysToAdd);
+            const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
+            if(record.day >= FirstMondayDate) {
+              return record
+            }
+          }
+          else {
+            return record;
+          }
         }
       } else if (yearSelected + 1 === record.year && record.month < 9) {
         return record;
