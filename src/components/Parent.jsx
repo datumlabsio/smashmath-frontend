@@ -325,7 +325,7 @@ const Parent = () => {
         year++;
       }
     }
-
+    setDataSelectedYear(yearList[yearList.length-1])
     // years = years.map(item => item-1)
     setDataYearList(yearList);
   },[])
@@ -430,19 +430,20 @@ const Parent = () => {
           });
           const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
           setChartYearList(sortedUniqueYears);
-          console.log(`Filtered yearssss` , sortedUniqueYears)
 
 
-          let filterData = quizes?.map(({ quiz_name, year_name }, index) => {
+          let filterData = quizes?.map(({ quiz_name, year_name, date_submitted }, index) => {
             return {
               year_name,
               quiz_name,
               index,
+              year : new Date(date_submitted).getFullYear(),
+              month : new Date(date_submitted).getMonth() + 1,
               week: getWeekNumber(quiz_name)
             }
           })
           setTableHeadersAll(filterData)
-          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, sortedUniqueYears[sortedUniqueYears.length-1] - 1)  
+          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, sortedUniqueYears[sortedUniqueYears.length-1])  
           setDataLoadin(false)
 
           return
@@ -577,8 +578,19 @@ const Parent = () => {
     let sortedHeader = filterHeader.sort((a, b) => b.week - a.week)
     const ids = sortedHeader.map(o => o.quiz_name)
     const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
-    setTableHeaders(filtered)
-    // console.log(`Filter table Header `, filtered)
+    const finalHeader = filtered.filter(record => {
+      console.log(`Filter table Header3`, record)
+      if (yearSelected === record.year) {
+        if ( record.month >= 9) {
+          return record;
+        }
+      } else if (yearSelected + 1 === record.year && record.month < 9) {
+        return record;
+      }
+    })
+    setTableHeaders(finalHeader)
+    console.log(`Filter table Header`, yearData, filtered)
+    console.log(`Filter table Header2`, yearData, finalHeader)
 
     let filterDurationlData = data
     // Commented Previous Data Since last 52 Weeks
@@ -614,7 +626,7 @@ const Parent = () => {
       }
     })
     // Calculate Cohort average Avg
-    const QuizName = filterHeader?.map(item => item.quiz_name)    
+    const QuizName = finalHeader?.map(item => item.quiz_name)    
     const filteredQuizes = quizesAverages?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
     const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj?.average_score, 0);
     const AVGCohort = (sumCohort / (filteredQuizes?.length *100)) * 100;
@@ -878,7 +890,6 @@ const Parent = () => {
       }
     });
     if(finalData?.length === 0) return '-';
-    console.log(`finalData`,finalData);
     const uniqueObjectsById = finalData?.reduce((acc, obj) => {
       const key = `${obj.user_name}-${obj.quiz_name}`;
       if (!acc[key]) {
@@ -894,6 +905,7 @@ const Parent = () => {
     const completedQuizzes = filteredData.filter(item => item.status === 'submitted').length;
     // const effortScore = (completedQuizzes / totalQuizzes) * 100;
     const effortScore = ( completedQuizzes / tableHeaders.length ) * 100;
+    console.log(`Table header`, completedQuizzes, tableHeaders.length, effortScore)
     return effortScore === 0 ? '-' : `${effortScore.toFixed(1)} %`;
   }
 
@@ -1455,9 +1467,9 @@ quiz5: 35,
             </tbody>
           </table>
         </div>}
-        {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
-          <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
-            <thead className="text-xs text-white uppercase bg-[#17026b]">
+        {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ minHeight: '100px', maxHeight: 'calc(100vh - 250px)' }}>
+          <table className="min-h-74 w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
+            <thead className="text-xs text-white uppercase bg-[#17026b] h-32">
               <tr className="items-center">
                 <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
                 {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th> */}

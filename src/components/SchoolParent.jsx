@@ -302,6 +302,7 @@ const SchoolParent = () => {
       }
     }
     years = years.map(item => item-1)
+    
     setDataYearList([...new Set(years)]);
   },[])
   const handleDataYearSelect = (childName) =>{
@@ -326,7 +327,7 @@ const SchoolParent = () => {
         year++;
       }
     }
-
+    setDataSelectedYear(yearList[yearList.length-1])
     // years = years.map(item => item-1)
     setDataYearList(yearList);
   },[])
@@ -404,17 +405,19 @@ const SchoolParent = () => {
           // console.log('bilal--->', parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]))
 
 
-          let filterData = quizes?.map(({ quiz_name, year_name }, index) => {
+          let filterData = quizes?.map(({ quiz_name, year_name, date_submitted}, index) => {
             return {
               year_name,
               quiz_name,
               index,
+              year : new Date(date_submitted).getFullYear(),
+              month : new Date(date_submitted).getMonth() + 1,
               week: getWeekNumber(quiz_name)
             }
           })
 
           setTableHeadersAll(filterData)
-          applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1] - 1)
+          applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1])
           if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
           
           // setDataLoadin(false)
@@ -537,8 +540,17 @@ const SchoolParent = () => {
     // sortedHeader = [new Set(sortedHeader)]
     const ids = sortedHeader.map(o => o.quiz_name)
     const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1)).sort()
-    console.log('therer------>2', filtered)
-    setTableHeaders(filtered)
+    const finalHeader = filtered.filter(record => {
+      if (yearSelected === record.year) {
+        if ( record.month >= 9) {
+          return record;
+        }
+      } else if (yearSelected + 1 === record.year && record.month < 9) {
+        return record;
+      }
+    })
+    // console.log('therer------>2', filtered)
+    setTableHeaders(finalHeader)
 
     let filterEmailData = data.filter(({ email_address }) => email_address == email)
     let filterFinalData;
@@ -573,7 +585,7 @@ const SchoolParent = () => {
       }
     })
     // Calculate Cohort average Avg
-    const QuizName = filterHeader?.map(item => item?.quiz_name)    
+    const QuizName = finalHeader?.map(item => item?.quiz_name)    
     const filteredQuizes = quizesAverages?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
     const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj?.average_score, 0);
     const AVGCohort = (sumCohort / (filteredQuizes?.length *100)) * 100;
@@ -1654,8 +1666,8 @@ quiz5: 35,
                   <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
                   <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Name</th>
                   {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th> */}
-                  <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Avg</th>
-                  <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Effort Score</th>
+                  <th scope="col" className="z-10 p-3 text-center bg-[#17026b] text-white w-40">Student Avg</th>
+                  <th scope="col" className="z-10 p-3 text-center bg-[#17026b] text-white w-40">Effort Score</th>
                   {tableHeaders?.map(({ quiz_name }) => (<th scope="col" className="p-3 bg-[#17026b] text-white w-40"> {quiz_name}</th>))}
                 </tr>
               </thead>
@@ -1755,9 +1767,9 @@ quiz5: 35,
             </table>
           </div>
         }
-        {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ maxHeight: 'calc(100vh - 250px)' }}>
-          <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
-            <thead className="text-xs text-white uppercase bg-[#17026b]">
+        {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ minHeight: '100px', maxHeight: 'calc(100vh - 250px)' }}>
+          <table className="min-h-74 w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
+            <thead className="text-xs text-white uppercase bg-[#17026b] h-32">
               <tr className="items-center">
                 <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
                 {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th> */}
@@ -1777,8 +1789,7 @@ quiz5: 35,
               
                 <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
                   {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
-                  <td className="p-3 text-center" rowSpan='3'>No Data Avaiable.</td>
-                  
+                  <td className="p-3 text-center" rowSpan='3'>No Data Avaiable.</td>   
                 </tr>
             </tbody>
           </table>
