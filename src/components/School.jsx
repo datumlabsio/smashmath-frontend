@@ -637,9 +637,25 @@ const School = () => {
       const submissionDate = new Date(record.date_submitted);
       const year = submissionDate.getFullYear();
       const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      const day = submissionDate.getDate();
       if (yearSelected === year) {
         if ( month >= 9) {
-          return record;
+          if(month == 9){
+            const firstDayOfMonth = new Date(yearSelected, month - 1, 1); // Month is zero-based
+            // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
+            const firstDayOfWeek = firstDayOfMonth.getDay();
+            // Calculate the number of days to add to reach the first Monday (if it's not already Monday)
+            const daysToAdd = (8 - firstDayOfWeek) % 7;
+            // Create a new date by adding the days to the first day of the month
+            const firstMondayOfMonth = new Date(yearSelected, month - 1, 1 + daysToAdd);
+            const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
+            if(day >= FirstMondayDate) {
+              return record
+            }
+          }
+          else{
+            return record
+          }
         }
       } else if (yearSelected + 1 === year && month < 9) {
         return record;
@@ -965,9 +981,25 @@ const School = () => {
       const submissionDate = new Date(record?.date_submitted);
       const year = submissionDate.getFullYear();
       const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      const day = submissionDate.getDate();
       if (dataSelectedYear === year) {
         if ( month >= 9) {
-          return record;
+          if(month == 9){
+            const firstDayOfMonth = new Date(dataSelectedYear, month - 1, 1); // Month is zero-based
+            // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
+            const firstDayOfWeek = firstDayOfMonth.getDay();
+            // Calculate the number of days to add to reach the first Monday (if it's not already Monday)
+            const daysToAdd = (8 - firstDayOfWeek) % 7;
+            // Create a new date by adding the days to the first day of the month
+            const firstMondayOfMonth = new Date(dataSelectedYear, month - 1, 1 + daysToAdd);
+            const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
+            if(day >= FirstMondayDate) {
+              return record
+            }
+          }
+          else{
+            return record
+          }
         }
       } else if (dataSelectedYear + 1 === year && month < 9) {
         return record;
@@ -1010,9 +1042,25 @@ const School = () => {
       const submissionDate = new Date(record?.date_submitted);
       const year = submissionDate.getFullYear();
       const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      const day = submissionDate.getDate();
       if (dataSelectedYear === year) {
         if ( month >= 9) {
-          return record;
+          if(month == 9){
+            const firstDayOfMonth = new Date(dataSelectedYear, month - 1, 1); // Month is zero-based
+            // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
+            const firstDayOfWeek = firstDayOfMonth.getDay();
+            // Calculate the number of days to add to reach the first Monday (if it's not already Monday)
+            const daysToAdd = (8 - firstDayOfWeek) % 7;
+            // Create a new date by adding the days to the first day of the month
+            const firstMondayOfMonth = new Date(dataSelectedYear, month - 1, 1 + daysToAdd);
+            const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
+            if(day >= FirstMondayDate) {
+              return record
+            }
+          }
+          else{
+            return record
+          }
         }
       } else if (dataSelectedYear + 1 === year && month < 9) {
         return record;
@@ -1038,9 +1086,25 @@ const School = () => {
       const submissionDate = new Date(record?.date_submitted);
       const year = submissionDate.getFullYear();
       const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      const day = submissionDate.getDate();
       if (dataSelectedYear === year) {
         if ( month >= 9) {
-          return record;
+          if(month == 9){
+            const firstDayOfMonth = new Date(dataSelectedYear, month - 1, 1); // Month is zero-based
+            // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
+            const firstDayOfWeek = firstDayOfMonth.getDay();
+            // Calculate the number of days to add to reach the first Monday (if it's not already Monday)
+            const daysToAdd = (8 - firstDayOfWeek) % 7;
+            // Create a new date by adding the days to the first day of the month
+            const firstMondayOfMonth = new Date(dataSelectedYear, month - 1, 1 + daysToAdd);
+            const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
+            if(day >= FirstMondayDate) {
+              return record
+            }
+          }
+          else{
+            return record
+          }
         }
       } else if (dataSelectedYear + 1 === year && month < 9) {
         return record;
