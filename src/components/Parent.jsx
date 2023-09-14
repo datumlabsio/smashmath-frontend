@@ -580,7 +580,6 @@ const Parent = () => {
     const ids = sortedHeader.map(o => o.quiz_name)
     const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
     const finalHeader = filtered.filter(record => {
-      console.log(`Filter table Header3`, record)
       if (yearSelected === record.year) {
         if ( record.month >= 9) {
           if(record.month == 9){
@@ -623,9 +622,25 @@ const Parent = () => {
       const submissionDate = new Date(record?.date_submitted);
       const year = submissionDate.getFullYear();
       const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      const day = submissionDate.getDate();
       if (yearSelected === year) {
         if ( month >= 9) {
-          return record;
+          if(month == 9){
+            const firstDayOfMonth = new Date(yearSelected, month - 1, 1); // Month is zero-based
+            // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
+            const firstDayOfWeek = firstDayOfMonth.getDay();
+            // Calculate the number of days to add to reach the first Monday (if it's not already Monday)
+            const daysToAdd = (8 - firstDayOfWeek) % 7;
+            // Create a new date by adding the days to the first day of the month
+            const firstMondayOfMonth = new Date(yearSelected, month - 1, 1 + daysToAdd);
+            const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
+            if(day >= FirstMondayDate) {
+              return record
+            }
+          }
+          else{
+            return record
+          }
         }
       } else if (yearSelected + 1 === year && month < 9) {
         return record;
@@ -870,9 +885,25 @@ const Parent = () => {
       const submissionDate = new Date(record?.date_submitted);
       const year = submissionDate.getFullYear();
       const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      const day = submissionDate.getDate();
       if (dataSelectedYear === year) {
         if ( month >= 9) {
-          return record;
+          if(month == 9){
+            const firstDayOfMonth = new Date(dataSelectedYear, month - 1, 1); // Month is zero-based
+            // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
+            const firstDayOfWeek = firstDayOfMonth.getDay();
+            // Calculate the number of days to add to reach the first Monday (if it's not already Monday)
+            const daysToAdd = (8 - firstDayOfWeek) % 7;
+            // Create a new date by adding the days to the first day of the month
+            const firstMondayOfMonth = new Date(dataSelectedYear, month - 1, 1 + daysToAdd);
+            const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
+            if(day >= FirstMondayDate) {
+              return record
+            }
+          }
+          else{
+            return record
+          }
         }
       } else if (dataSelectedYear + 1 === year && month < 9) {
         return record;
@@ -897,9 +928,25 @@ const Parent = () => {
       const submissionDate = new Date(record?.date_submitted);
       const year = submissionDate.getFullYear();
       const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
+      const day = submissionDate.getDate();
       if (dataSelectedYear === year) {
         if ( month >= 9) {
-          return record;
+          if(month == 9){
+            const firstDayOfMonth = new Date(dataSelectedYear, month - 1, 1); // Month is zero-based
+            // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
+            const firstDayOfWeek = firstDayOfMonth.getDay();
+            // Calculate the number of days to add to reach the first Monday (if it's not already Monday)
+            const daysToAdd = (8 - firstDayOfWeek) % 7;
+            // Create a new date by adding the days to the first day of the month
+            const firstMondayOfMonth = new Date(dataSelectedYear, month - 1, 1 + daysToAdd);
+            const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
+            if(day >= FirstMondayDate) {
+              return record
+            }
+          }
+          else{
+            return record
+          }
         }
       } else if (dataSelectedYear + 1 === year && month < 9) {
         return record;
@@ -1415,8 +1462,8 @@ quiz5: 35,
             <thead className="text-xs text-white uppercase bg-[#17026b]  h-32">
               <tr className="items-center">
                 <th scope="col" className="p-3 bg-[#17026b] text-white w-96">Email</th>
-                <th scope="col" className="p-3 bg-[#17026b] text-white w-40">Student AVG</th>
-                <th scope="col" className="p-3 bg-[#17026b] text-white w-40">Effort Score</th>
+                <th scope="col" className="p-3 text-center bg-[#17026b] text-white w-40">Student AVG</th>
+                <th scope="col" className="p-3 text-center bg-[#17026b] text-white w-40">Effort Score</th>
                 {tableHeaders?.map(({ quiz_name }) => (<th scope="col" className="px-6 py-3 bg-[#17026b] text-white w-40">{quiz_name}</th>))}
               </tr>
             </thead>
@@ -1474,7 +1521,7 @@ quiz5: 35,
                 </tr> }
               {Object.keys(users).map((student) => (
                 <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-                  <td class="px-6 py-4 text-center">{users[student][0]?.user_name}</td>
+                  <td class="p-3">{users[student][0]?.user_name}</td>
                   <td className="p-3 text-center">{getStudentaverage(users[student][0]?.user_name)}</td>
                   <td className="p-3 text-center">{getStudentEffort(users[student][0]?.user_name)}</td>
                   {tableHeaders?.map(({ quiz_name }) => (<td class="px-6 py-4 text-white w-8 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
