@@ -1733,7 +1733,7 @@ quiz5: 35,
       <div className="w-full flex justify-start items-center gap-4 flex-row mt-10">
         {/* choose Year dropdown */}
         <div className="grid gap-1">
-          <label htmlFor="">Academice Year</label>
+          <label htmlFor="">Academic Year</label>
           <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
             <li className="mr-3">
               <div className="inline-block relative" ref={dropdownRefYear}>
