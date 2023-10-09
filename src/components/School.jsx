@@ -1164,53 +1164,71 @@ const School = () => {
 
   const UpdateFullNameDB = (e, username ) =>{
     const full_name = e.target.value;
-    const found = allUniqueUsers.filter(item => item.user_name === username);
-    const id = found[0].id;
     const email = localStorage.getItem('userEmail')
-    
-    // for (let i = 0; i < allUniqueUsers.length; i++) {
-    //   if (array[i].id === id) {
-    //     array[i].full_name = full_name;
-    //     break;  // Assuming you only want to update the first occurrence with id
-    //   }
-    // }
-    
-    // let temp = [...allUniqueUsers];
-    // for (let user of temp) {
-    //   if (user.id === id) {
-    //     console.log(user)
-    //     user.full_name = full_name;
-    //     console.log(user)
-    //     break;
-    //   }
-    // }
-    try {
-      const token = localStorage.getItem('token')
-      fetch(testURL + '/updateuser', {
-        method: 'PUT',
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-          "Authorization": token ? `${token}` : null
-        },
-        body: JSON.stringify({
-          full_name,
-          id,
+    const found = allUniqueUsers.filter(item => item.user_name === username);
+    if(found[0]?.id)
+    {
+      const id = found[0]?.id;
+      try {
+        const token = localStorage.getItem('token')
+        fetch(testURL + '/updateuser', {
+          method: 'PUT',
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
+            "Authorization": token ? `${token}` : null
+          },
+          body: JSON.stringify({
+            full_name,
+            id,
+          })
         })
-      })
-        .then(response => {
-          // window.location.reload();
-          const updatedData = allUniqueUsers.map(user => {
-            if (user.id === id) {
-              const modified =  { ...user, full_name: full_name }
-              return modified;
-            }
-            return user;
-          });
-          setallUniqueUsers(updatedData);
+          .then(response => {
+            // window.location.reload();
+            const updatedData = allUniqueUsers.map(user => {
+              if (user.id === id) {
+                const modified =  { ...user, full_name: full_name }
+                return modified;
+              }
+              return user;
+            });
+            setallUniqueUsers(updatedData);
+          })
+      } catch (e) {
+        // setDataLoadin(false)
+      }
+    }
+    else{
+      try {
+        const token = localStorage.getItem('token')
+        fetch(testURL + '/addmissinguser', {
+          method: 'POST',
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
+            "Authorization": token ? `${token}` : null
+          },
+          body: JSON.stringify({
+            full_name,
+            email,
+            user_name : username
+          })
         })
-    } catch (e) {
-      // setDataLoadin(false)
+          .then(response => {
+            // window.location.reload();
+            const updatedData = allUniqueUsers.map(user => {
+              if (user.id === id) {
+                const modified =  { ...user, full_name: full_name }
+                return modified;
+              }
+              return user;
+            });
+            setallUniqueUsers(updatedData);
+          })
+      } catch (e) {
+        // setDataLoadin(false)
+      }
+
     }
   }
 
