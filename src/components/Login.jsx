@@ -35,7 +35,7 @@ const Login = () => {
         // }
       }
   };
-
+  
   const loginService = () => {
     try {
       fetch(TestURL + '/login', {
@@ -53,7 +53,7 @@ const Login = () => {
 
         toast.success("Login successful");
         localStorage.setItem('userEmail', email)
-        localStorage.setItem('Status', response.data[0]?.buy)
+        localStorage.setItem('Status', response.data[0]?.Payment_Status)
         localStorage.setItem('token', response.data[0]?.jwt_token)
         if (selectedButton === "School") {
           navigate("/school-dashboard");

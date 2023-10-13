@@ -1164,53 +1164,71 @@ const School = () => {
 
   const UpdateFullNameDB = (e, username ) =>{
     const full_name = e.target.value;
-    const found = allUniqueUsers.filter(item => item.user_name === username);
-    const id = found[0].id;
     const email = localStorage.getItem('userEmail')
-    
-    // for (let i = 0; i < allUniqueUsers.length; i++) {
-    //   if (array[i].id === id) {
-    //     array[i].full_name = full_name;
-    //     break;  // Assuming you only want to update the first occurrence with id
-    //   }
-    // }
-    
-    // let temp = [...allUniqueUsers];
-    // for (let user of temp) {
-    //   if (user.id === id) {
-    //     console.log(user)
-    //     user.full_name = full_name;
-    //     console.log(user)
-    //     break;
-    //   }
-    // }
-    try {
-      const token = localStorage.getItem('token')
-      fetch(testURL + '/updateuser', {
-        method: 'PUT',
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-          "Authorization": token ? `${token}` : null
-        },
-        body: JSON.stringify({
-          full_name,
-          id,
+    const found = allUniqueUsers.filter(item => item.user_name === username);
+    if(found[0]?.id)
+    {
+      const id = found[0]?.id;
+      try {
+        const token = localStorage.getItem('token')
+        fetch(testURL + '/updateuser', {
+          method: 'PUT',
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
+            "Authorization": token ? `${token}` : null
+          },
+          body: JSON.stringify({
+            full_name,
+            id,
+          })
         })
-      })
-        .then(response => {
-          // window.location.reload();
-          const updatedData = allUniqueUsers.map(user => {
-            if (user.id === id) {
-              const modified =  { ...user, full_name: full_name }
-              return modified;
-            }
-            return user;
-          });
-          setallUniqueUsers(updatedData);
+          .then(response => {
+            // window.location.reload();
+            const updatedData = allUniqueUsers.map(user => {
+              if (user.id === id) {
+                const modified =  { ...user, full_name: full_name }
+                return modified;
+              }
+              return user;
+            });
+            setallUniqueUsers(updatedData);
+          })
+      } catch (e) {
+        // setDataLoadin(false)
+      }
+    }
+    else{
+      try {
+        const token = localStorage.getItem('token')
+        fetch(testURL + '/addmissinguser', {
+          method: 'POST',
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
+            "Authorization": token ? `${token}` : null
+          },
+          body: JSON.stringify({
+            full_name,
+            email,
+            user_name : username
+          })
         })
-    } catch (e) {
-      // setDataLoadin(false)
+          .then(response => {
+            // window.location.reload();
+            const updatedData = allUniqueUsers.map(user => {
+              if (user.id === id) {
+                const modified =  { ...user, full_name: full_name }
+                return modified;
+              }
+              return user;
+            });
+            setallUniqueUsers(updatedData);
+          })
+      } catch (e) {
+        // setDataLoadin(false)
+      }
+
     }
   }
 
@@ -1466,21 +1484,7 @@ const School = () => {
         <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
         <div className="w-full flex justify-start items-center mb-10">
           <div className="w-full flex justify-start items-center gap-4 flex-row mt-6">
-            { (ProductStatus === "true") && (
-              // <div className="grid gap-1 float-right">
-              //   <label htmlFor="">Package</label>
-              //   <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-              //     <li className="mr-3">
-              //       <div className="inline-block relative" >
-              //         <button
-              //           onClick = {ToParentsDashboard}
-              //           className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
-              //           Premium Package
-              //         </button>
-              //       </div>
-              //     </li>
-              //   </ul>
-              // </div>
+            { (ProductStatus === "School - premium") && (
               <div className="grid gap-1">
                 <label htmlFor="">Goto Package</label>
                 <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20 h-16">
