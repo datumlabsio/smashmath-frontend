@@ -1484,21 +1484,7 @@ const School = () => {
         <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
         <div className="w-full flex justify-start items-center mb-10">
           <div className="w-full flex justify-start items-center gap-4 flex-row mt-6">
-            { (ProductStatus === "true") && (
-              // <div className="grid gap-1 float-right">
-              //   <label htmlFor="">Package</label>
-              //   <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
-              //     <li className="mr-3">
-              //       <div className="inline-block relative" >
-              //         <button
-              //           onClick = {ToParentsDashboard}
-              //           className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg ">
-              //           Premium Package
-              //         </button>
-              //       </div>
-              //     </li>
-              //   </ul>
-              // </div>
+            { (ProductStatus === "School - premium") && (
               <div className="grid gap-1">
                 <label htmlFor="">Goto Package</label>
                 <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20 h-16">
