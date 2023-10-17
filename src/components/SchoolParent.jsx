@@ -531,20 +531,20 @@ const SchoolParent = () => {
     console.log(`selectedYear`, yearSelected)
     let filterHeader;
     if(year != "Other"){
-      filterHeader = headers.filter(({ year_name }) => year_name === year)
+      filterHeader = headers?.filter(({ year_name }) => year_name === year)
     }
     else{
-      filterHeader = headers.filter(item => !(item.year_name && item.year_name.includes('Year')))
+      filterHeader = headers?.filter(item => !(item.year_name && item.year_name.includes('Year')))
     }
-    let sortedHeader = filterHeader.sort((a, b) =>  b.week - a.week)
+    let sortedHeader = filterHeader?.sort((a, b) =>  b.week - a.week)
     // console.log('therer------>1Header', filterHeader)
     // sortedHeader = [new Set(sortedHeader)]
-    const ids = sortedHeader.map(o => o.quiz_name)
-    const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1)).sort()
-    const finalHeader = filtered.filter(record => {
-      if (yearSelected === record.year) {
-        if ( record.month >= 9) {
-          if(record.month == 9){
+    const ids = sortedHeader?.map(o => o.quiz_name)
+    // const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1)).sort()
+    const finalHeader = sortedHeader?.filter(record => {
+      if (yearSelected === record?.year) {
+        if ( record?.month >= 9) {
+          if(record?.month == 9){
             const firstDayOfMonth = new Date(yearSelected, record.month - 1, 1); // Month is zero-based
             // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
             const firstDayOfWeek = firstDayOfMonth.getDay();
@@ -553,7 +553,7 @@ const SchoolParent = () => {
             // Create a new date by adding the days to the first day of the month
             const firstMondayOfMonth = new Date(yearSelected, record.month - 1, 1 + daysToAdd);
             const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
-            if(record.day >= FirstMondayDate) {
+            if(record?.day >= FirstMondayDate) {
               return record
             }
           }
@@ -561,12 +561,20 @@ const SchoolParent = () => {
             return record;
           }
         }
-      } else if (yearSelected + 1 === record.year && record.month < 9) {
+      } else if (yearSelected + 1 === record?.year && record?.month < 9) {
         return record;
       }
     })
+    const uniqueQuizNames = finalHeader?.reduce((accumulator, currentObj) => {
+      const quizName = currentObj?.quiz_name;
+      // Check if the quiz_name is not already in the accumulator
+      if (!accumulator.some(obj => obj.quiz_name === quizName)) {
+          accumulator.push(currentObj);
+      }
+      return accumulator;
+    }, []);
     // console.log('therer------>2', filtered)
-    setTableHeaders(finalHeader)
+    setTableHeaders(uniqueQuizNames)
 
     let filterEmailData = data.filter(({ email_address }) => email_address == email)
     let filterFinalData;

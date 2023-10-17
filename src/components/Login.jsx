@@ -51,15 +51,38 @@ const Login = () => {
           return
         }
 
-        toast.success("Login successful");
         localStorage.setItem('userEmail', email)
         localStorage.setItem('Status', response.data[0]?.Payment_Status)
         localStorage.setItem('token', response.data[0]?.jwt_token)
-        if (selectedButton === "School") {
+        if(response.data[0]?.Payment_Status =="School - free" || response.data[0]?.Payment_Status == "School - premium"){
+          toast.success("Login successful");
           navigate("/school-dashboard");
-        } else {
+        }
+        else if(response.data[0]?.Payment_Status == "Yes" ) {
+          toast.success("Login successful");
           navigate("/parent-dashboard");
         }
+        else{
+          toast.error("You do not have an active package to access this.");
+        }
+        // if (selectedButton === "School") {
+        //   if(response.data[0]?.Payment_Status =="School - free" || response.data[0]?.Payment_Status == "School - premium"){
+        //     toast.success("Login successful");
+        //     navigate("/school-dashboard");
+        //   }
+        //   else{
+        //     toast.error("You do not have an active package to access this.");
+        //   }
+        // } 
+        // else {
+        //   if(response.data[0]?.Payment_Status == "Yes" ) {
+        //     toast.success("Login successful");
+        //     navigate("/parent-dashboard");
+        //   }
+        //   else{
+        //     toast.error("You do not have an active package to access this.");
+        //   }
+        // }
       })
     } catch (e) {
       setLoading(false)
@@ -93,7 +116,7 @@ parent using SMASH Maths at Home, choose Parent</span>
           </Link> */}
         </div>
 
-        <div className="flex justify-between border border-[#17026b] my-6 gap-1">
+        {/* <div className="flex justify-between border border-[#17026b] my-6 gap-1">
           <button
             type="button"
             className={`${selectedButton === "School" && 'bg-[#17026b] text-white'}  flex-1  focus:ring-blue-300 font-medium text-sm px-5 py-2.5 focus:outline-none hover:cursor-pointer`}
@@ -108,9 +131,9 @@ parent using SMASH Maths at Home, choose Parent</span>
           >
             Parent
           </button>
-        </div>
+        </div> */}
 
-        <label className="font-semibold text-xs" htmlFor="email">
+        <label className="font-semibold text-xs mt-14" htmlFor="email">
           Email
         </label>
         <input
