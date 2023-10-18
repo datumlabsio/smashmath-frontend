@@ -106,8 +106,7 @@ const Login = () => {
           {/* <Link className="text-[#17026b] font-bold" style={{maxWidth: '15rem'}} to="#">
           If you are a teacher using SMASH Maths at School,If you are a teacher using SMASH Maths at School,If you are a teacher using SMASH Maths at School,If you are a teacher using SMASH Maths at School,
           </Link> */}
-          <span className="mx-2 -text-gray-300" style={{maxWidth: '20rem'}}>If you are a teacher using SMASH Maths at School, choose School. If you are a
-parent using SMASH Maths at Home, choose Parent</span>
+          <span className="mx-2 -text-gray-300" style={{maxWidth: '20rem'}}>Login To continue!!!</span>
           {/* <span className="mx-2 text-gray-300">If you are a teacher using SMASH Maths at School, </span>
 <span className="mx-2 text-gray-300">choose School. If you are a parent using SMASH Maths</span>
 <span className="mx-2 text-gray-300"> at Home, choose Parent</span> */}
