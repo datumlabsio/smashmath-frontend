@@ -531,20 +531,20 @@ const SchoolParent = () => {
     console.log(`selectedYear`, yearSelected)
     let filterHeader;
     if(year != "Other"){
-      filterHeader = headers.filter(({ year_name }) => year_name === year)
+      filterHeader = headers?.filter(({ year_name }) => year_name === year)
     }
     else{
-      filterHeader = headers.filter(item => !(item.year_name && item.year_name.includes('Year')))
+      filterHeader = headers?.filter(item => !(item.year_name && item.year_name.includes('Year')))
     }
-    let sortedHeader = filterHeader.sort((a, b) =>  b.week - a.week)
+    let sortedHeader = filterHeader?.sort((a, b) =>  b.week - a.week)
     // console.log('therer------>1Header', filterHeader)
     // sortedHeader = [new Set(sortedHeader)]
-    const ids = sortedHeader.map(o => o.quiz_name)
-    const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1)).sort()
-    const finalHeader = filtered.filter(record => {
-      if (yearSelected === record.year) {
-        if ( record.month >= 9) {
-          if(record.month == 9){
+    const ids = sortedHeader?.map(o => o.quiz_name)
+    // const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1)).sort()
+    const finalHeader = sortedHeader?.filter(record => {
+      if (yearSelected === record?.year) {
+        if ( record?.month >= 9) {
+          if(record?.month == 9){
             const firstDayOfMonth = new Date(yearSelected, record.month - 1, 1); // Month is zero-based
             // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
             const firstDayOfWeek = firstDayOfMonth.getDay();
@@ -553,7 +553,7 @@ const SchoolParent = () => {
             // Create a new date by adding the days to the first day of the month
             const firstMondayOfMonth = new Date(yearSelected, record.month - 1, 1 + daysToAdd);
             const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
-            if(record.day >= FirstMondayDate) {
+            if(record?.day >= FirstMondayDate) {
               return record
             }
           }
@@ -561,12 +561,20 @@ const SchoolParent = () => {
             return record;
           }
         }
-      } else if (yearSelected + 1 === record.year && record.month < 9) {
+      } else if (yearSelected + 1 === record?.year && record?.month < 9) {
         return record;
       }
     })
+    const uniqueQuizNames = finalHeader?.reduce((accumulator, currentObj) => {
+      const quizName = currentObj?.quiz_name;
+      // Check if the quiz_name is not already in the accumulator
+      if (!accumulator.some(obj => obj.quiz_name === quizName)) {
+          accumulator.push(currentObj);
+      }
+      return accumulator;
+    }, []);
     // console.log('therer------>2', filtered)
-    setTableHeaders(finalHeader)
+    setTableHeaders(uniqueQuizNames)
 
     let filterEmailData = data.filter(({ email_address }) => email_address == email)
     let filterFinalData;
@@ -1453,7 +1461,7 @@ const SchoolParent = () => {
               </li>
             </ul>
             </div> */}
-              <div className="grid gap-1">
+            {/* <div className="grid gap-1">
               <label htmlFor="">Goto Package</label>
               <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20 h-16">
                 <li className="mr-3">
@@ -1507,7 +1515,7 @@ const SchoolParent = () => {
                   </div>
                 </li>
               </ul>
-            </div>
+            </div> */}
           {/* choose teacher dropdown */}
           <div className="grid gap-1">
             <label htmlFor="">Teacher</label>
@@ -2247,8 +2255,6 @@ quiz5: 35,
               </u>
               <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
                 To view your pupils’ data, please choose from the following options from the drop-down buttons.
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                  <strong style={{ fontSize: '16px' }}>Package:- </strong> – Free Package if your school is signed up to Free Practices (6 questions a week, published during school term time only) or Premium Practices (20+ questions a week, published every week of the calendar year).</Typography>
                 <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
                   <strong style={{ fontSize: '16px' }}>Teacher:– </strong> Choose the teacher at your school for whom you would like to view the pupils’ results.</Typography>
                 <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>

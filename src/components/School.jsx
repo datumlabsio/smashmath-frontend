@@ -595,14 +595,13 @@ const School = () => {
     setDataSelectedYear(yearData)
 
     const yearSelected = yearData;
-
-    let filterHeader = headers.filter(({ year_name }) => year_name === year)
+    let filterHeader = headers.filter(({ year_name }) => year_name == year)
     let sortedHeader = filterHeader.sort((a, b) =>  b.week - a.week)
-    // console.log('therer------>1Header', filterHeader)
     // sortedHeader = [new Set(sortedHeader)]
     const ids = sortedHeader.map(o => o.quiz_name)
     const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
-    const finalHeader = filtered.filter(record => {
+    console.log(`filtered`, filtered)
+    const finalHeader = sortedHeader.filter(record => {
       if (yearSelected === record.year) {
         if ( record.month >= 9) {
           if(record.month == 9){
@@ -626,8 +625,17 @@ const School = () => {
         return record;
       }
     })
-    console.log('therer------>2', finalHeader)
-    setTableHeaders(finalHeader)
+    // Get Unique Quiz name from records
+    const uniqueQuizNames = finalHeader.reduce((accumulator, currentObj) => {
+      const quizName = currentObj.quiz_name;
+      // Check if the quiz_name is not already in the accumulator
+      if (!accumulator.some(obj => obj.quiz_name === quizName)) {
+          accumulator.push(currentObj);
+      }
+      return accumulator;
+    }, []);
+    // console.log('therer------>2', uniqueQuizNames)
+    setTableHeaders(uniqueQuizNames)
 
     let filterEmailData = data.filter(({ email_address }) => email_address == email)
     // console.log(`teacher Data in Quiz Dashboard`, filterEmailData);
@@ -1024,6 +1032,7 @@ const School = () => {
 
   const getMarks = (key, name) => {
     let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
+    console.log(`student obje`,users[key],name)
     // if(name == 'Year 6 - SP 2023 Summer Term Week 02') console.log(`Why Not Display`, obj)
     return obj ? obj?.percentage_score > 0 ? obj?.percentage_score.toFixed(1) : '' : ''
   }
@@ -1110,6 +1119,7 @@ const School = () => {
         return record;
       }
     });
+    console.log(`Result Set`,finalData)
     if(finalData?.length === 0) return '-';
     // Calculate the effort score for the student user_name
     // Filter Object with unique user_name and quiz_name
@@ -1121,6 +1131,7 @@ const School = () => {
       return acc;
     }, {});
     let filteredData = Object.values(uniqueObjectsById);
+    console.log("My Effort ", filteredData)
     filteredData = filteredData?.filter(item => item?.percentage_score > 0)
     const totalQuizzes = filteredData?.length;
     let completedQuizzes = filteredData?.filter(item => item?.status === 'submitted')?.length;
@@ -1484,7 +1495,7 @@ const School = () => {
         <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
         <div className="w-full flex justify-start items-center mb-10">
           <div className="w-full flex justify-start items-center gap-4 flex-row mt-6">
-            { (ProductStatus === "School - premium") && (
+            {/* { (ProductStatus === "School - premium") && (
               <div className="grid gap-1">
                 <label htmlFor="">Goto Package</label>
                 <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20 h-16">
@@ -1540,7 +1551,7 @@ const School = () => {
                   </li>
                 </ul>
               </div>
-            )}
+            )} */}
             {/* choose teacher dropdown */}
             <div className="grid gap-1">
               <label htmlFor="">Teacher</label>
@@ -2108,8 +2119,6 @@ const School = () => {
               </u>
               <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
                 To view your pupils’ data, please choose from the following options from the drop-down buttons.
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                  <strong style={{ fontSize: '16px' }}>Package:- </strong> – Free Package if your school is signed up to Free Practices (6 questions a week, published during school term time only) or Premium Practices (20+ questions a week, published every week of the calendar year).</Typography>
                 <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
                   <strong style={{ fontSize: '16px' }}>Teacher:– </strong> Choose the teacher at your school for whom you would like to view the pupils’ results.</Typography>
                 <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
