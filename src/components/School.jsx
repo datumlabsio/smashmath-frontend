@@ -1495,7 +1495,7 @@ const School = () => {
         <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
         <div className="w-full flex justify-start items-center mb-10">
           <div className="w-full flex justify-start items-center gap-4 flex-row mt-6">
-            { (ProductStatus === "School - premium") && (
+            {/* { (ProductStatus === "School - premium") && (
               <div className="grid gap-1">
                 <label htmlFor="">Goto Package</label>
                 <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20 h-16">
@@ -1551,7 +1551,7 @@ const School = () => {
                   </li>
                 </ul>
               </div>
-            )}
+            )} */}
             {/* choose teacher dropdown */}
             <div className="grid gap-1">
               <label htmlFor="">Teacher</label>
@@ -2119,8 +2119,6 @@ const School = () => {
               </u>
               <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
                 To view your pupils’ data, please choose from the following options from the drop-down buttons.
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                  <strong style={{ fontSize: '16px' }}>Package:- </strong> – Free Package if your school is signed up to Free Practices (6 questions a week, published during school term time only) or Premium Practices (20+ questions a week, published every week of the calendar year).</Typography>
                 <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
                   <strong style={{ fontSize: '16px' }}>Teacher:– </strong> Choose the teacher at your school for whom you would like to view the pupils’ results.</Typography>
                 <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>

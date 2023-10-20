@@ -1461,7 +1461,7 @@ const SchoolParent = () => {
               </li>
             </ul>
             </div> */}
-              <div className="grid gap-1">
+            {/* <div className="grid gap-1">
               <label htmlFor="">Goto Package</label>
               <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20 h-16">
                 <li className="mr-3">
@@ -1515,7 +1515,7 @@ const SchoolParent = () => {
                   </div>
                 </li>
               </ul>
-            </div>
+            </div> */}
           {/* choose teacher dropdown */}
           <div className="grid gap-1">
             <label htmlFor="">Teacher</label>
@@ -2255,8 +2255,6 @@ quiz5: 35,
               </u>
               <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
                 To view your pupils’ data, please choose from the following options from the drop-down buttons.
-                <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
-                  <strong style={{ fontSize: '16px' }}>Package:- </strong> – Free Package if your school is signed up to Free Practices (6 questions a week, published during school term time only) or Premium Practices (20+ questions a week, published every week of the calendar year).</Typography>
                 <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>
                   <strong style={{ fontSize: '16px' }}>Teacher:– </strong> Choose the teacher at your school for whom you would like to view the pupils’ results.</Typography>
                 <Typography variant="h6" component="h6" sx={{color: 'black', margin:'2px'}}>

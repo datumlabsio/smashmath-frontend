@@ -54,9 +54,13 @@ const Login = () => {
         localStorage.setItem('userEmail', email)
         localStorage.setItem('Status', response.data[0]?.Payment_Status)
         localStorage.setItem('token', response.data[0]?.jwt_token)
-        if(response.data[0]?.Payment_Status =="School - free" || response.data[0]?.Payment_Status == "School - premium"){
+        if(response.data[0]?.Payment_Status =="School - free"){
           toast.success("Login successful");
           navigate("/school-dashboard");
+        }
+        else if(response.data[0]?.Payment_Status == "School - premium") {
+          toast.success("Login successful");
+          navigate("/extra-dashboard");
         }
         else if(response.data[0]?.Payment_Status == "Yes" ) {
           toast.success("Login successful");
