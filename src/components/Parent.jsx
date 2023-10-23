@@ -193,8 +193,9 @@ const Parent = () => {
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isChildOpen, setIsChildOpen] = useState(false);
   const [selectedChild, setSelectedChild] = useState("");
-  const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app'
-  const testURL = 'https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api'
+  // const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app'
+  // const testURL = 'https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api'
+  const testURL = import.meta.env.MODE === 'development' ? import.meta.env.VITE_REACT_APP_API_BASE_URL_DEV : import.meta.env.VITE_REACT_APP_API_BASE_URL_PRD;
 
 
   const [isTimeFrameOpen, setIsTimeFrameOpen] = useState(false);

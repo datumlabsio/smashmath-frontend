@@ -181,8 +181,9 @@ const School = () => {
   const [isChildOpen, setIsChildOpen] = useState(false);
   const [selectedChild, setSelectedChild] = useState("");
   const [isDataYearOpen, setIsDataYearOpen] = useState();
-  const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app';
-  const testURL = 'https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api'
+  // const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app';
+  // const testURL = 'https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api'
+  const testURL = import.meta.env.MODE === 'development' ? import.meta.env.VITE_REACT_APP_API_BASE_URL_DEV : import.meta.env.VITE_REACT_APP_API_BASE_URL_PRD;
 
   const [isTimeFrameOpen, setIsTimeFrameOpen] = useState(false);
   const [isChildOpen2, setIsChildOpen2] = useState(false);
@@ -1492,6 +1493,8 @@ const School = () => {
         {/* main bar ends */}
         {/* ----------------------------------------------------------- */}
         {/* filter bar starts here */}
+        <h4 className="ml-[380px] text-[#17026b] items-center font-bold text-xl">ANALYTICS Console - Free Schools Package</h4>
+        <p className="ml-[360px] text-[#17026b] items-center text-xl">To upgrade to Premium Schools Package, please <a href="https://www.smashmaths.org/smash-maths-for-schools-premium-spiral-maths-package/" target="_blank" className="text-xl underline">click here</a></p>
         <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
         <div className="w-full flex justify-start items-center mb-10">
           <div className="w-full flex justify-start items-center gap-4 flex-row mt-6">
