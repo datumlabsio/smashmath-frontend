@@ -1442,7 +1442,10 @@ const SchoolParent = () => {
 
       {/* ----------------------------------------------------------- */}
       {/* filter bar starts here */}
-      <h4 className="ml-[360px] text-[#17026b] items-center font-bold text-xl">ANALYTICS Console - Premium Schools Package</h4>
+      
+      <div className="flex items-center justify-center">
+        <h4 className="text-[#17026b] items-center font-bold text-xl">ANALYTICS Console - Premium Schools Package</h4>
+      </div>
       <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
       <div className="w-full flex justify-start items-center">
         <div className="w-full flex justify-start items-center gap-4 flex-row mt-1">

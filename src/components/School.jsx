@@ -1493,8 +1493,11 @@ const School = () => {
         {/* main bar ends */}
         {/* ----------------------------------------------------------- */}
         {/* filter bar starts here */}
-        <h4 className="ml-[380px] text-[#17026b] items-center font-bold text-xl">ANALYTICS Console - Free Schools Package</h4>
-        <p className="ml-[360px] text-[#17026b] items-center text-xl">To upgrade to Premium Schools Package, please <a href="https://www.smashmaths.org/smash-maths-for-schools-premium-spiral-maths-package/" target="_blank" className="text-xl underline">click here</a></p>
+        <div className="flex flex-col items-center justify-center">
+          <h4 className="text-[#17026b] font-bold text-xl">ANALYTICS Console - Free Schools Package</h4>
+          <p className="text-[#17026b] text-xl">To upgrade to Premium Schools Package, please <a href="https://www.smashmaths.org/smash-maths-for-schools-premium-spiral-maths-package/" target="_blank" className="text-xl underline">click here</a></p>
+        </div>
+        {/* <h4 className="ml-[380px] text-[#17026b] items-center font-bold text-xl">ANALYTICS Console - Free Schools Package</h4> */}
         <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
         <div className="w-full flex justify-start items-center mb-10">
           <div className="w-full flex justify-start items-center gap-4 flex-row mt-6">
