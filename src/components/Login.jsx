@@ -4,14 +4,18 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { CustomLoader } from "../components/Loader";
 
+// const TestURL = `${process.env.REACT_APP_API_BASE_URL}`;
+
 const Login = () => {
+  const TestURL = import.meta.env.MODE === 'development' ? import.meta.env.VITE_REACT_APP_API_BASE_URL_DEV : import.meta.env.VITE_REACT_APP_API_BASE_URL_PRD;
+  console.log(TestURL)
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [selectedButton, setSelectedButton] = useState("School");
   const [showPassword, setShowPassword] = useState(false);
   // const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app'
-  const TestURL = "https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api"
+  // const TestURL = "https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api"
   const [loading, setLoading] = useState(false)
 
 

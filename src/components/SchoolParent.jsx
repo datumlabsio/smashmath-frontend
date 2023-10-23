@@ -193,8 +193,9 @@ const SchoolParent = () => {
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isChildOpen, setIsChildOpen] = useState(false);
   const [selectedChild, setSelectedChild] = useState("");
-  const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app';
-  const testURL = 'https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api'
+  // const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app';
+  // const testURL = 'https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api'
+  const testURL = import.meta.env.MODE === 'development' ? import.meta.env.VITE_REACT_APP_API_BASE_URL_DEV : import.meta.env.VITE_REACT_APP_API_BASE_URL_PRD;
 
   const [isTimeFrameOpen, setIsTimeFrameOpen] = useState(false);
   const [isChildOpen2, setIsChildOpen2] = useState(false);
@@ -1441,9 +1442,8 @@ const SchoolParent = () => {
 
       {/* ----------------------------------------------------------- */}
       {/* filter bar starts here */}
-      
+      <h4 className="ml-[550px] text-[#17026b] items-center font-bold text-xl">ANALYSIS</h4>
       <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
-      
       <div className="w-full flex justify-start items-center">
         <div className="w-full flex justify-start items-center gap-4 flex-row mt-1">
             {/* Button  */}
