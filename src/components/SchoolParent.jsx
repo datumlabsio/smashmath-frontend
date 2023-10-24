@@ -445,50 +445,54 @@ const SchoolParent = () => {
   }, [])
 
   useEffect(() => {
-    try {
-      const token = localStorage.getItem('token')
-      const email = selectedTeacher;
-      fetch(testURL + '/user', {
-        method: 'POST',
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-          "Authorization": token ? `${token}` : null
-        },
-        body: JSON.stringify({
-          email
+    const email = selectedTeacher;
+    if(email){
+      try {
+        const token = localStorage.getItem('token')
+        fetch(testURL + '/user', {
+          method: 'POST',
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
+            "Authorization": token ? `${token}` : null
+          },
+          body: JSON.stringify({
+            email
+          })
         })
-      })
-        .then(response => response.json())
-        .then(response => {
-          setallUniqueUsers(response.data)
-        })
-    } catch (e) {
+          .then(response => response.json())
+          .then(response => {
+            setallUniqueUsers(response.data)
+          })
+      } catch (e) {
+      }
     }
   }, [selectedTeacher])
 
   // Get User's Data For Charts from DB
   useEffect(() => {
-    try {
-      const token = localStorage.getItem('token')
-      const email = selectedReChartTeacher;
-      fetch(testURL + '/user', {
-        method: 'POST',
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-          "Authorization": token ? `${token}` : null
-        },
-        body: JSON.stringify({
-          email
+    const email = selectedReChartTeacher;
+    if(email){
+      try {
+        const token = localStorage.getItem('token')
+        fetch(testURL + '/user', {
+          method: 'POST',
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Content-Type": "application/json",
+            "Authorization": token ? `${token}` : null
+          },
+          body: JSON.stringify({
+            email
+          })
         })
-      })
-        .then(response => response.json())
-        .then(response => {
-          setallUniqueChartUsers(response.data)
-        })
-    } catch (e) {
-      // setDataLoadin(false)
+          .then(response => response.json())
+          .then(response => {
+            setallUniqueChartUsers(response.data)
+          })
+      } catch (e) {
+        // setDataLoadin(false)
+      }
     }
   }, [selectedReChartTeacher])
 
