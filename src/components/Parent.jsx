@@ -482,7 +482,7 @@ const Parent = () => {
 
   }, [])
 
-    // Rolling Averages API
+    //  Rolling Averages API
     useEffect(() => {
       setDataLoadin(true)
       const username = localStorage.getItem('userEmail')
