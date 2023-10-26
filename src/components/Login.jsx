@@ -220,7 +220,6 @@ const Login = () => {
             Sign Up
           </Link> */}
         </div>
-        <h1>Kasa?</h1>
       </form>
     </div>
   );
