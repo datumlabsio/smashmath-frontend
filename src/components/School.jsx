@@ -476,36 +476,10 @@ const School = () => {
   // Get User's Data from DB
   useEffect(() => {
     // setDataLoadin(true)
-    try {
-      const token = localStorage.getItem('token')
-      const email = selectedTeacher;
-      fetch(testURL + '/user', {
-        method: 'POST',
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-          "Authorization": token ? `${token}` : null
-        },
-        body: JSON.stringify({
-          email
-        })
-      })
-        .then(response => response.json())
-        .then(response => {
-          setallUniqueUsers(response.data)
-          // setDataLoadin(false)
-        })
-    } catch (e) {
-      // setDataLoadin(false)
-    }
-  }, [selectedTeacher])
-
-    // Get User's Data For Charts from DB
-    useEffect(() => {
-      // setDataLoadin(true)
+    const email = selectedTeacher;
+    if(email){
       try {
         const token = localStorage.getItem('token')
-        const email = selectedReChartTeacher;
         fetch(testURL + '/user', {
           method: 'POST',
           headers: {
@@ -519,11 +493,41 @@ const School = () => {
         })
           .then(response => response.json())
           .then(response => {
-            setallUniqueChartUsers(response.data)
+            setallUniqueUsers(response.data)
             // setDataLoadin(false)
           })
       } catch (e) {
         // setDataLoadin(false)
+      }
+    }
+  }, [selectedTeacher])
+
+    // Get User's Data For Charts from DB
+    useEffect(() => {
+      const email = selectedReChartTeacher;
+      // setDataLoadin(true)
+      if(email){
+        try {
+          const token = localStorage.getItem('token')
+          fetch(testURL + '/user', {
+            method: 'POST',
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Content-Type": "application/json",
+              "Authorization": token ? `${token}` : null
+            },
+            body: JSON.stringify({
+              email
+            })
+          })
+            .then(response => response.json())
+            .then(response => {
+              setallUniqueChartUsers(response.data)
+              // setDataLoadin(false)
+            })
+        } catch (e) {
+          // setDataLoadin(false)
+        }
       }
     }, [selectedReChartTeacher])
 
@@ -2180,3 +2184,14 @@ const School = () => {
 };
 
 export default School;
+
+
+
+
+// "type": "module",
+//   "scripts": {
+//     "dev": "vite --host 0.0.0.0 --port 8080",
+//     "build": "vite build",
+//     "preview": "vite preview",
+//     "start": "vite preview --host 0.0.0.0 --port 8081"
+//   },

@@ -3,9 +3,7 @@ on:
   push:
     branches:
       - dev
-
 jobs:
-
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -27,12 +25,17 @@ jobs:
         # connection timeout to remote host
         connect_timeout: 30
         # execute commands on ssh
+        
+        
+
+        # rm -rf dev.smashmath-frontend
+        # git clone https://github.com/TechLev/smashmath-frontend dev.smashmath-frontend
+        # git checkout dev
+        
         script: |
           cd /root/
-          rm -rf dev.smashmath-frontend
-          git clone https://github.com/TechLev/smashmath-frontend dev.smashmath-frontend
           cd dev.smashmath-frontend
-          git checkout dev
+          git pull
           npm install --include=dev
           pm2 stop dev; pm2 start 'npm run dev' --name dev
 

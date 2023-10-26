@@ -482,16 +482,17 @@ const Parent = () => {
 
   }, [])
 
-    // Rolling Averages API
+    //  Rolling Averages API
     useEffect(() => {
       setDataLoadin(true)
+      const username = localStorage.getItem('userEmail')
       const year = rechartSelectedYear || rechartYearList[rechartYearList.length - 1]
       const year_name =  selectedReChartTeacher || '';
       // const username = rechartSelectedStudent || "";
       const type = "parent";
-      let payload = { year, type };
+      let payload = { year, type, username };
       if (year_name != "") {
-        payload = { year, year_name, type };
+        payload = { year, year_name, type, username };
       }
       try {
         const token = localStorage.getItem('token')
