@@ -35,7 +35,7 @@ jobs:
         script: |
           cd /root/
           cd dev.smashmath-frontend
-          git origin dev
+          git pull
           npm install --include=dev
           pm2 stop dev; pm2 start 'npm run dev' --name dev
 
