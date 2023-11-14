@@ -312,7 +312,7 @@ const SchoolParent = () => {
     // applyFilter ( childName, selectedChartTeacher, chartSelectedStudent)
   }
   useEffect(() => {
-    // Get the current year
+    // Get the current yearallUniqueChartUsers
     const currentYear = new Date().getFullYear();
     // Set the start year
     let year = 2021;
@@ -1171,29 +1171,12 @@ const SchoolParent = () => {
   
   const UpdateFullName = (e, username ) =>{
     const full_name = e.target.value;
-    const found = allUniqueUsers.filter(item => item.user_name === username);
-    const id = found[0].id;
+    // const found = allUniqueUsers.filter(item => item.user_name === username);
+    // const id = found[0].id;
     const email = localStorage.getItem('userEmail')
-    
-    // for (let i = 0; i < allUniqueUsers.length; i++) {
-    //   if (array[i].id === id) {
-    //     array[i].full_name = full_name;
-    //     break;  // Assuming you only want to update the first occurrence with id
-    //   }
-    // }
-    
-    // let temp = [...allUniqueUsers];
-    // for (let user of temp) {
-    //   if (user.id === id) {
-    //     console.log(user)
-    //     user.full_name = full_name;
-    //     console.log(user)
-    //     break;
-    //   }
-    // }
 
     const updatedData = allUniqueUsers.map(user => {
-      if (user.id === id) {
+      if (user.user_name === username) {
         const modified =  { ...user, full_name: full_name }
         return modified;
       }
@@ -1204,26 +1187,9 @@ const SchoolParent = () => {
 
   const UpdateFullNameDB = (e, username ) =>{
     const full_name = e.target.value;
-    const found = allUniqueUsers.filter(item => item.user_name === username);
-    const id = found[0].id;
+    // const found = allUniqueUsers.filter(item => item.user_name === username);
+    // const userName = found[0].username;
     const email = localStorage.getItem('userEmail')
-    
-    // for (let i = 0; i < allUniqueUsers.length; i++) {
-    //   if (array[i].id === id) {
-    //     array[i].full_name = full_name;
-    //     break;  // Assuming you only want to update the first occurrence with id
-    //   }
-    // }
-    
-    // let temp = [...allUniqueUsers];
-    // for (let user of temp) {
-    //   if (user.id === id) {
-    //     console.log(user)
-    //     user.full_name = full_name;
-    //     console.log(user)
-    //     break;
-    //   }
-    // }
     try {
       const token = localStorage.getItem('token')
       fetch(testURL + '/updateuser', {
@@ -1235,13 +1201,14 @@ const SchoolParent = () => {
         },
         body: JSON.stringify({
           full_name,
-          id,
+          user_name: username,
+          email
         })
       })
         .then(response => {
           // window.location.reload();
           const updatedData = allUniqueUsers.map(user => {
-            if (user.id === id) {
+            if (user.user_name === username) {
               const modified =  { ...user, full_name: full_name }
               return modified;
             }
@@ -1255,6 +1222,7 @@ const SchoolParent = () => {
   }
   const getFullName = (username) => {
     const found = allUniqueUsers.filter(item => item.user_name == username)
+    console.log(username, found)
     return found[0]?.full_name == username ? "" :  found[0]?.full_name
   }
   const getStudentName = (username) =>{
