@@ -379,11 +379,11 @@ const SchoolParent = () => {
         .then(response => {
           const quizes = response?.quizes || [[]]
           setQuizesData(quizes)
-          const teacherFilters = quizes.map(x => x.email_address)
-          let yearsFilters = quizes.map(x => x.year_name)
-          yearsFilters = yearsFilters.filter(item => item.includes('Year'))
+          const teacherFilters = quizes?.map(x => x?.email_address)
+          let yearsFilters = quizes?.map(x => x?.year_name)
+          yearsFilters = yearsFilters?.filter(item => item?.includes('Year'))
           const uniqueTeacherFilters = [...new Set(teacherFilters)]
-          let uniqueYearsFilters = [...new Set(yearsFilters)].sort()
+          let uniqueYearsFilters = [...new Set(yearsFilters)]?.sort()
           uniqueYearsFilters.push("Other")
           setTeacherFilter(uniqueTeacherFilters)
           setYearFilter(uniqueYearsFilters)

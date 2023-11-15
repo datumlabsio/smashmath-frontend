@@ -416,8 +416,8 @@ const Parent = () => {
           })
           let yearsFilters = quizes.map(x => x.year_name)
           const teacherFilters = quizes?.map(x => x.user_name)
-          yearsFilters = yearsFilters.filter(item => item.includes('Year'))
-          const uniqueYearsFilters = [...new Set(yearsFilters)].sort()
+          yearsFilters = yearsFilters?.filter(item => item?.includes('Year'))
+          const uniqueYearsFilters = [...new Set(yearsFilters)]?.sort()
           const uniqueTeacherFilters = [...new Set(teacherFilters)]
           setYearFilter(uniqueYearsFilters)
           setChartTeacherList(uniqueTeacherFilters)

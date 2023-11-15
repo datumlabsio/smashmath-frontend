@@ -411,8 +411,8 @@ const School = () => {
           setQuizesData(quizes)
           const teacherFilters = quizes.map(x => x.email_address)
           let yearsFilters = quizes.map(x => x.year_name)
-          const studentFilters = quizes.map(({date_submitted,user_name, email_address, percentage_score}) => ({date_submitted,user_name, email_address, percentage_score}))
-          yearsFilters = yearsFilters.filter(item => item.includes('Year'))
+          const studentFilters = quizes?.map(({date_submitted,user_name, email_address, percentage_score}) => ({date_submitted,user_name, email_address, percentage_score}))
+          yearsFilters = yearsFilters?.filter(item => item?.includes('Year'))
 
           const uniqueTeacherFilters = [...new Set(teacherFilters)]
           const uniqueYearsFilters = [...new Set(yearsFilters)].sort()
@@ -603,8 +603,8 @@ const School = () => {
     let filterHeader = headers.filter(({ year_name }) => year_name == year)
     let sortedHeader = filterHeader.sort((a, b) =>  b.week - a.week)
     // sortedHeader = [new Set(sortedHeader)]
-    const ids = sortedHeader.map(o => o.quiz_name)
-    const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
+    const ids = sortedHeader?.map(o => o.quiz_name)
+    const filtered = filterHeader?.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
     console.log(`filtered`, filtered)
     const finalHeader = sortedHeader.filter(record => {
       if (yearSelected === record.year) {
