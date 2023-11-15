@@ -1124,7 +1124,6 @@ const School = () => {
         return record;
       }
     });
-    console.log(`Result Set`,finalData)
     if(finalData?.length === 0) return '-';
     // Calculate the effort score for the student user_name
     // Filter Object with unique user_name and quiz_name
@@ -1541,7 +1540,7 @@ const School = () => {
                             <>
                               <li
                                 className={
-                                  index !== childName.length - 1
+                                  index !== childName?.length - 1
                                     ? "border-b border-slate-400 cursor-pointer"
                                     : "cursor-pointer"
 
@@ -1598,7 +1597,7 @@ const School = () => {
                             <>
                               <li
                                 className={
-                                  index !== childName.length - 1
+                                  index !== childName?.length - 1
                                     ? "border-b border-slate-400 cursor-pointer"
                                     : "cursor-pointer"
 
@@ -1656,7 +1655,7 @@ const School = () => {
                               <>
                                 <li
                                   className={
-                                    index !== childName.length - 1
+                                    index !== childName?.length - 1
                                       ? "border-b border-slate-400 cursor-pointer"
                                       : "cursor-pointer"
 
@@ -1777,11 +1776,11 @@ const School = () => {
                       </>
                     ) : (
                       <>
-                        {averages.map(
+                        {averages?.map(
                           (average, index) =>
-                            data.some((student) => student[`quiz${index + 1}`]) && (
+                            data?.some((student) => student[`quiz${index + 1}`]) && (
                               <td className="p-3 text-center">
-                                {average.toFixed(2)}
+                                {average?.toFixed(2)}
                               </td>
                             )
                         )}
@@ -1825,14 +1824,14 @@ const School = () => {
                       </>
                     )}
                   </tr>
-                  {Object.keys(users)?.length === 0 && 
+                  {Object?.keys(users)?.length === 0 && 
                   <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
                     {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
                     <td className="p-5 text-center w-98s" rowSpan='3'></td> 
                     <td className="p-5 text-center w-98s" rowSpan='3'>No Data Avaiable.</td> 
                     <td className="p-5 text-center w-98s" rowSpan='3'></td>                  
                   </tr> }
-                  {Object.keys(users).map((student) => (
+                  {Object?.keys(users)?.map((student) => (
                     <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
                       <td className="p-3">{users[student][0]?.user_name}</td>
                       <td className="p-3"><input value={getFullName(users[student][0]?.user_name)} className="h-8 placeholder-red-600" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, users[student][0]?.user_name)} onBlur={(e) => UpdateFullNameDB(e, users[student][0]?.user_name)}/></td>
@@ -1963,7 +1962,7 @@ const School = () => {
                           <>
                             <li
                               className={
-                                index !== childName.length - 1
+                                index !== childName?.length - 1
                                   ? "border-b border-slate-400 cursor-pointer"
                                   : "cursor-pointer"
                               }
@@ -2018,7 +2017,7 @@ const School = () => {
                           <>
                             <li
                               className={
-                                index !== childName.length - 1
+                                index !== childName?.length - 1
                                   ? "border-b border-slate-400 cursor-pointer"
                                   : "cursor-pointer"
                               }
