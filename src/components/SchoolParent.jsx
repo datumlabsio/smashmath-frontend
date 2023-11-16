@@ -377,17 +377,33 @@ const SchoolParent = () => {
       })
         .then(response => response.json())
         .then(response => {
-          const quizes = response?.quizes || [[]]
+          let quizes = response?.quizes || [[]]
+          // quizes = quizes?.map((obj, index) => ({
+          //   attributes_properties: obj.attributes_properties,
+          //   child_name: obj.child_name,
+          //   date_submitted: '2023-10-12',
+          //   user_name: obj.user_name ? obj.user_name : obj.mu_user_name,
+          //   email_address: obj.email_address ? obj.email_address : obj.mu_email_address,
+          //   full_name: obj.full_name,
+          //   mu_email_address: obj.mu_email_address,
+          //   mu_user_name: obj.mu_user_name,
+          //   percentage_score: obj.percentage_score ? obj.percentage_score : 0,
+          //   quiz_name: obj.quiz_name,
+          //   school_name_capital: obj.school_name_capital,
+          //   school_name_small: obj.school_name_small,
+          //   status: 'submitted',
+          //   year_name: obj.year_name
+          // }))
           setQuizesData(quizes)
           const teacherFilters = quizes?.map(x => x?.email_address)
           let yearsFilters = quizes?.map(x => x?.year_name)
           yearsFilters = yearsFilters?.filter(item => item?.includes('Year'))
-          const uniqueTeacherFilters = [...new Set(teacherFilters)]
+          let uniqueTeacherFilters = [...new Set(teacherFilters)]
+          uniqueTeacherFilters = uniqueTeacherFilters.filter(value => value !== null)
           let uniqueYearsFilters = [...new Set(yearsFilters)]?.sort()
           uniqueYearsFilters.push("Other")
           setTeacherFilter(uniqueTeacherFilters)
           setYearFilter(uniqueYearsFilters)
-
           setChartTeacherList(uniqueTeacherFilters)
           setReChartTeacherList(uniqueTeacherFilters)
 
@@ -399,7 +415,6 @@ const SchoolParent = () => {
           });
           const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
           setChartYearList(sortedUniqueYears);
-          console.log(`Filtered yearssss` , sortedUniqueYears)
 
           // console.log('bilal--->',"Year 4 - SP Autumn Term Week 14 - Christmas Practice 01"?.match(/WEEK (\d+)$/i)[1])
           let arr = "Year 4 - SP Autumn Term Week 14 - Christmas Practice 01".split(' ')
@@ -533,13 +548,12 @@ const SchoolParent = () => {
     setSelectedTeacher(email)
     setDataSelectedYear(yearData)
     const yearSelected = yearData;
-    console.log(`selectedYear`, yearSelected)
     let filterHeader;
     if(year != "Other"){
       filterHeader = headers?.filter(({ year_name }) => year_name === year)
     }
     else{
-      filterHeader = headers?.filter(item => !(item.year_name && item?.year_name?.includes('Year')))
+      filterHeader = headers?.filter(item => !(item?.year_name && item?.year_name?.includes('Year')))
     }
     let sortedHeader = filterHeader?.sort((a, b) =>  b.week - a.week)
     // console.log('therer------>1Header', filterHeader)
@@ -572,14 +586,16 @@ const SchoolParent = () => {
     })
     const uniqueQuizNames = finalHeader?.reduce((accumulator, currentObj) => {
       const quizName = currentObj?.quiz_name;
-      // Check if the quiz_name is not already in the accumulator
+      // Check if the quiz_name is not already in the list
       if (!accumulator.some(obj => obj.quiz_name === quizName)) {
           accumulator.push(currentObj);
       }
       return accumulator;
     }, []);
     // console.log('therer------>2', filtered)
+    
     setTableHeaders(uniqueQuizNames)
+
 
     let filterEmailData = data?.filter(({ email_address }) => email_address == email)
     let filterFinalData;
@@ -638,8 +654,7 @@ const SchoolParent = () => {
     // Calculate Class average Avg
     const sum = filteredRecords.reduce((accumulator, currentObj) => accumulator + currentObj?.percentage_score, 0);
     const AVG = (sum / (filteredRecords?.length *100)) * 100;
-    setClassAverageAVG( AVG ? `${AVG?.toFixed(1)} %`: "-") 
-    console.log(`Filtered Data`,filteredRecords)
+    setClassAverageAVG( AVG ? `${AVG?.toFixed(1)} %`: "-")
 
     const ordered = Object?.keys(usersObject)?.sort()?.reduce(
       (obj, key) => {
@@ -855,7 +870,6 @@ const SchoolParent = () => {
     const studentAvg = DataToArrayOfMonths(filteredStudentDataByOneQuiz);
 
     const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
-    console.log(`Quzies` , filteredClassData )
     setFilteredChartData(ToSingleObj);
   }
   const DataToArrayOfMonths = (data) =>{
@@ -1108,13 +1122,13 @@ const SchoolParent = () => {
     }, {});
     const filteredData = Object.values(uniqueObjectsById);
     const sumOfAllQuizes = filteredData.reduce((acc, item) => acc + item['percentage_score'], 0)
-    console.log(`Data Avg`,sumOfAllQuizes, filteredData?.length)
     return filteredData?.length === 0 ? '-' : `${(sumOfAllQuizes / filteredData?.length).toFixed(1)} %`;
   }
 
-  const getMarks = (key, name) => {
-    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
-    return obj ? `${obj.percentage_score.toFixed(1)} %` : ''
+  const getMarks = (user_name, quiz_name) => {
+    let obj = quizesData?.filter((item) => item.user_name === user_name && item.quiz_name === quiz_name && item.email_address == selectedTeacher)
+    if(obj?.length === 0) return ''
+    return obj != undefined ? `${obj[0]?.percentage_score?.toFixed(1)} %` : ''
   }
 
   const getStudentaverage = (student) =>{
@@ -1221,7 +1235,6 @@ const SchoolParent = () => {
   }
   const getFullName = (username) => {
     const found = allUniqueUsers?.filter(item => item.user_name == username)
-    console.log(username, found)
     return found[0]?.full_name == username ? "" :  found[0]?.full_name
   }
   const getStudentName = (username) =>{
@@ -1238,10 +1251,10 @@ const SchoolParent = () => {
   const getStudentEffort = (student) =>{
     let studentData = [];
     if(selectedYear != "Other"){
-      studentData = quizesData?.filter(item => item.user_name === student && item.year_name === selectedYear && item.percentage_score > 0);
+      studentData = quizesData?.filter(item => item.user_name === student && item.year_name === selectedYear && item.email_address == selectedTeacher && item.percentage_score > 0);
     }
     else{
-      studentData = quizesData?.filter((record) => !record.year_name.includes('Year')  && record.user_name == student && record.percentage_score > 0);
+      studentData = quizesData?.filter((record) => !record.year_name.includes('Year')  && record.user_name == student && item.email_address == selectedTeacher && record.percentage_score > 0);
     }
     const finalData = studentData?.filter(record => {
       const submissionDate = new Date(record?.date_submitted);
@@ -1298,7 +1311,6 @@ const SchoolParent = () => {
   // Revised Charts
   const handleReChartYearSelect = (childName) => {
     setReChartSelectedYear(childName)
-    console.log( childName, selectedReChartTeacher, rechartSelectedStudent, )
   }
   const handleReChartTeacherSelect = (childName) => {
     setSelectedReChartTeacher(childName)
@@ -1310,10 +1322,14 @@ const SchoolParent = () => {
   const handleReChartStudentSelect = (childName) => {
     setReChartSelectedStudent(childName)
   } 
-  const getMarkColor = (key, name) => {
-    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
-    if(!obj) return ''
-    return obj.percentage_score.toFixed(1)
+  const getMarkColor = (user_name, quiz_name) => {
+    let obj = quizesData?.filter((item) => item.user_name === user_name && item.quiz_name === quiz_name && item.email_address == selectedTeacher)
+    if(obj.length === 0) return ''
+    return obj[0]?.percentage_score?.toFixed(1)
+    
+    // let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
+    // if(!obj) return ''
+    // return obj.percentage_score.toFixed(1)
   } 
 
   return (
@@ -1746,7 +1762,7 @@ quiz5: 35,
                         ))
                       }
                       {/* {tableAverage?.map((average) => (
-                      <td class="p-3 text-center">
+                      <td className="p-3 text-center">
                         {(average / totalQuizCount).toFixed(2)}
                       </td>
                     )
@@ -1784,7 +1800,7 @@ quiz5: 35,
                         ))
                       }
                       {/* {tableAverage?.map((average) => (
-                      <td class="p-3 text-center">
+                      <td className="p-3 text-center">
                         {(average / totalQuizCount).toFixed(2)}
                       </td>
                     )
@@ -1803,9 +1819,9 @@ quiz5: 35,
                     </>
                   )}
                 </tr>
-                {Object?.keys(users)?.length === 0 && 
+                {/* {Object?.keys(users)?.length === 0 && 
                 <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
-                  {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
+                  {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> *9/}
                   <td className="p-5 text-center w-98s" rowSpan='3'></td> 
                   <td className="p-5 text-center w-98s" rowSpan='3'>No Data Avaiable.</td> 
                   <td className="p-5 text-center w-98s" rowSpan='3'></td>                  
@@ -1814,10 +1830,21 @@ quiz5: 35,
                   <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
                     <td className="p-3">{users[student][0]?.user_name}</td>
                     <td className="p-3"><input value={getFullName(users[student][0]?.user_name)} className="h-8 placeholder-red-600" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, users[student][0]?.user_name)} onBlur={(e) => UpdateFullNameDB(e, users[student][0]?.user_name)}/></td>
-                    {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
+                    {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> *9/}
                     <td className="p-3 text-center w-40 font-bold">{getStudentaverage(users[student][0]?.user_name)}</td>
                     <td className="p-3 text-center w-40 font-bold">{getStudentEffort(users[student][0]?.user_name)}</td>
                     {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
+                  </tr>
+                ))} */}
+                {/* Test  fro all users */}
+                {allUniqueUsers?.map((student) => (
+                  <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
+                    <td className="p-3">{student?.user_name}</td>
+                    <td className="p-3"><input value={getFullName(student.user_name)} className="h-8 placeholder-red-600" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, student?.user_name)} onBlur={(e) => UpdateFullNameDB(e, student?.user_name)}/></td>
+                    {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
+                    <td className="p-3 text-center w-40 font-bold">{getStudentaverage(student.user_name)}</td>
+                    <td className="p-3 text-center w-40 font-bold">{getStudentEffort(student.user_name)}</td>
+                    {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student.user_name, quiz_name)) }}>{getMarks(student.user_name, quiz_name)}</td>))}
                   </tr>
                 ))}
               </tbody>
@@ -1838,16 +1865,16 @@ quiz5: 35,
               {/* SMASH Maths Cohort  */}
               <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
                 {/* <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td> */}
-                <td className="sticky left-40 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
-                <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
-                <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
+                <td className="sticky left-40 z-10 px-6 h-16 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
+                <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold">-</td>
+                <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold">-</td>
               </tr>
-
-              
-                <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
-                  {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
-                  <td className="p-3 text-center" rowSpan='3'>No Data Avaiable.</td>   
-                </tr>
+              <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
+                {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
+                <td className="p-3 text-center h-5" rowSpan='3'  style={{ height: '5rem' }}></td> 
+                <td className=" h-28">No Data Avaiable.</td> 
+                <td className="text-center h-5" rowSpan='3'  style={{ height: '5rem' }}></td>   
+              </tr>
             </tbody>
           </table>
         </div>}

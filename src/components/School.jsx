@@ -1035,17 +1035,15 @@ const School = () => {
     return filteredData?.length === 0 ? '-' : `${(sumOfAllQuizes / filteredData.length).toFixed(1)} %`;
   }
 
-  const getMarks = (key, name) => {
-    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
-    console.log(`student obje`,users[key],name)
-    // if(name == 'Year 6 - SP 2023 Summer Term Week 02') console.log(`Why Not Display`, obj)
-    return obj ? obj?.percentage_score > 0 ? obj?.percentage_score.toFixed(1) : '' : ''
+  const getMarks = (user_name, quiz_name) => {
+    let obj = quizesData?.filter((item) => item?.user_name === user_name && item?.quiz_name === quiz_name && item?.email_address == selectedTeacher)
+    if(obj?.length === 0) return ''
+    return obj != undefined ? `${obj[0]?.percentage_score?.toFixed(1)} %` : ''
   }
-  const getMarkColor = (key, name) => {
-    console.log(`users[key]`, users[key])
-    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
-    if(!obj) return ''
-    return obj.percentage_score.toFixed(1)
+  const getMarkColor = (user_name, quiz_name) => {
+    let obj = quizesData?.filter((item) => item?.user_name === user_name && item?.quiz_name === quiz_name && item?.email_address == selectedTeacher)
+    if(obj?.length === 0) return ''
+    return obj[0]?.percentage_score?.toFixed(1)
   }
 
   const getStudentaverage = (student) =>{
@@ -1824,9 +1822,9 @@ const School = () => {
                       </>
                     )}
                   </tr>
-                  {Object?.keys(users)?.length === 0 && 
+                  {/* {Object?.keys(users)?.length === 0 && 
                   <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
-                    {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
+                    <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> *0/}
                     <td className="p-5 text-center w-98s" rowSpan='3'></td> 
                     <td className="p-5 text-center w-98s" rowSpan='3'>No Data Avaiable.</td> 
                     <td className="p-5 text-center w-98s" rowSpan='3'></td>                  
@@ -1835,16 +1833,29 @@ const School = () => {
                     <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
                       <td className="p-3">{users[student][0]?.user_name}</td>
                       <td className="p-3"><input value={getFullName(users[student][0]?.user_name)} className="h-8 placeholder-red-600" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, users[student][0]?.user_name)} onBlur={(e) => UpdateFullNameDB(e, users[student][0]?.user_name)}/></td>
-                      {/* <td className="p-3">{users[student][0]?.full_name}</td> */}
+                      {/* <td className="p-3">{users[student][0]?.full_name}</td> *9/}
                       <td className="p-3 text-center">{getStudentaverage(users[student][0]?.user_name)}</td>
                       <td className="p-3 text-center">{getStudentEffort(users[student][0]?.user_name)}</td>
                       {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{`${getMarks(student, quiz_name)} %`}</td>))}
-                    </tr>
-                  ))}
+                      {allUniqueUsers?.map((student) => (
+                  <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
+                    <td className="p-3">{student?.user_name}</td>
+                    <td className="p-3"><input value={getFullName(student.user_name)} className="h-8 placeholder-red-600" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, student?.user_name)} onBlur={(e) => UpdateFullNameDB(e, student?.user_name)}/></td>
+                    {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
+                    {allUniqueUsers?.map((student) => (
+                      <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
+                        <td className="p-3">{student?.user_name}</td>
+                        <td className="p-3"><input value={getFullName(student.user_name)} className="h-8 placeholder-red-600" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, student?.user_name)} onBlur={(e) => UpdateFullNameDB(e, student?.user_name)}/></td>
+                        {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
+                        <td className="p-3 text-center w-40 font-bold">{getStudentaverage(student.user_name)}</td>
+                        <td className="p-3 text-center w-40 font-bold">{getStudentEffort(student.user_name)}</td>
+                        {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student.user_name, quiz_name)) }}>{getMarks(student.user_name, quiz_name)}</td>))}
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>}
-            {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ minHeight: '100px',  maxHeight: 'calc(100vh - 250px)' }}>
+            {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ minHeight: '100px', maxHeight: 'calc(100vh - 250px)' }}>
             <table className="min-h-74 w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
               <thead className="text-xs text-white uppercase bg-[#17026b] h-32">
                 <tr className="items-center">
@@ -1858,13 +1869,15 @@ const School = () => {
                 {/* SMASH Maths Cohort  */}
                 <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
                   {/* <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td> */}
-                  <td className="sticky left-40 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
-                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
-                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
+                  <td className="sticky left-40 z-10 px-6 h-16 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
+                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold">-</td>
+                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold">-</td>
                 </tr>
                 <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
                   {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
-                  <td className="p-3 text-center" rowSpan='3'>No Data Avaiable.</td>    
+                  <td className="p-3 text-center h-5" rowSpan='3'  style={{ height: '5rem' }}></td> 
+                  <td className=" h-28">No Data Avaiable.</td> 
+                  <td className="text-center h-5" rowSpan='3'  style={{ height: '5rem' }}></td>   
                 </tr>
               </tbody>
             </table>
