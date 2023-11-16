@@ -10,6 +10,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import CloseIcon from '@mui/icons-material/Close';
+import { toast } from "react-hot-toast";
 const ChildNames = ["Ali", "Usama", "Omair", "Talha", "Agha", "Hassan"];
 const data = [
   {
@@ -414,7 +415,8 @@ const School = () => {
           const studentFilters = quizes?.map(({date_submitted,user_name, email_address, percentage_score}) => ({date_submitted,user_name, email_address, percentage_score}))
           yearsFilters = yearsFilters?.filter(item => item?.includes('Year'))
 
-          const uniqueTeacherFilters = [...new Set(teacherFilters)]
+          let uniqueTeacherFilters = [...new Set(teacherFilters)]
+          uniqueTeacherFilters = uniqueTeacherFilters.filter(value => value !== null)
           const uniqueYearsFilters = [...new Set(yearsFilters)].sort()
           setYearFilter(uniqueYearsFilters)
           setTeacherFilter(uniqueTeacherFilters)
@@ -595,6 +597,7 @@ const School = () => {
   }
 
   const applyFilter = (email, year, headers, data , yearData) => {
+    setDataLoadin(true)
     setSelectedYear(year)
     setSelectedTeacher(email)
     setDataSelectedYear(yearData)
@@ -706,6 +709,7 @@ const School = () => {
     );
 
     setUsers(ordered)
+    setDataLoadin(false)
     // console.log('therer------>2', usersObject)
     // console.log('therer------>2', usersObject)
     return
@@ -1187,9 +1191,10 @@ const School = () => {
             return user;
           });
           setallUniqueUsers(updatedData);
+          toast.success("User name updated successful.");
         })
     } catch (e) {
-      // setDataLoadin(false)
+      toast.error("Unable to updated username, please try later.");
     }
   }
 

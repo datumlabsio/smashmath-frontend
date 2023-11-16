@@ -10,6 +10,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import CloseIcon from '@mui/icons-material/Close';
+import { toast } from "react-hot-toast";
 
 const style = {
   position: 'absolute',
@@ -1228,9 +1229,10 @@ const SchoolParent = () => {
             return user;
           });
           setallUniqueUsers(updatedData);
+          toast.success("User name updated successful.");
         })
     } catch (e) {
-      // setDataLoadin(false)
+      toast.error("Unable to updated username, please try later.");
     }
   }
   const getFullName = (username) => {
