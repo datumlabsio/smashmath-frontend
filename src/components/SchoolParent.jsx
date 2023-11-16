@@ -1203,7 +1203,7 @@ const SchoolParent = () => {
     const full_name = e.target.value;
     // const found = allUniqueUsers.filter(item => item.user_name === username);
     // const userName = found[0].username;
-    const email = localStorage.getItem('userEmail')
+    const email = selectedTeacher
     try {
       const token = localStorage.getItem('token')
       fetch(testURL + '/updateuser', {

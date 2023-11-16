@@ -1164,8 +1164,8 @@ const School = () => {
 
   const UpdateFullNameDB = (e, username ) =>{
     const full_name = e.target.value;
-    const email = localStorage.getItem('userEmail')
-    
+    // const email = localStorage.getItem('userEmail')
+    const email = selectedTeacher
     try {
       const token = localStorage.getItem('token')
       fetch(testURL + '/updateuser', {
