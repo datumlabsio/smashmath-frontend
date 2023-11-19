@@ -8,6 +8,8 @@
     "dev": "vite --host 0.0.0.0 --port 8081",
     "build": "vite build",
     "preview": "vite preview",
+    "development": "vite build --mode development",
+    "production": "vite build --mode production",
     "start": "vite preview --host 0.0.0.0 --port 8080"
   },
   "dependencies": {
