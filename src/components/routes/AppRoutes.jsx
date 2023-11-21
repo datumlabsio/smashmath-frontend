@@ -12,7 +12,7 @@ const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
       <Route path="/about" element={<div>
-        {import.meta.env.MODE} Build version: 0.0.1
+        {import.meta.env.MODE} Build version: 0.0.2
       </div>} />
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
