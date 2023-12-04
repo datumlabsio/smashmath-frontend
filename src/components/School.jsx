@@ -1528,12 +1528,12 @@ const School = () => {
             {/* choose teacher dropdown */}
             <div className="grid gap-1">
               <label htmlFor="">Teacher</label>
-              <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20 h-16">
+              <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
                 <li className="mr-3">
-                  <div className="inline-block relative" ref={dropdownRef1}>
+                  <div className="inline-block relative ml-4" ref={dropdownRef1}>
                     <button
                       onClick={() => setIsChildOpen(!isChildOpen)}
-                      className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                      className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg"
                     >
                       {selectedTeacher ? selectedTeacher : "Choose Teacher"}
                       <svg
@@ -1550,37 +1550,32 @@ const School = () => {
                       </svg>
                     </button>
                     {isChildOpen && (
-                      <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
-                        {teacherFilter?.map((childName, index) => {
-                          return (
-                            <>
-                              <li
-                                className={
-                                  index !== childName?.length - 1
-                                    ? "border-b border-slate-400 cursor-pointer"
-                                    : "cursor-pointer"
-
-                                }
-                                key={index}
-                                onClick={() => {
-                                  setIsChildOpen(!isChildOpen)
-                                  handleTeacherSelect(childName)
-                                }}
-                              >
-                                <span
-                                  className="block px-4 py-1 text-gray-800 hover:bg-indigo-500 hover:text-white">
-                                  {childName}
-                                </span>
-                              </li>
-                            </>
-                          );
-                        })}
+                      <ul className="absolute right-0 mt-2 py-2 w-74 max-h-[400px] overflow-y-auto bg-white rounded-lg shadow-slate-800 shadow-md">
+                        {teacherFilter?.map((childName, index) => (
+                          <li
+                            className={
+                              index !== teacherFilter.length - 1
+                                ? "border-b border-slate-400 cursor-pointer"
+                                : "cursor-pointer"
+                            }
+                            key={index}
+                            onClick={() => {
+                              setIsChildOpen(!isChildOpen);
+                              handleTeacherSelect(childName);
+                            }}
+                          >
+                            <span className="block px-4 py-1 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                              {childName}
+                            </span>
+                          </li>
+                        ))}
                       </ul>
                     )}
                   </div>
                 </li>
               </ul>
             </div>
+
 
             {/* choose Year dropdown */}
             <div className="grid gap-1">
