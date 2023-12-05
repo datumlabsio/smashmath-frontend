@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import CloseIcon from '@mui/icons-material/Close';
 import { toast } from "react-hot-toast";
+import './Charts.css'
 const ChildNames = ["Ali", "Usama", "Omair", "Talha", "Agha", "Hassan"];
 const data = [
   {
@@ -1530,7 +1531,7 @@ const School = () => {
               <label htmlFor="">Teacher</label>
               <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
                 <li className="mr-3">
-                  <div className="inline-block relative ml-4" ref={dropdownRef1}>
+                  <div className="inline-block relative" ref={dropdownRef1}>
                     <button
                       onClick={() => setIsChildOpen(!isChildOpen)}
                       className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg"
@@ -1550,7 +1551,7 @@ const School = () => {
                       </svg>
                     </button>
                     {isChildOpen && (
-                      <ul className="absolute right-0 mt-2 py-2 w-74 max-h-[400px] overflow-y-auto bg-white rounded-lg shadow-slate-800 shadow-md">
+                      <ul className="absolute pl-4 right-0 mt-2 py-2 w-74 max-h-[400px] overflow-y-auto bg-white rounded-lg shadow-slate-800 shadow-md ml-4">
                         {teacherFilter?.map((childName, index) => (
                           <li
                             className={
@@ -1858,7 +1859,7 @@ const School = () => {
                     {allUniqueUsers?.map((student) => (
                       <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
                         <td className="p-3">{student}</td>
-                        <td className="p-3"><input value={getFullName(student)} className="h-8 placeholder-red-600" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
+                        <td className="p-3"><input placeholder="Enter name" value={getFullName(student)} className="h-8 text-red-900 placeholder-red-900 bold-placeholder"  onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
                         {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
                         <td className="p-3 text-center w-40 font-bold">{getStudentaverage(student)}</td>
                         <td className="p-3 text-center w-40 font-bold">{getStudentEffort(student)}</td>

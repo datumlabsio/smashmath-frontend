@@ -1849,7 +1849,7 @@ quiz5: 35,
                 {allUniqueUsers?.map((student) => (
                   <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
                     <td className="p-3">{student}</td>
-                    <td className="p-3"><input value={getFullName(student)} className="h-8 placeholder-red-600" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
+                    <td className="p-3"><input value={getFullName(student)} className="h-8  text-red-900 placeholder-red-900 bold-placeholder" placeholder="Enter name" onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
                     {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
                     <td className="p-3 text-center w-40 font-bold">{getStudentaverage(student)}</td>
                     <td className="p-3 text-center w-40 font-bold">{getStudentEffort(student)}</td>

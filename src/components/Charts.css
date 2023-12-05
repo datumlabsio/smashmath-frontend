@@ -6,3 +6,8 @@
   .chart-container .recharts-x-axis .recharts-cartesian-axis-tick {
     white-space: nowrap;
   }
+
+  /* styles.css */
+.bold-placeholder::placeholder {
+  font-weight: bold;
+}
