@@ -240,7 +240,7 @@ const School = () => {
   const [quizesAverages, setQuizesAverages] = useState()
   const [allUniqueUsers, setallUniqueUsers] = useState([])
   const [dataYearList, setDataYearList] = useState([])
-  const [dataSelectedYear, setDataSelectedYear] = useState()
+  const [dataSelectedYear, setDataSelectedYear] = useState(null)
   // const [chartsData, setChartsData] = useState(datachartslinefromfile)
   // const [filteredChartData, setFilteredChartData] = useState(initialChartData)
   const [chartTeacherList, setChartTeacherList] = useState([])
@@ -318,7 +318,7 @@ const School = () => {
       }
     }
     console.log(`yearList`, yearList[yearList.length-1],yearList)
-    setDataSelectedYear(yearList[yearList.length-1])
+    // setDataSelectedYear(yearList[yearList.length-1])
     setDataYearList(yearList);
     setReChartYearList(yearList)
   },[])
@@ -602,6 +602,7 @@ const School = () => {
     setSelectedYear(year)
     setSelectedTeacher(email)
     setDataSelectedYear(yearData)
+    console.log(`dataSelectedYear`, yearData)
 
     const filterUserByTeacher = data?.filter(quiz => quiz?.email_address == email );
     const userName = filterUserByTeacher?.map(quiz => quiz?.user_name);
@@ -1578,7 +1579,7 @@ const School = () => {
                       onClick={() => setIsDataYearOpen(!isDataYearOpen)}
                       className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                     >
-                      {`September ${dataYearList[dataYearList.length -1 ]} - August ${dataYearList[dataYearList.length -1 ] + 1}`}
+                      {dataSelectedYear ? `September ${dataSelectedYear} - August ${dataSelectedYear + 1}` : `September ${dataYearList[dataYearList.length - 1]} - August ${dataYearList[dataYearList.length - 1]+1}`}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 20 20"
