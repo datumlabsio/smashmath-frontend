@@ -1343,7 +1343,7 @@ const School = () => {
   }
 
   const getFullName = (username) => {
-    const found = quizesData.filter(item => item.user_name == username)
+    const found = quizesData?.filter(item => item?.user_name == username)
     const studentName = found[0]?.full_name ? found[0]?.full_name : ""
     const fullName = studentName.trim() == username.trim() ? "" : studentName
     return fullName
@@ -1854,7 +1854,7 @@ const School = () => {
                     {allUniqueUsers?.map((student) => (
                       <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
                         <td className="p-3">{student}</td>
-                        <td className="p-3"><input placeholder="Enter name" value={getFullName(student)} className="h-8 text-[#ED1C24] placeholder-[#ED1C24] bold-placeholder"  onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
+                        <td className="p-3"><input placeholder="Enter name" value={getFullName(student)} className="h-8 text-[#ED1C24] px-3 placeholder-[#ED1C24] bold-placeholder"  onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
                         {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
                         <td className="p-3 text-center w-40 font-bold">{getStudentaverage(student)}</td>
                         <td className="p-3 text-center w-40 font-bold">{getStudentEffort(student)}</td>
@@ -1884,7 +1884,7 @@ const School = () => {
                 {allUniqueUsers?.length > 0 && allUniqueUsers?.map((student) => (
                   <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
                     <td className="p-3">{student}</td>
-                    <td className="p-3"><input value={getFullName(student)} className="h-8  text-[#ED1C24] placeholder-[#ED1C24] bold-placeholder" placeholder="Enter name" onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
+                    <td className="p-3"><input value={getFullName(student)} className="h-8  text-[#ED1C24] placeholder-[#ED1C24] bold-placeholder px-3" placeholder="Enter name" onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
                     <td className="p-3 w-40 font-bold">-</td>
                   </tr>
                 ))}
