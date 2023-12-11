@@ -283,27 +283,27 @@ const Parent = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  useEffect(() => {
-    const email = localStorage.getItem('userEmail')
-    try {
-      const token = localStorage.getItem('token')
-      fetch(testURL + '/all_quiz_averages', {
-        method: 'POST',
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-          "Authorization": token ? `${token}` : null
-        }
-      })
-        .then(response => response.json())
-        .then(response => {
-          setQuizesAverages(response.quizes.averages)
-        })
-    } catch (e) {
-      setDataLoadin(false)
-    }
+  // useEffect(() => {
+  //   const email = localStorage.getItem('userEmail')
+  //   try {
+  //     const token = localStorage.getItem('token')
+  //     fetch(testURL + '/all_quiz_averages', {
+  //       method: 'POST',
+  //       headers: {
+  //         "Access-Control-Allow-Origin": "*",
+  //         "Content-Type": "application/json",
+  //         "Authorization": token ? `${token}` : null
+  //       }
+  //     })
+  //       .then(response => response.json())
+  //       .then(response => {
+  //         setQuizesAverages(response.quizes.averages)
+  //       })
+  //   } catch (e) {
+  //     setDataLoadin(false)
+  //   }
 
-  }, [])
+  // }, [])
   useEffect(() => {
     // Get the current year
     const currentYear = new Date().getFullYear();
@@ -391,64 +391,86 @@ const Parent = () => {
   // }, [])
 
   useEffect(() => {
-    const user_name = localStorage.getItem('userEmail')
+    const email = localStorage.getItem('userEmail')
+    let quizdata = [];
     try {
       const token = localStorage.getItem('token')
-      fetch(testURL + '/getparentdashboard', {
+      fetch(testURL + '/all_quiz_averages', {
         method: 'POST',
         headers: {
           "Access-Control-Allow-Origin": "*",
           "Content-Type": "application/json",
           "Authorization": token ? `${token}` : null
-        },
-        body: JSON.stringify({
-          user_name
-        })
+        }
       })
         .then(response => response.json())
         .then(response => {
-          const quizes = response?.quizes || [[]]
-          setQuizesData(quizes)
-          quizes.map(x => {
-            if (x.year_name === 'Multip') {
-              // console.log('therer====>', x)
-            }
-          })
-          let yearsFilters = quizes.map(x => x.year_name)
-          const teacherFilters = quizes?.map(x => x.user_name)
-          yearsFilters = yearsFilters?.filter(item => item?.includes('Year'))
-          const uniqueYearsFilters = [...new Set(yearsFilters)]?.sort()
-          const uniqueTeacherFilters = [...new Set(teacherFilters)]
-          setYearFilter(uniqueYearsFilters)
-          setChartTeacherList(uniqueTeacherFilters)
-          setReChartTeacherList(uniqueTeacherFilters)
-
-          // Filter Unique Year for chart
-          const uniqueYears = new Set();
-          quizes.forEach(item => {
-            const year = new Date(item.date_submitted).getFullYear();
-            uniqueYears.add(year);
-          });
-          const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
-          setChartYearList(sortedUniqueYears);
-
-
-          let filterData = quizes?.map(({ quiz_name, year_name, date_submitted }, index) => {
-            return {
-              year_name,
-              quiz_name,
-              index,
-              year : new Date(date_submitted)?.getFullYear(),
-              month : new Date(date_submitted)?.getMonth() + 1,
-              day : new Date(date_submitted)?.getDate(),
-              week: getWeekNumber(quiz_name)
-            }
-          })
-          setTableHeadersAll(filterData)
-          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, sortedUniqueYears[sortedUniqueYears.length-1])  
-          setDataLoadin(false)
-
-          return
+          quizdata = response?.quizes?.averages;
+          setQuizesAverages(response.quizes.averages)
+        })
+        .then(()=> {
+          try {
+            const user_name = localStorage.getItem('userEmail')
+            const token = localStorage.getItem('token')
+            fetch(testURL + '/getparentdashboard', {
+              method: 'POST',
+              headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+                "Authorization": token ? `${token}` : null
+              },
+              body: JSON.stringify({
+                user_name
+              })
+            })
+              .then(response => response.json())
+              .then(response => {
+                const quizes = response?.quizes || [[]]
+                setQuizesData(quizes)
+                quizes.map(x => {
+                  if (x.year_name === 'Multip') {
+                    // console.log('therer====>', x)
+                  }
+                })
+                let yearsFilters = quizes.map(x => x.year_name)
+                const teacherFilters = quizes?.map(x => x.user_name)
+                yearsFilters = yearsFilters?.filter(item => item?.includes('Year'))
+                const uniqueYearsFilters = [...new Set(yearsFilters)]?.sort()
+                const uniqueTeacherFilters = [...new Set(teacherFilters)]
+                setYearFilter(uniqueYearsFilters)
+                setChartTeacherList(uniqueTeacherFilters)
+                setReChartTeacherList(uniqueTeacherFilters)
+      
+                // Filter Unique Year for chart
+                const uniqueYears = new Set();
+                quizes.forEach(item => {
+                  const year = new Date(item.date_submitted).getFullYear();
+                  uniqueYears.add(year);
+                });
+                const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
+                setChartYearList(sortedUniqueYears);
+      
+      
+                let filterData = quizes?.map(({ quiz_name, year_name, date_submitted }, index) => {
+                  return {
+                    year_name,
+                    quiz_name,
+                    index,
+                    year : new Date(date_submitted)?.getFullYear(),
+                    month : new Date(date_submitted)?.getMonth() + 1,
+                    day : new Date(date_submitted)?.getDate(),
+                    week: getWeekNumber(quiz_name)
+                  }
+                })
+                setTableHeadersAll(filterData)
+                applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, sortedUniqueYears[sortedUniqueYears.length-1], quizdata)  
+                setDataLoadin(false)
+      
+                return
+              })
+          } catch (e) {
+            setDataLoadin(false)
+          }
         })
     } catch (e) {
       setDataLoadin(false)
@@ -546,7 +568,7 @@ const Parent = () => {
     // applyFilter ( childName, selectedChartTeacher, chartSelectedStudent)
   }
 
-  const applyFilter = (selectedDuraationParm, year, headers, data, yearData) => {
+  const applyFilter = (selectedDuraationParm, year, headers, data, yearData, quizdata) => {
 
     setSelectedYear(year)
     setSelectedDuraation(selectedDuraationParm)
@@ -631,8 +653,9 @@ const Parent = () => {
       }
     })
     // Calculate Cohort average Avg
-    const QuizName = finalHeader?.map(item => item.quiz_name)    
-    const filteredQuizes = quizesAverages?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
+    const QuizName = finalHeader?.map(item => item.quiz_name)  
+    const allQuizeData = quizesAverages ? quizesAverages : quizdata;  
+    const filteredQuizes = allQuizeData?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
     const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj?.average_score, 0);
     const AVGCohort = (sumCohort / (filteredQuizes?.length *100)) * 100;
     setCohortAverageAVG(AVGCohort ? `${AVGCohort?.toFixed(1)} %` : '-')

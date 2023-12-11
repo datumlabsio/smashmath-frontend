@@ -332,10 +332,34 @@ const SchoolParent = () => {
     setDataSelectedYear(yearList[yearList.length-1])
     // years = years.map(item => item-1)
     setDataYearList(yearList);
+    setReChartYearList(yearList)
   },[])
+
+  // useEffect(() => {
+  //   const email = localStorage.getItem('userEmail')
+  //   try {
+  //     const token = localStorage.getItem('token')
+  //     fetch(testURL + '/all_quiz_averages', {
+  //       method: 'POST',
+  //       headers: {
+  //         "Access-Control-Allow-Origin": "*",
+  //         "Content-Type": "application/json",
+  //         "Authorization": token ? `${token}` : null
+  //       }
+  //     })
+  //       .then(response => response.json())
+  //       .then(response => {
+  //         setQuizesAverages(response?.quizes?.averages)
+  //       })
+  //   } catch (e) {
+  //   }
+
+  // }, [])
+
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
+    let quizdata = [];
     try {
       const token = localStorage.getItem('token')
       fetch(testURL + '/all_quiz_averages', {
@@ -348,116 +372,111 @@ const SchoolParent = () => {
       })
         .then(response => response.json())
         .then(response => {
+          quizdata = response?.quizes?.averages;
           setQuizesAverages(response?.quizes?.averages)
         })
+        .then(( ) => {
+          const token = localStorage?.getItem('token')
+          try {
+            fetch(testURL + '/getteacherparent', {
+              method: 'POST',
+              mode: 'cors',
+              cache: 'no-cache',
+              headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+                "Authorization": token ? `${token}` : null
+              },
+              body: JSON.stringify({
+                email
+              })
+            })
+              .then(response => response.json())
+              .then(response => {
+                let quizes = response?.quizes || [[]]
+                // quizes = quizes?.map((obj, index) => ({
+                //   attributes_properties: obj.attributes_properties,
+                //   child_name: obj.child_name,
+                //   date_submitted: '2023-10-12',
+                //   user_name: obj.user_name ? obj.user_name : obj.mu_user_name,
+                //   email_address: obj.email_address ? obj.email_address : obj.mu_email_address,
+                //   full_name: obj.full_name,
+                //   mu_email_address: obj.mu_email_address,
+                //   mu_user_name: obj.mu_user_name,
+                //   percentage_score: obj.percentage_score ? obj.percentage_score : 0,
+                //   quiz_name: obj.quiz_name,
+                //   school_name_capital: obj.school_name_capital,
+                //   school_name_small: obj.school_name_small,
+                //   status: 'submitted',
+                //   year_name: obj.year_name
+                // }))
+                setQuizesData(quizes)
+                const teacherFilters = quizes?.map(x => x?.email_address)
+                let yearsFilters = quizes?.map(x => x?.year_name)
+                yearsFilters = yearsFilters?.filter(item => item?.includes('Year'))
+                let uniqueTeacherFilters = [...new Set(teacherFilters)]
+                uniqueTeacherFilters = uniqueTeacherFilters.filter(value => value !== null)
+                let uniqueYearsFilters = [...new Set(yearsFilters)]?.sort()
+                uniqueYearsFilters.push("Other")
+                setTeacherFilter(uniqueTeacherFilters)
+                setYearFilter(uniqueYearsFilters)
+                setChartTeacherList(uniqueTeacherFilters)
+                setReChartTeacherList(uniqueTeacherFilters)
+      
+                // Filter Unique Year for chart
+                const uniqueYears = new Set();
+                quizes.forEach(item => {
+                  const year = new Date(item.date_submitted).getFullYear();
+                  uniqueYears.add(year);
+                });
+                const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
+                setChartYearList(sortedUniqueYears);
+      
+                // console.log('bilal--->',"Year 4 - SP Autumn Term Week 14 - Christmas Practice 01"?.match(/WEEK (\d+)$/i)[1])
+                let arr = "Year 4 - SP Autumn Term Week 14 - Christmas Practice 01".split(' ')
+                // console.log('bilal--->', parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]))
+      
+      
+                let filterData = quizes?.map(({ quiz_name, year_name, date_submitted}, index) => {
+                  return {
+                    year_name,
+                    quiz_name,
+                    index,
+                    year : new Date(date_submitted).getFullYear(),
+                    month : new Date(date_submitted).getMonth() + 1,
+                    day : new Date(date_submitted).getDate(),
+                    week: getWeekNumber(quiz_name)
+                  }
+                })
+      
+                setTableHeadersAll(filterData)
+                applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1], quizdata)
+                if (quizes != null) { setSchoolNama(Object?.values(quizes)[0]?.school_name_small) }
+                
+                // setDataLoadin(false)
+                return
+      
+                // let { headers, users } = response?.quizes || [[], {}]
+                // setTableHeadersAll(headers)
+                // setTableData(users)
+                // let avgArray = Array(headers.length).fill(0)
+      
+                // setUsers(users)
+                // setFilter(users, headers)
+                // setAverage(avgArray, users)
+                if (users != null) { setSchoolNama(Object.values(users)[0]?.school_name_small) }
+      
+              })
+              .then(()=>{
+                setDataLoadin(false)
+              })
+          } catch (e) {
+            setDataLoadin(false)
+          }
+        })
     } catch (e) {
     }
 
-  }, [])
-
-
-  useEffect(() => {
-    const email = localStorage.getItem('userEmail')
-    // fetch(API_URL + '/api/parent_dashboard', {teacher_dashboard
-    // "email": "jbrogan5.208@lgflmail.org"
-
-    const token = localStorage?.getItem('token')
-    try {
-      fetch(testURL + '/getteacherparent', {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-          "Authorization": token ? `${token}` : null
-        },
-        body: JSON.stringify({
-          email
-        })
-      })
-        .then(response => response.json())
-        .then(response => {
-          let quizes = response?.quizes || [[]]
-          // quizes = quizes?.map((obj, index) => ({
-          //   attributes_properties: obj.attributes_properties,
-          //   child_name: obj.child_name,
-          //   date_submitted: '2023-10-12',
-          //   user_name: obj.user_name ? obj.user_name : obj.mu_user_name,
-          //   email_address: obj.email_address ? obj.email_address : obj.mu_email_address,
-          //   full_name: obj.full_name,
-          //   mu_email_address: obj.mu_email_address,
-          //   mu_user_name: obj.mu_user_name,
-          //   percentage_score: obj.percentage_score ? obj.percentage_score : 0,
-          //   quiz_name: obj.quiz_name,
-          //   school_name_capital: obj.school_name_capital,
-          //   school_name_small: obj.school_name_small,
-          //   status: 'submitted',
-          //   year_name: obj.year_name
-          // }))
-          setQuizesData(quizes)
-          const teacherFilters = quizes?.map(x => x?.email_address)
-          let yearsFilters = quizes?.map(x => x?.year_name)
-          yearsFilters = yearsFilters?.filter(item => item?.includes('Year'))
-          let uniqueTeacherFilters = [...new Set(teacherFilters)]
-          uniqueTeacherFilters = uniqueTeacherFilters.filter(value => value !== null)
-          let uniqueYearsFilters = [...new Set(yearsFilters)]?.sort()
-          uniqueYearsFilters.push("Other")
-          setTeacherFilter(uniqueTeacherFilters)
-          setYearFilter(uniqueYearsFilters)
-          setChartTeacherList(uniqueTeacherFilters)
-          setReChartTeacherList(uniqueTeacherFilters)
-
-          // Filter Unique Year for chart
-          const uniqueYears = new Set();
-          quizes.forEach(item => {
-            const year = new Date(item.date_submitted).getFullYear();
-            uniqueYears.add(year);
-          });
-          const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
-          setChartYearList(sortedUniqueYears);
-
-          // console.log('bilal--->',"Year 4 - SP Autumn Term Week 14 - Christmas Practice 01"?.match(/WEEK (\d+)$/i)[1])
-          let arr = "Year 4 - SP Autumn Term Week 14 - Christmas Practice 01".split(' ')
-          // console.log('bilal--->', parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]))
-
-
-          let filterData = quizes?.map(({ quiz_name, year_name, date_submitted}, index) => {
-            return {
-              year_name,
-              quiz_name,
-              index,
-              year : new Date(date_submitted).getFullYear(),
-              month : new Date(date_submitted).getMonth() + 1,
-              day : new Date(date_submitted).getDate(),
-              week: getWeekNumber(quiz_name)
-            }
-          })
-
-          setTableHeadersAll(filterData)
-          applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1])
-          if (quizes != null) { setSchoolNama(Object?.values(quizes)[0]?.school_name_small) }
-          
-          // setDataLoadin(false)
-          return
-
-          // let { headers, users } = response?.quizes || [[], {}]
-          // setTableHeadersAll(headers)
-          // setTableData(users)
-          // let avgArray = Array(headers.length).fill(0)
-
-          // setUsers(users)
-          // setFilter(users, headers)
-          // setAverage(avgArray, users)
-          if (users != null) { setSchoolNama(Object.values(users)[0]?.school_name_small) }
-
-        })
-        .then(()=>{
-          setDataLoadin(false)
-        })
-    } catch (e) {
-      setDataLoadin(false)
-    }
   }, [])
 
   useEffect(() => {
@@ -544,7 +563,7 @@ const SchoolParent = () => {
     setTeacherFilter([...new Set(_teacherFilter)])
   }
 
-  const applyFilter = (email, year, headers, data, yearData ) => {
+  const applyFilter = (email, year, headers, data, yearData, quizdata ) => {
     setSelectedYear(year)
     setSelectedTeacher(email)
     setDataSelectedYear(yearData)
@@ -651,8 +670,9 @@ const SchoolParent = () => {
       }
     })
     // Calculate Cohort average Avg
-    const QuizName = finalHeader?.map(item => item?.quiz_name)    
-    const filteredQuizes = quizesAverages?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
+    const QuizName = finalHeader?.map(item => item?.quiz_name)   
+    const allQuizeData = quizesAverages ? quizesAverages : quizdata; 
+    const filteredQuizes = allQuizeData?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
     const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj?.average_score, 0);
     const AVGCohort = (sumCohort / (filteredQuizes?.length *100)) * 100;
     setCohortAverageAVG(AVGCohort ? `${AVGCohort?.toFixed(1)} %` : '-')
@@ -1536,7 +1556,7 @@ const SchoolParent = () => {
                     </svg>
                   </button>
                   {isChildOpen && (
-                    <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                    <ul className="absolute right-0 mt-2 py-2 w-74 max-h-[400px] overflow-y-auto bg-white rounded-lg shadow-slate-800 shadow-md ml-4">
                       {teacherFilter?.map((childName, index) => {
                         return (
                           <>
@@ -1849,7 +1869,7 @@ quiz5: 35,
                 {allUniqueUsers?.map((student) => (
                   <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
                     <td className="p-3">{student}</td>
-                    <td className="p-3"><input value={getFullName(student)} className="h-8  text-red-900 placeholder-red-900 bold-placeholder" placeholder="Enter name" onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
+                    <td className="p-3"><input value={getFullName(student)} className="h-8  text-[#ED1C24] placeholder-[#ED1C24] bold-placeholder" placeholder="Enter name" onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
                     {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
                     <td className="p-3 text-center w-40 font-bold">{getStudentaverage(student)}</td>
                     <td className="p-3 text-center w-40 font-bold">{getStudentEffort(student)}</td>
@@ -1872,18 +1892,20 @@ quiz5: 35,
             </thead>
             <tbody>
               {/* SMASH Maths Cohort  */}
-              <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-                {/* <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td> */}
-                <td className="sticky left-40 z-10 px-6 h-16 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
-                <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold">-</td>
-                <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold">-</td>
-              </tr>
-              <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
-                {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
-                <td className="p-3 text-center h-5" rowSpan='3'  style={{ height: '5rem' }}></td> 
-                <td className=" h-28">No Data Avaiable.</td> 
-                <td className="text-center h-5" rowSpan='3'  style={{ height: '5rem' }}></td>   
-              </tr>
+              {allUniqueUsers?.length > 0 && allUniqueUsers?.map((student) => (
+                  <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
+                    <td className="p-3">{student}</td>
+                    <td className="p-3"><input value={getFullName(student)} className="h-8  text-[#ED1C24] placeholder-[#ED1C24] bold-placeholder" placeholder="Enter name" onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
+                    <td className="p-3 w-40 font-bold">-</td>
+                  </tr>
+                ))}
+                {allUniqueUsers?.length == 0 &&  (
+                  <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
+                  <td className="p-3 text-center h-5" rowSpan='3'  style={{ height: '5rem' }}></td> 
+                  <td className=" h-28">No Data Avaiable.</td> 
+                  <td className="text-center h-5" rowSpan='3'  style={{ height: '5rem' }}></td>   
+                </tr>
+                )}
             </tbody>
           </table>
         </div>}
