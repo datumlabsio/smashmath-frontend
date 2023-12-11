@@ -426,10 +426,14 @@ const School = () => {
                 // Filter Unique Year for chart
                 const uniqueYears = new Set();
                 quizes.forEach(item => {
-                  const year = new Date(item.date_submitted).getFullYear();
+                  const year = new Date(item?.date_submitted).getFullYear();
                   uniqueYears.add(year);
                 });
                 const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
+                let filteredYears = sortedUniqueYears.filter(year => year >= 2021);
+                const currentYear = new Date().getFullYear();
+                filteredYears = filteredYears.length == 0 ? [currentYear] : filteredYears
+                console.log(`filteredYears`, filteredYears);
                 setChartYearList(sortedUniqueYears);
                 // setReChartYearList(sortedUniqueYears);
       
@@ -449,7 +453,7 @@ const School = () => {
                   }
                 })
                 setTableHeadersAll(filterData)
-                applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1], quizdata)
+                applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,filteredYears[filteredYears.length - 1], quizdata)
                 if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
                 // setDataLoadin(false)
                 return
