@@ -1355,13 +1355,9 @@ const School = () => {
   }
 
   const getStudentNameForChart = (username) =>{
-    const found = allUniqueChartUsers.filter(item => item.user_name == username)
+    const found = quizesData?.filter(item => item.user_name == username)
     if(!found) return `${username} - Enter Name`;
-    return found[0]?.full_name == username ? `${username} - Enter Name` :  `${username} - ${found[0]?.full_name}`
-  }
-
-  const GetAllQuizAVG = () =>{
-    // const sum = tableHeaders
+    return found[0]?.full_name == username || found[0]?.full_name == "" ? `${username} - Enter Name` :  `${username} - ${found[0]?.full_name}`
   }
  
   return (
