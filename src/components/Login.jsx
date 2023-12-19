@@ -50,8 +50,8 @@ const Login = () => {
       .then(response => response.json())
       .then(response => {
         setLoading(false)
-        if (response.data[1] != 200) {
-          toast.error(response.data[0]?.error)
+        if (response?.error) {
+          toast.error("Can not verify your credentials")
           return
         }
 
@@ -91,9 +91,12 @@ const Login = () => {
         //     toast.error("You do not have an active package to access this.");
         //   }
         // }
-      })
-    } catch (e) {
+       })
+    } catch (error) {
       setLoading(false)
+      alert("Error")
+      console.log(`Login Error`, error)
+      toast.error("Invalid email or password.");
     }
   }
 

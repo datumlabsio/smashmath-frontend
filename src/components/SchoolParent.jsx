@@ -10,6 +10,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import CloseIcon from '@mui/icons-material/Close';
+import { toast } from "react-hot-toast";
 
 const style = {
   position: 'absolute',
@@ -221,17 +222,17 @@ const SchoolParent = () => {
   const dropdownRefPackage = useRef(null);
 
   // Calculate the averages
-  const numColumns = Object.keys(data[0]).length - 2;
+  const numColumns = Object.keys(data[0])?.length - 2;
 
   // excluding the first two columns
-  const averages = Array(numColumns).fill(0);
+  const averages = Array(numColumns)?.fill(0);
   data.forEach((student) => {
     for (let i = 2; i < numColumns + 2; i++) {
       averages[i - 2] += parseInt(student[`quiz${i - 1}`]);
     }
   });
   for (let i = 0; i < numColumns; i++) {
-    averages[i] /= data.length;
+    averages[i] /= data?.length;
   }
 
   const [schoolName, setSchoolName] = useState()
@@ -312,7 +313,7 @@ const SchoolParent = () => {
     // applyFilter ( childName, selectedChartTeacher, chartSelectedStudent)
   }
   useEffect(() => {
-    // Get the current year
+    // Get the current yearallUniqueChartUsers
     const currentYear = new Date().getFullYear();
     // Set the start year
     let year = 2021;
@@ -331,10 +332,34 @@ const SchoolParent = () => {
     setDataSelectedYear(yearList[yearList.length-1])
     // years = years.map(item => item-1)
     setDataYearList(yearList);
+    setReChartYearList(yearList)
   },[])
+
+  // useEffect(() => {
+  //   const email = localStorage.getItem('userEmail')
+  //   try {
+  //     const token = localStorage.getItem('token')
+  //     fetch(testURL + '/all_quiz_averages', {
+  //       method: 'POST',
+  //       headers: {
+  //         "Access-Control-Allow-Origin": "*",
+  //         "Content-Type": "application/json",
+  //         "Authorization": token ? `${token}` : null
+  //       }
+  //     })
+  //       .then(response => response.json())
+  //       .then(response => {
+  //         setQuizesAverages(response?.quizes?.averages)
+  //       })
+  //   } catch (e) {
+  //   }
+
+  // }, [])
+
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
+    let quizdata = [];
     try {
       const token = localStorage.getItem('token')
       fetch(testURL + '/all_quiz_averages', {
@@ -347,108 +372,118 @@ const SchoolParent = () => {
       })
         .then(response => response.json())
         .then(response => {
-          setQuizesAverages(response.quizes.averages)
+          quizdata = response?.quizes?.averages;
+          setQuizesAverages(response?.quizes?.averages)
+        })
+        .then(( ) => {
+          const token = localStorage?.getItem('token')
+          try {
+            fetch(testURL + '/getteacherparent', {
+              method: 'POST',
+              mode: 'cors',
+              cache: 'no-cache',
+              headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+                "Authorization": token ? `${token}` : null
+              },
+              body: JSON.stringify({
+                email
+              })
+            })
+              .then(response => response.json())
+              .then(response => {
+                let quizes = response?.quizes || [[]]
+                // quizes = quizes?.map((obj, index) => ({
+                //   attributes_properties: obj.attributes_properties,
+                //   child_name: obj.child_name,
+                //   date_submitted: '2023-10-12',
+                //   user_name: obj.user_name ? obj.user_name : obj.mu_user_name,
+                //   email_address: obj.email_address ? obj.email_address : obj.mu_email_address,
+                //   full_name: obj.full_name,
+                //   mu_email_address: obj.mu_email_address,
+                //   mu_user_name: obj.mu_user_name,
+                //   percentage_score: obj.percentage_score ? obj.percentage_score : 0,
+                //   quiz_name: obj.quiz_name,
+                //   school_name_capital: obj.school_name_capital,
+                //   school_name_small: obj.school_name_small,
+                //   status: 'submitted',
+                //   year_name: obj.year_name
+                // }))
+                setQuizesData(quizes)
+                const teacherFilters = quizes?.map(x => x?.email_address)
+                let yearsFilters = quizes?.map(x => x?.year_name)
+                yearsFilters = yearsFilters?.filter(item => item?.includes('Year'))
+                let uniqueTeacherFilters = [...new Set(teacherFilters)]
+                uniqueTeacherFilters = uniqueTeacherFilters.filter(value => value !== null)
+                let uniqueYearsFilters = [...new Set(yearsFilters)]?.sort()
+                uniqueYearsFilters.push("Other")
+                setTeacherFilter(uniqueTeacherFilters)
+                setYearFilter(uniqueYearsFilters)
+                setChartTeacherList(uniqueTeacherFilters)
+                setReChartTeacherList(uniqueTeacherFilters)
+      
+                // Filter Unique Year for chart
+                const uniqueYears = new Set();
+                quizes.forEach(item => {
+                  const year = new Date(item.date_submitted).getFullYear();
+                  uniqueYears.add(year);
+                });
+                const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
+                setChartYearList(sortedUniqueYears);
+      
+                // console.log('bilal--->',"Year 4 - SP Autumn Term Week 14 - Christmas Practice 01"?.match(/WEEK (\d+)$/i)[1])
+                let arr = "Year 4 - SP Autumn Term Week 14 - Christmas Practice 01".split(' ')
+                // console.log('bilal--->', parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]))
+      
+      
+                let filterData = quizes?.map(({ quiz_name, year_name, date_submitted}, index) => {
+                  return {
+                    year_name,
+                    quiz_name,
+                    index,
+                    year : new Date(date_submitted).getFullYear(),
+                    month : new Date(date_submitted).getMonth() + 1,
+                    day : new Date(date_submitted).getDate(),
+                    week: getWeekNumber(quiz_name)
+                  }
+                })
+      
+                setTableHeadersAll(filterData)
+                applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1], quizdata)
+                if (quizes != null) { setSchoolNama(Object?.values(quizes)[0]?.school_name_small) }
+                
+                // setDataLoadin(false)
+                return
+      
+                // let { headers, users } = response?.quizes || [[], {}]
+                // setTableHeadersAll(headers)
+                // setTableData(users)
+                // let avgArray = Array(headers.length).fill(0)
+      
+                // setUsers(users)
+                // setFilter(users, headers)
+                // setAverage(avgArray, users)
+                if (users != null) { setSchoolNama(Object.values(users)[0]?.school_name_small) }
+      
+              })
+              .then(()=>{
+                setDataLoadin(false)
+              })
+          } catch (e) {
+            setDataLoadin(false)
+          }
         })
     } catch (e) {
     }
 
-  }, [])
-
-
-  useEffect(() => {
-    const email = localStorage.getItem('userEmail')
-    // fetch(API_URL + '/api/parent_dashboard', {teacher_dashboard
-    // "email": "jbrogan5.208@lgflmail.org"
-
-    const token = localStorage.getItem('token')
-    try {
-      fetch(testURL + '/getteacherparent', {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-          "Authorization": token ? `${token}` : null
-        },
-        body: JSON.stringify({
-          email
-        })
-      })
-        .then(response => response.json())
-        .then(response => {
-          const quizes = response?.quizes || [[]]
-          setQuizesData(quizes)
-          const teacherFilters = quizes.map(x => x.email_address)
-          let yearsFilters = quizes.map(x => x.year_name)
-          yearsFilters = yearsFilters.filter(item => item.includes('Year'))
-          const uniqueTeacherFilters = [...new Set(teacherFilters)]
-          let uniqueYearsFilters = [...new Set(yearsFilters)].sort()
-          uniqueYearsFilters.push("Other")
-          setTeacherFilter(uniqueTeacherFilters)
-          setYearFilter(uniqueYearsFilters)
-
-          setChartTeacherList(uniqueTeacherFilters)
-          setReChartTeacherList(uniqueTeacherFilters)
-
-          // Filter Unique Year for chart
-          const uniqueYears = new Set();
-          quizes.forEach(item => {
-            const year = new Date(item.date_submitted).getFullYear();
-            uniqueYears.add(year);
-          });
-          const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
-          setChartYearList(sortedUniqueYears);
-          console.log(`Filtered yearssss` , sortedUniqueYears)
-
-          // console.log('bilal--->',"Year 4 - SP Autumn Term Week 14 - Christmas Practice 01"?.match(/WEEK (\d+)$/i)[1])
-          let arr = "Year 4 - SP Autumn Term Week 14 - Christmas Practice 01".split(' ')
-          // console.log('bilal--->', parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]))
-
-
-          let filterData = quizes?.map(({ quiz_name, year_name, date_submitted}, index) => {
-            return {
-              year_name,
-              quiz_name,
-              index,
-              year : new Date(date_submitted).getFullYear(),
-              month : new Date(date_submitted).getMonth() + 1,
-              day : new Date(date_submitted).getDate(),
-              week: getWeekNumber(quiz_name)
-            }
-          })
-
-          setTableHeadersAll(filterData)
-          applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1])
-          if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
-          
-          // setDataLoadin(false)
-          return
-
-          // let { headers, users } = response?.quizes || [[], {}]
-          // setTableHeadersAll(headers)
-          // setTableData(users)
-          // let avgArray = Array(headers.length).fill(0)
-
-          // setUsers(users)
-          // setFilter(users, headers)
-          // setAverage(avgArray, users)
-          if (users != null) { setSchoolNama(Object.values(users)[0]?.school_name_small) }
-
-        })
-        .then(()=>{
-          setDataLoadin(false)
-        })
-    } catch (e) {
-      setDataLoadin(false)
-    }
   }, [])
 
   useEffect(() => {
     const email = selectedTeacher;
     if(email){
       try {
-        const token = localStorage.getItem('token')
+        const token = localStorage?.getItem('token')
         fetch(testURL + '/user', {
           method: 'POST',
           headers: {
@@ -456,13 +491,13 @@ const SchoolParent = () => {
             "Content-Type": "application/json",
             "Authorization": token ? `${token}` : null
           },
-          body: JSON.stringify({
+          body: JSON?.stringify({
             email
           })
         })
           .then(response => response.json())
           .then(response => {
-            setallUniqueUsers(response.data)
+            // setallUniqueUsers(response.data)
           })
       } catch (e) {
       }
@@ -514,9 +549,9 @@ const SchoolParent = () => {
     let _yesrFilter = []
     let _teacherFilter = []
 
-    Object.values(dataSet).map(item => {
-      _yesrFilter.push(item.year_name)
-      _teacherFilter.push(item.email_address)
+    Object.values(dataSet)?.map(item => {
+      _yesrFilter.push(item?.year_name)
+      _teacherFilter.push(item?.email_address)
     })
 
     let _email = [...new Set(_teacherFilter)][0]
@@ -528,18 +563,22 @@ const SchoolParent = () => {
     setTeacherFilter([...new Set(_teacherFilter)])
   }
 
-  const applyFilter = (email, year, headers, data, yearData ) => {
+  const applyFilter = (email, year, headers, data, yearData, quizdata ) => {
     setSelectedYear(year)
     setSelectedTeacher(email)
     setDataSelectedYear(yearData)
+    const filterUserByTeacher = data?.filter(quiz => quiz?.email_address == email );
+    const userName = filterUserByTeacher?.map(quiz => quiz?.user_name);
+    const uniqueuserName = [...new Set(userName)]?.sort()
+    setallUniqueUsers(uniqueuserName);
+    console.log(`uniqueuserName`, uniqueuserName)
     const yearSelected = yearData;
-    console.log(`selectedYear`, yearSelected)
     let filterHeader;
     if(year != "Other"){
       filterHeader = headers?.filter(({ year_name }) => year_name === year)
     }
     else{
-      filterHeader = headers?.filter(item => !(item.year_name && item.year_name.includes('Year')))
+      filterHeader = headers?.filter(item => !(item?.year_name && item?.year_name?.includes('Year')))
     }
     let sortedHeader = filterHeader?.sort((a, b) =>  b.week - a.week)
     // console.log('therer------>1Header', filterHeader)
@@ -556,7 +595,7 @@ const SchoolParent = () => {
             // Calculate the number of days to add to reach the first Monday (if it's not already Monday)
             const daysToAdd = (8 - firstDayOfWeek) % 7;
             // Create a new date by adding the days to the first day of the month
-            const firstMondayOfMonth = new Date(yearSelected, record.month - 1, 1 + daysToAdd);
+            const firstMondayOfMonth = new Date(yearSelected, record?.month - 1, 1 + daysToAdd);
             const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
             if(record?.day >= FirstMondayDate) {
               return record
@@ -572,28 +611,30 @@ const SchoolParent = () => {
     })
     const uniqueQuizNames = finalHeader?.reduce((accumulator, currentObj) => {
       const quizName = currentObj?.quiz_name;
-      // Check if the quiz_name is not already in the accumulator
+      // Check if the quiz_name is not already in the list
       if (!accumulator.some(obj => obj.quiz_name === quizName)) {
           accumulator.push(currentObj);
       }
       return accumulator;
     }, []);
     // console.log('therer------>2', filtered)
+    
     setTableHeaders(uniqueQuizNames)
 
-    let filterEmailData = data.filter(({ email_address }) => email_address == email)
+
+    let filterEmailData = data?.filter(({ email_address }) => email_address == email)
     let filterFinalData;
     if(year != "Other"){
-      filterFinalData = filterEmailData.filter(({ year_name }) => year_name == year)
+      filterFinalData = filterEmailData?.filter(({ year_name }) => year_name == year)
     }
     else{
-      filterFinalData = filterEmailData.filter(item => !(item.year_name && item.year_name.includes('Year')))
+      filterFinalData = filterEmailData?.filter(item => !(item.year_name && item.year_name.includes('Year')))
     }
-    const filteredRecords = filterFinalData.filter(record => {
-      const submissionDate = new Date(record.date_submitted);
-      const year = submissionDate.getFullYear();
-      const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
-      const day = submissionDate.getDate();  
+    const filteredRecords = filterFinalData?.filter(record => {
+      const submissionDate = new Date(record?.date_submitted);
+      const year = submissionDate?.getFullYear();
+      const month = submissionDate?.getMonth() + 1; // Adding 1 because months are 0-indexed
+      const day = submissionDate?.getDate();  
       if (yearSelected === year) {
         if ( month >= 9) {
           if(month == 9){
@@ -619,7 +660,7 @@ const SchoolParent = () => {
     });
     // console.log('therer------>1', filterFinalData)
     let usersObject = {}
-    filteredRecords.map((item) => {
+    filteredRecords?.map((item) => {
       // console.log('therer------>2', usersObject)
       if (usersObject[item?.user_name]) {
         usersObject[item?.user_name] = [...usersObject[item?.user_name], item]
@@ -629,8 +670,9 @@ const SchoolParent = () => {
       }
     })
     // Calculate Cohort average Avg
-    const QuizName = finalHeader?.map(item => item?.quiz_name)    
-    const filteredQuizes = quizesAverages?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
+    const QuizName = finalHeader?.map(item => item?.quiz_name)   
+    const allQuizeData = quizesAverages ? quizesAverages : quizdata; 
+    const filteredQuizes = allQuizeData?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
     const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj?.average_score, 0);
     const AVGCohort = (sumCohort / (filteredQuizes?.length *100)) * 100;
     setCohortAverageAVG(AVGCohort ? `${AVGCohort?.toFixed(1)} %` : '-')
@@ -638,10 +680,9 @@ const SchoolParent = () => {
     // Calculate Class average Avg
     const sum = filteredRecords.reduce((accumulator, currentObj) => accumulator + currentObj?.percentage_score, 0);
     const AVG = (sum / (filteredRecords?.length *100)) * 100;
-    setClassAverageAVG( AVG ? `${AVG?.toFixed(1)} %`: "-") 
-    console.log(`Filtered Data`,filteredRecords)
+    setClassAverageAVG( AVG ? `${AVG?.toFixed(1)} %`: "-")
 
-    const ordered = Object.keys(usersObject).sort().reduce(
+    const ordered = Object?.keys(usersObject)?.sort()?.reduce(
       (obj, key) => {
         obj[key] = usersObject[key];
         return obj;
@@ -672,7 +713,7 @@ const SchoolParent = () => {
   // Rolling Averages API
   useEffect(() => {
     setChartDataLoading(true)
-    const year = rechartSelectedYear || rechartYearList[rechartYearList.length - 1]
+    const year = rechartSelectedYear || rechartYearList[rechartYearList?.length - 1]
     const email =  selectedReChartTeacher || "";
     const username = rechartSelectedStudent || "";
     const type = "teacherparent";
@@ -697,7 +738,6 @@ const SchoolParent = () => {
       })
         .then(response => response.json())
         .then(response => {
-          console.log(`Token `, token)
           if(response?.rollingaverage.length === 0){
             setChart([{
               "SMASH Maths Cohort Average": 0.0,
@@ -721,11 +761,11 @@ const SchoolParent = () => {
   const setAverage = (avgArr, dataSet) => {
     if (dataSet != null) {
       let _totalQuizCount = 0
-      Object.values(dataSet).map(item => {
+      Object.values(dataSet)?.map(item => {
 
         _totalQuizCount++
-        for (let i = 0; i < item.quizes.length; i++) {
-          avgArr[i] = avgArr[i] + (item.quizes[i] === "" ? 0 : item.quizes[i])
+        for (let i = 0; i < item?.quizes?.length; i++) {
+          avgArr[i] = avgArr[i] + (item?.quizes[i] === "" ? 0 : item?.quizes[i])
         }
       })
       setTableAverage(avgArr)
@@ -754,8 +794,8 @@ const SchoolParent = () => {
 
   const handleChartTeacherSelect = (childName) => {
     setSelectedChartTeacher(childName)
-    const teacherFilters = quizesData.filter(x => x.email_address === childName)
-    const students = teacherFilters.map(x => x.user_name).sort();
+    const teacherFilters = quizesData?.filter(x => x?.email_address === childName)
+    const students = teacherFilters?.map(x => x?.user_name)?.sort();
     const uniqueStudents =  [...new Set(students)]
     setChartStudentList(uniqueStudents);
     filterChartaData ( chartSelectedYear, childName, chartSelectedStudent)
@@ -829,34 +869,33 @@ const SchoolParent = () => {
       };
     });
     let filteredByYear = modifiedArray?.filter(item => item?.date_submitted[0] == year);
-    const filteredByClass = filteredByYear.filter(item => item.email_address === teacher);
+    const filteredByClass = filteredByYear?.filter(item => item.email_address === teacher);
     // Get Only First Quiz from Same Quiz by User
-    const uniqueObjectsByQuiz = filteredByClass.reduce((acc, obj) => {
+    const uniqueObjectsByQuiz = filteredByClass?.reduce((acc, obj) => {
       const key = `${obj.user_name}-${obj.quiz_name}`;
       if (!acc[key]) {
         acc[key] = obj;
       }
       return acc;
     }, {});   
-    const filteredClassDataByOneQuiz = Object.values(uniqueObjectsByQuiz);
-    const filteredClassData = filteredClassDataByOneQuiz.filter(item => item.percentage_score > 0)
+    const filteredClassDataByOneQuiz = Object?.values(uniqueObjectsByQuiz);
+    const filteredClassData = filteredClassDataByOneQuiz?.filter(item => item.percentage_score > 0)
     const ClassAvg = DataToArrayOfMonths(filteredClassData);
 
-    const filteredByStudent = filteredByYear.filter(item => item.user_name == student);
+    const filteredByStudent = filteredByYear?.filter(item => item?.user_name == student);
     // Get Only First Quiz from Same Quiz by User
-    const uniqueObjectsById = filteredByStudent.reduce((acc, obj) => {
-      const key = `${obj.user_name}-${obj.quiz_name}`;
+    const uniqueObjectsById = filteredByStudent?.reduce((acc, obj) => {
+      const key = `${obj?.user_name}-${obj?.quiz_name}`;
       if (!acc[key]) {
         acc[key] = obj;
       }
       return acc;
     }, {});
-    let filteredStudentDataByOneQuiz = Object.values(uniqueObjectsById);
-    filteredStudentDataByOneQuiz = filteredStudentDataByOneQuiz.filter(item => item.percentage_score > 0)
+    let filteredStudentDataByOneQuiz = Object?.values(uniqueObjectsById);
+    filteredStudentDataByOneQuiz = filteredStudentDataByOneQuiz?.filter(item => item?.percentage_score > 0)
     const studentAvg = DataToArrayOfMonths(filteredStudentDataByOneQuiz);
 
     const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
-    console.log(`Quzies` , filteredClassData )
     setFilteredChartData(ToSingleObj);
   }
   const DataToArrayOfMonths = (data) =>{
@@ -866,7 +905,7 @@ const SchoolParent = () => {
     const monthOccurrences = {};
 
     // Loop through the given data and store average scores for each month
-    data.forEach(item => {
+    data?.forEach(item => {
       const monthName = item?.date_submitted[1];
       const cohort = item.percentage_score;
 
@@ -881,7 +920,7 @@ const SchoolParent = () => {
 
     // Loop through all the 12 months to calculate the average score for each month
     const allMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    const newArray = allMonths.map(month => {
+    const newArray = allMonths?.map(month => {
       const averageScore = monthsData[month] || 0;
       const occurrenceCount = monthOccurrences[month] || 0;
       return {
@@ -896,12 +935,12 @@ const SchoolParent = () => {
   // Function to convert Different average to a single average
   const ConvertTosingleObj = (CohortAvg, ClassAvg, studentAvg) =>{
     const allMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    const result = allMonths.map((month, index) => {
+    const result = allMonths?.map((month, index) => {
       return {
         month: month,
-        CohortAvg: CohortAvg[index].cohort,
-        ClassAvg: ClassAvg[index].cohort,
-        studentAvg: studentAvg[index].cohort,
+        CohortAvg: CohortAvg[index]?.cohort,
+        ClassAvg: ClassAvg[index]?.cohort,
+        studentAvg: studentAvg[index]?.cohort,
       }
     });
     return result;
@@ -1109,13 +1148,13 @@ const SchoolParent = () => {
     }, {});
     const filteredData = Object.values(uniqueObjectsById);
     const sumOfAllQuizes = filteredData.reduce((acc, item) => acc + item['percentage_score'], 0)
-    console.log(`Data Avg`,sumOfAllQuizes, filteredData?.length)
     return filteredData?.length === 0 ? '-' : `${(sumOfAllQuizes / filteredData?.length).toFixed(1)} %`;
   }
 
-  const getMarks = (key, name) => {
-    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
-    return obj ? `${obj.percentage_score.toFixed(1)} %` : ''
+  const getMarks = (user_name, quiz_name) => {
+    let obj = quizesData?.filter((item) => item.user_name === user_name && item.quiz_name === quiz_name && item.email_address == selectedTeacher)
+    if(obj?.length === 0) return ''
+    return obj != undefined ? `${obj[0]?.percentage_score?.toFixed(1)} %` : ''
   }
 
   const getStudentaverage = (student) =>{
@@ -1171,59 +1210,26 @@ const SchoolParent = () => {
   
   const UpdateFullName = (e, username ) =>{
     const full_name = e.target.value;
-    const found = allUniqueUsers.filter(item => item.user_name === username);
-    const id = found[0].id;
     const email = localStorage.getItem('userEmail')
-    
-    // for (let i = 0; i < allUniqueUsers.length; i++) {
-    //   if (array[i].id === id) {
-    //     array[i].full_name = full_name;
-    //     break;  // Assuming you only want to update the first occurrence with id
-    //   }
-    // }
-    
-    // let temp = [...allUniqueUsers];
-    // for (let user of temp) {
-    //   if (user.id === id) {
-    //     console.log(user)
-    //     user.full_name = full_name;
-    //     console.log(user)
-    //     break;
-    //   }
-    // }
-
-    const updatedData = allUniqueUsers.map(user => {
-      if (user.id === id) {
+    console.log(`modified`, username, quizesData?.filter(user => user?.user_name == username))
+    const updatedData = quizesData?.map(user => {
+      if (user?.user_name === username) {
         const modified =  { ...user, full_name: full_name }
+        console.log(`modified`, modified)
         return modified;
       }
       return user;
     });
-    setallUniqueUsers(updatedData);
+    setQuizesData(updatedData);
   }
 
   const UpdateFullNameDB = (e, username ) =>{
     const full_name = e.target.value;
-    const found = allUniqueUsers.filter(item => item.user_name === username);
-    const id = found[0].id;
-    const email = localStorage.getItem('userEmail')
-    
-    // for (let i = 0; i < allUniqueUsers.length; i++) {
-    //   if (array[i].id === id) {
-    //     array[i].full_name = full_name;
-    //     break;  // Assuming you only want to update the first occurrence with id
-    //   }
-    // }
-    
-    // let temp = [...allUniqueUsers];
-    // for (let user of temp) {
-    //   if (user.id === id) {
-    //     console.log(user)
-    //     user.full_name = full_name;
-    //     console.log(user)
-    //     break;
-    //   }
-    // }
+    // const found = allUniqueUsers.filter(item => item.user_name === username);
+    // const userName = found[0].username;
+    const isUserExists = quizesData.filter(user => user.user_name == username);
+    const user_id = isUserExists[0]?.user_id;
+    const email = selectedTeacher
     try {
       const token = localStorage.getItem('token')
       fetch(testURL + '/updateuser', {
@@ -1235,63 +1241,68 @@ const SchoolParent = () => {
         },
         body: JSON.stringify({
           full_name,
-          id,
+          user_id,
+          user_name:username,
+          email
         })
       })
         .then(response => {
           // window.location.reload();
-          const updatedData = allUniqueUsers.map(user => {
-            if (user.id === id) {
+          const updatedData = quizesData?.map(user => {
+            if (user.user_name === username) {
               const modified =  { ...user, full_name: full_name }
               return modified;
             }
             return user;
           });
-          setallUniqueUsers(updatedData);
+          setQuizesData(updatedData);
+          toast.success("User name updated successful.");
         })
     } catch (e) {
-      // setDataLoadin(false)
+      toast.error("Unable to updated username, please try later.");
     }
   }
   const getFullName = (username) => {
-    const found = allUniqueUsers.filter(item => item.user_name == username)
-    return found[0]?.full_name == username ? "" :  found[0]?.full_name
+    const found = quizesData.filter(item => item.user_name == username)
+    const studentName = found[0]?.full_name ? found[0]?.full_name : ""
+    const fullName = studentName.trim() == username.trim() ? "" : studentName
+    return fullName
   }
   const getStudentName = (username) =>{
-    const found = allUniqueUsers.filter(item => item.user_name == username)
+    const found = allUniqueUsers?.filter(item => item.user_name == username)
     if(!found) return `${username} - Enter Name`;
     return found[0]?.full_name == username ? `${username} - Enter Name` :  `${username} - ${found[0]?.full_name}`
   }
   const getStudentNameForChart = (username) =>{
-    const found = allUniqueChartUsers.filter(item => item.user_name == username)
+    const found = quizesData?.filter(item => item.user_name == username)
     if(!found) return `${username} - Enter Name`;
-    return found[0]?.full_name == username ? `${username} - Enter Name` :  `${username} - ${found[0]?.full_name}`
+    return found[0]?.full_name == username ||  found[0]?.full_name == "" ? `${username} - Enter Name` :  `${username} - ${found[0]?.full_name}`
   }
 
   const getStudentEffort = (student) =>{
     let studentData = [];
     if(selectedYear != "Other"){
-      studentData = quizesData.filter(item => item.user_name === student && item.year_name === selectedYear && item.percentage_score > 0);
+      studentData = quizesData?.filter(item => item.user_name === student && item.year_name === selectedYear && item.email_address == selectedTeacher && item.percentage_score > 0);
     }
     else{
-      studentData = quizesData.filter((record) => !record.year_name.includes('Year')  && record.user_name == student && record.percentage_score > 0);
+      studentData = quizesData?.filter((record) => !record.year_name.includes('Year')  && record.user_name == student && item.email_address == selectedTeacher && record.percentage_score > 0);
     }
     const finalData = studentData?.filter(record => {
       const submissionDate = new Date(record?.date_submitted);
-      const year = submissionDate.getFullYear();
-      const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
-      const day = submissionDate.getDate();
+      const year = submissionDate?.getFullYear();
+      const month = submissionDate?.getMonth() + 1; // Adding 1 because months are 0-indexed
+      const day = submissionDate?.getDate();
       if (dataSelectedYear === year) {
         if ( month >= 9) {
           if(month == 9){
             const firstDayOfMonth = new Date(dataSelectedYear, month - 1, 1); // Month is zero-based
             // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
-            const firstDayOfWeek = firstDayOfMonth.getDay();
+            const firstDayOfWeek = firstDayOfMonth?.getDay();
             // Calculate the number of days to add to reach the first Monday (if it's not already Monday)
             const daysToAdd = (8 - firstDayOfWeek) % 7;
             // Create a new date by adding the days to the first day of the month
             const firstMondayOfMonth = new Date(dataSelectedYear, month - 1, 1 + daysToAdd);
-            const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
+            const FirstMondayDate = new Date(firstMondayOfMonth)?.getDate();
             if(day >= FirstMondayDate) {
               return record
             }
@@ -1313,7 +1324,7 @@ const SchoolParent = () => {
       }
       return acc;
     }, {});
-    let filteredData = Object.values(uniqueObjectsById);
+    let filteredData = Object?.values(uniqueObjectsById);
     filteredData = filteredData?.filter(item => item?.percentage_score > 0)
 
     // Calculate the effort score for the student user_name
@@ -1331,7 +1342,6 @@ const SchoolParent = () => {
   // Revised Charts
   const handleReChartYearSelect = (childName) => {
     setReChartSelectedYear(childName)
-    console.log( childName, selectedReChartTeacher, rechartSelectedStudent, )
   }
   const handleReChartTeacherSelect = (childName) => {
     setSelectedReChartTeacher(childName)
@@ -1339,18 +1349,18 @@ const SchoolParent = () => {
     const students = teacherFilters.map(x => x.user_name).sort();
     const uniqueStudents =  [...new Set(students)]
     setReChartStudentList(uniqueStudents);
-    console.log(uniqueStudents)
-    console.log( rechartSelectedYear, childName, rechartSelectedStudent)
   }
   const handleReChartStudentSelect = (childName) => {
     setReChartSelectedStudent(childName)
-    console.log( rechartSelectedYear, selectedReChartTeacher, childName)
   } 
-  const getMarkColor = (key, name) => {
-    console.log(`users[key]`, users[key])
-    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
-    if(!obj) return ''
-    return obj.percentage_score.toFixed(1)
+  const getMarkColor = (user_name, quiz_name) => {
+    let obj = quizesData?.filter((item) => item.user_name === user_name && item.quiz_name === quiz_name && item.email_address == selectedTeacher)
+    if(obj.length === 0) return ''
+    return obj[0]?.percentage_score?.toFixed(1)
+    
+    // let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
+    // if(!obj) return ''
+    // return obj.percentage_score.toFixed(1)
   } 
 
   return (
@@ -1450,6 +1460,9 @@ const SchoolParent = () => {
       <div className="flex items-center justify-center ml-36">
         <h4 className="text-[#17026b] items-center font-bold text-xl">ANALYTICS Console - Premium Schools Package</h4>
       </div>
+      <div className="flex items-center justify-center ml-36">
+        <h4 className="text-[#17026b] items-center">Need help? Email us at <b>hello@smashmaths.org</b></h4>
+      </div>
       <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
       <div className="w-full flex justify-start items-center">
         <div className="w-full flex justify-start items-center gap-4 flex-row mt-1">
@@ -1548,13 +1561,13 @@ const SchoolParent = () => {
                     </svg>
                   </button>
                   {isChildOpen && (
-                    <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
+                    <ul className="absolute right-0 mt-2 py-2 w-74 max-h-[400px] overflow-y-auto bg-white rounded-lg shadow-slate-800 shadow-md ml-4">
                       {teacherFilter?.map((childName, index) => {
                         return (
                           <>
                             <li
                               className={
-                                index !== childName.length - 1
+                                index !== childName?.length - 1
                                   ? "border-b border-slate-400 cursor-pointer"
                                   : "cursor-pointer"
 
@@ -1611,7 +1624,7 @@ const SchoolParent = () => {
                           <>
                             <li
                               className={
-                                index !== childName.length - 1
+                                index !== childName?.length - 1
                                   ? "border-b border-slate-400 cursor-pointer"
                                   : "cursor-pointer"
 
@@ -1670,7 +1683,7 @@ const SchoolParent = () => {
                             <>
                               <li
                                 className={
-                                  index !== childName.length - 1
+                                  index !== childName?.length - 1
                                     ? "border-b border-slate-400 cursor-pointer"
                                     : "cursor-pointer"
 
@@ -1783,7 +1796,7 @@ quiz5: 35,
                         ))
                       }
                       {/* {tableAverage?.map((average) => (
-                      <td class="p-3 text-center">
+                      <td className="p-3 text-center">
                         {(average / totalQuizCount).toFixed(2)}
                       </td>
                     )
@@ -1791,11 +1804,11 @@ quiz5: 35,
                     </>
                   ) : (
                     <>
-                      {averages.map(
+                      {averages?.map(
                         (average, index) =>
-                          data.some((student) => student[`quiz${index + 1}`]) && (
+                          data?.some((student) => student[`quiz${index + 1}`]) && (
                             <td className="p-3 text-center">
-                              {average.toFixed(2)}
+                              {average?.toFixed(2)}
                             </td>
                           )
                       )}
@@ -1821,7 +1834,7 @@ quiz5: 35,
                         ))
                       }
                       {/* {tableAverage?.map((average) => (
-                      <td class="p-3 text-center">
+                      <td className="p-3 text-center">
                         {(average / totalQuizCount).toFixed(2)}
                       </td>
                     )
@@ -1829,9 +1842,9 @@ quiz5: 35,
                     </>
                   ) : (
                     <>
-                      {averages.map(
+                      {averages?.map(
                         (average, index) =>
-                          data.some((student) => student[`quiz${index + 1}`]) && (
+                          data?.some((student) => student[`quiz${index + 1}`]) && (
                             <td className="p-3 text-center">
                               {average.toFixed(2)}
                             </td>
@@ -1840,20 +1853,31 @@ quiz5: 35,
                     </>
                   )}
                 </tr>
-                {Object.keys(users)?.length === 0 && 
+                {/* {Object?.keys(users)?.length === 0 && 
                 <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
-                  {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
+                  {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> *9/}
                   <td className="p-5 text-center w-98s" rowSpan='3'></td> 
                   <td className="p-5 text-center w-98s" rowSpan='3'>No Data Avaiable.</td> 
                   <td className="p-5 text-center w-98s" rowSpan='3'></td>                  
                 </tr> }
-                {Object.keys(users).map((student) => (
+                {Object?.keys(users)?.map((student) => (
                   <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
                     <td className="p-3">{users[student][0]?.user_name}</td>
                     <td className="p-3"><input value={getFullName(users[student][0]?.user_name)} className="h-8 placeholder-red-600" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, users[student][0]?.user_name)} onBlur={(e) => UpdateFullNameDB(e, users[student][0]?.user_name)}/></td>
-                    {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
+                    {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> *9/}
                     <td className="p-3 text-center w-40 font-bold">{getStudentaverage(users[student][0]?.user_name)}</td>
                     <td className="p-3 text-center w-40 font-bold">{getStudentEffort(users[student][0]?.user_name)}</td>
+                    {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
+                  </tr>
+                ))} */}
+                {/* Test  fro all users */}
+                {allUniqueUsers?.map((student) => (
+                  <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
+                    <td className="p-3">{student}</td>
+                    <td className="p-3"><input value={getFullName(student)} className="h-8 px-3 text-[#ED1C24] placeholder-[#ED1C24] bold-placeholder" placeholder="Enter name" onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
+                    {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
+                    <td className="p-3 text-center w-40 font-bold">{getStudentaverage(student)}</td>
+                    <td className="p-3 text-center w-40 font-bold">{getStudentEffort(student)}</td>
                     {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
                   </tr>
                 ))}
@@ -1866,25 +1890,26 @@ quiz5: 35,
             <thead className="text-xs text-white uppercase bg-[#17026b] h-32">
               <tr className="items-center">
                 <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
-                {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th> */}
-                <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Avg</th>
+                <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th>
                 <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Effort Score</th>
               </tr>
             </thead>
             <tbody>
               {/* SMASH Maths Cohort  */}
-              <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-                {/* <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td> */}
-                <td className="sticky left-40 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
-                <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
-                <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
-              </tr>
-
-              
-                <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
-                  {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
-                  <td className="p-3 text-center" rowSpan='3'>No Data Avaiable.</td>   
+              {allUniqueUsers?.length > 0 && allUniqueUsers?.map((student) => (
+                  <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
+                    <td className="p-3">{student}</td>
+                    <td className="p-3"><input value={getFullName(student)} className="h-8 px-3 text-[#ED1C24] placeholder-[#ED1C24] bold-placeholder" placeholder="Enter name" onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
+                    <td className="p-3 w-40 font-bold">-</td>
+                  </tr>
+                ))}
+                {allUniqueUsers?.length == 0 &&  (
+                  <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
+                  <td className="p-3 text-center h-5" rowSpan='3'  style={{ height: '5rem' }}></td> 
+                  <td className=" h-28">No Data Avaiable.</td> 
+                  <td className="text-center h-5" rowSpan='3'  style={{ height: '5rem' }}></td>   
                 </tr>
+                )}
             </tbody>
           </table>
         </div>}
@@ -2092,7 +2117,7 @@ quiz5: 35,
                         <>
                           <li
                             className={
-                              index !== childName.length - 1
+                              index !== childName?.length - 1
                                 ? "border-b border-slate-400 cursor-pointer"
                                 : "cursor-pointer"
                             }
@@ -2147,7 +2172,7 @@ quiz5: 35,
                         <>
                           <li
                             className={
-                              index !== childName.length - 1
+                              index !== childName?.length - 1
                                 ? "border-b border-slate-400 cursor-pointer"
                                 : "cursor-pointer"
                             }
@@ -2202,7 +2227,7 @@ quiz5: 35,
                         <>
                           <li
                             className={
-                              index !== childName.length - 1
+                              index !== childName?.length - 1
                                 ? "border-b border-slate-400 cursor-pointer"
                                 : "cursor-pointer"
                             }
@@ -2228,7 +2253,7 @@ quiz5: 35,
         </div>        
       </div>
       <div className="mb-24">
-        {chart.length > 0 && <RevisedLineChart chart={chart}/>} 
+        {chart?.length > 0 && <RevisedLineChart chart={chart}/>} 
       </div>
     </div>
     

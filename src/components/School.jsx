@@ -10,6 +10,8 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import CloseIcon from '@mui/icons-material/Close';
+import { toast } from "react-hot-toast";
+import './Charts.css'
 const ChildNames = ["Ali", "Usama", "Omair", "Talha", "Agha", "Hassan"];
 const data = [
   {
@@ -184,7 +186,6 @@ const School = () => {
   // const API_URL = 'https://api-dashboard-brr3fliswa-uc.a.run.app';
   // const testURL = 'https://dev-api-dashboard-brr3fliswa-uc.a.run.app/api'
   const testURL = import.meta.env.MODE === 'development' ? import.meta.env.VITE_REACT_APP_API_BASE_URL_DEV : import.meta.env.VITE_REACT_APP_API_BASE_URL_PRD;
-
   const [isTimeFrameOpen, setIsTimeFrameOpen] = useState(false);
   const [isChildOpen2, setIsChildOpen2] = useState(false);
   const [studentOpen, setStudentOpen] = useState(false);
@@ -239,7 +240,7 @@ const School = () => {
   const [quizesAverages, setQuizesAverages] = useState()
   const [allUniqueUsers, setallUniqueUsers] = useState([])
   const [dataYearList, setDataYearList] = useState([])
-  const [dataSelectedYear, setDataSelectedYear] = useState()
+  const [dataSelectedYear, setDataSelectedYear] = useState(null)
   // const [chartsData, setChartsData] = useState(datachartslinefromfile)
   // const [filteredChartData, setFilteredChartData] = useState(initialChartData)
   const [chartTeacherList, setChartTeacherList] = useState([])
@@ -274,47 +275,30 @@ const School = () => {
   const [rechartSelectedYear, setReChartSelectedYear] = useState('')
 
 
-  useEffect(() => {
-    const email = localStorage.getItem('userEmail')
-    try {
-      const token = localStorage.getItem('token')
-      fetch(testURL + '/all_quiz_averages', {
-        method: 'POST',
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-          "Authorization": token ? `${token}` : null
-        }
-      })
-        .then(response => response.json())
-        .then(response => {
-          setQuizesAverages(response.quizes.averages)
-        })
-    } catch (e) {
-      // setDataLoadin(false)
-    }
-
-  }, [])
-
-
-
-
   // useEffect(() => {
-  //     let years = [];
-  //     const startYear = 2022;
-  //     const currentYear = new Date().getFullYear();
-    
-  //     for (let year = startYear; year <= currentYear; year++) {
-  //       years.push(year);
-  //       if (year < currentYear) {
-  //         years.push(year + 1);
-  //       } else if (new Date(year + 1, 8, 1) <= new Date()) {
-  //         years.push(year + 1);
+  //   const email = localStorage.getItem('userEmail')
+  //   try {
+  //     const token = localStorage.getItem('token')
+  //     fetch(testURL + '/all_quiz_averages', {
+  //       method: 'POST',
+  //       headers: {
+  //         "Access-Control-Allow-Origin": "*",
+  //         "Content-Type": "application/json",
+  //         "Authorization": token ? `${token}` : null
   //       }
-  //     }
-  //     years = years.map(item => item-1)
-  //     setDataYearList([...new Set(years)]);
-  //   },[])
+  //     })
+  //       .then(response => response.json())
+  //       .then(response => {
+  //         setQuizesAverages(response.quizes.averages)
+  //       })
+  //   } catch (e) {
+  //     // setDataLoadin(false)
+  //   }
+
+  // }, [])
+
+
+
 
   useEffect(() => {
     // Get the current year
@@ -333,10 +317,10 @@ const School = () => {
         year++;
       }
     }
-
-    setDataSelectedYear(yearList[yearList.length-1])
-    // years = years.map(item => item-1)
+    console.log(`yearList`, yearList[yearList.length-1],yearList)
+    // setDataSelectedYear(yearList[yearList.length-1])
     setDataYearList(yearList);
+    setReChartYearList(yearList)
   },[])
   // Rolling Averages API
   useEffect(() => {
@@ -389,87 +373,111 @@ const School = () => {
     const email = localStorage.getItem('userEmail')
     // fetch(API_URL + '/api/parent_dashboard', {teacher_dashboard
     // "email": "jbrogan5.208@lgflmail.org"
-
-    const token = localStorage.getItem('token')
+    let quizdata = [];
     try {
-      fetch(testURL + '/getteacherdashboard', {
+      const token = localStorage.getItem('token')
+      fetch(testURL + '/all_quiz_averages', {
         method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
         headers: {
           "Access-Control-Allow-Origin": "*",
           "Content-Type": "application/json",
           "Authorization": token ? `${token}` : null
-        },
-        body: JSON.stringify({
-          email
-        })
+        }
       })
         .then(response => response.json())
         .then(response => {
-          const quizes = response?.quizes || [[]]
-          setQuizesData(quizes)
-          const teacherFilters = quizes.map(x => x.email_address)
-          let yearsFilters = quizes.map(x => x.year_name)
-          const studentFilters = quizes.map(({date_submitted,user_name, email_address, percentage_score}) => ({date_submitted,user_name, email_address, percentage_score}))
-          yearsFilters = yearsFilters.filter(item => item.includes('Year'))
-
-          const uniqueTeacherFilters = [...new Set(teacherFilters)]
-          const uniqueYearsFilters = [...new Set(yearsFilters)].sort()
-          setYearFilter(uniqueYearsFilters)
-          setTeacherFilter(uniqueTeacherFilters)
-          setChartTeacherList(uniqueTeacherFilters)
-          setReChartTeacherList(uniqueTeacherFilters)
-          // setSelectedReChartTeacher(uniqueTeacherFilters[0])
-          
-          // Filter Unique Year for chart
-          const uniqueYears = new Set();
-          quizes.forEach(item => {
-            const year = new Date(item.date_submitted).getFullYear();
-            uniqueYears.add(year);
-          });
-          const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
-          setChartYearList(sortedUniqueYears);
-          // setReChartYearList(sortedUniqueYears);
-
-          // console.log('bilal--->',"Year 4 - SP Autumn Term Week 14 - Christmas Practice 01"?.match(/WEEK (\d+)$/i)[1])
-          let arr = "Year 4 - SP Autumn Term Week 14 - Christmas Practice 01".split(' ')
-          // console.log('bilal--->', parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]))
-
-          let filterData = quizes?.map(({ quiz_name, year_name, date_submitted }, index) => {
-            return {
-              year_name,
-              quiz_name,
-              index,
-              year : new Date(date_submitted).getFullYear(),
-              month : new Date(date_submitted).getMonth() + 1,
-              day : new Date(date_submitted).getDate(),
-              week: getWeekNumber(quiz_name)
-            }
-          })
-          setTableHeadersAll(filterData)
-          console.log(`Yearssss`, filterData)
-          applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1])
-          if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
-          // setDataLoadin(false)
-          return
-
-          // let { headers, users } = response?.quizes || [[], {}]
-          // setTableHeadersAll(headers)
-          // setTableData(users)
-          // let avgArray = Array(headers.length).fill(0)
-
-          // setUsers(users)
-          // setFilter(users, headers)
-          // setAverage(avgArray, users)
-          if (users != null) { setSchoolNama(Object.values(users)[0]?.school_name_small) }
-
+          quizdata = response?.quizes?.averages;
+          setQuizesAverages(response.quizes.averages)
         })
-        .then(()=>{
-          setDataLoadin(false)
+        .then(() => {
+          const token = localStorage.getItem('token')
+          try {
+            fetch(testURL + '/getteacherdashboard', {
+              method: 'POST',
+              mode: 'cors',
+              cache: 'no-cache',
+              headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+                "Authorization": token ? `${token}` : null
+              },
+              body: JSON.stringify({
+                email
+              })
+            })
+              .then(response => response.json())
+              .then(response => {
+                const quizes = response?.quizes || [[]]
+                setQuizesData(quizes)
+                const teacherFilters = quizes.map(x => x.email_address)
+                let yearsFilters = quizes.map(x => x.year_name)
+                const studentFilters = quizes?.map(({date_submitted,user_name, email_address, percentage_score}) => ({date_submitted,user_name, email_address, percentage_score}))
+                yearsFilters = yearsFilters?.filter(item => item?.includes('Year'))
+      
+                let uniqueTeacherFilters = [...new Set(teacherFilters)]
+                uniqueTeacherFilters = uniqueTeacherFilters.filter(value => value !== null)
+                const uniqueYearsFilters = [...new Set(yearsFilters)].sort()
+                setYearFilter(uniqueYearsFilters)
+                setTeacherFilter(uniqueTeacherFilters)
+                setChartTeacherList(uniqueTeacherFilters)
+                setReChartTeacherList(uniqueTeacherFilters)
+                // setSelectedReChartTeacher(uniqueTeacherFilters[0])
+                
+                // Filter Unique Year for chart
+                const uniqueYears = new Set();
+                quizes.forEach(item => {
+                  const year = new Date(item?.date_submitted).getFullYear();
+                  uniqueYears.add(year);
+                });
+                const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
+                let filteredYears = sortedUniqueYears.filter(year => year >= 2021);
+                const currentYear = new Date().getFullYear();
+                filteredYears = filteredYears.length == 0 ? [currentYear] : filteredYears
+                console.log(`filteredYears`, filteredYears);
+                setChartYearList(sortedUniqueYears);
+                // setReChartYearList(sortedUniqueYears);
+      
+                // console.log('bilal--->',"Year 4 - SP Autumn Term Week 14 - Christmas Practice 01"?.match(/WEEK (\d+)$/i)[1])
+                let arr = "Year 4 - SP Autumn Term Week 14 - Christmas Practice 01".split(' ')
+                // console.log('bilal--->', parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]))
+      
+                let filterData = quizes?.map(({ quiz_name, year_name, date_submitted }, index) => {
+                  return {
+                    year_name,
+                    quiz_name,
+                    index,
+                    year : new Date(date_submitted).getFullYear(),
+                    month : new Date(date_submitted).getMonth() + 1,
+                    day : new Date(date_submitted).getDate(),
+                    week: getWeekNumber(quiz_name)
+                  }
+                })
+                setTableHeadersAll(filterData)
+                applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,filteredYears[filteredYears.length - 1], quizdata)
+                if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
+                // setDataLoadin(false)
+                return
+      
+                // let { headers, users } = response?.quizes || [[], {}]
+                // setTableHeadersAll(headers)
+                // setTableData(users)
+                // let avgArray = Array(headers.length).fill(0)
+      
+                // setUsers(users)
+                // setFilter(users, headers)
+                // setAverage(avgArray, users)
+                if (users != null) { setSchoolNama(Object.values(users)[0]?.school_name_small) }
+      
+              })
+              .then(()=>{
+                setDataLoadin(false)
+              })
+          } catch (e) {
+            setDataLoadin(false)
+          }
         })
     } catch (e) {
-      setDataLoadin(false)
+      // setDataLoadin(false)
     }
   }, [])
 
@@ -493,7 +501,7 @@ const School = () => {
         })
           .then(response => response.json())
           .then(response => {
-            setallUniqueUsers(response.data)
+            // setallUniqueUsers(response.data)
             // setDataLoadin(false)
           })
       } catch (e) {
@@ -522,7 +530,7 @@ const School = () => {
           })
             .then(response => response.json())
             .then(response => {
-              setallUniqueChartUsers(response.data)
+              // setallUniqueChartUsers(response.data)
               // setDataLoadin(false)
             })
         } catch (e) {
@@ -558,7 +566,6 @@ const School = () => {
     return completeWeeksData;
   }
   function combineData(data1, data2, data3) {
-    console.log(`In data`, data1.length, data2.length, data3.length);
     const combinedData = [];
     for (let i = 1; i < 52; i++) {
       const week = data1[i]?.Week || i;
@@ -594,18 +601,24 @@ const School = () => {
     setTeacherFilter([...new Set(_teacherFilter)])
   }
 
-  const applyFilter = (email, year, headers, data , yearData) => {
+  const applyFilter = (email, year, headers, data , yearData, quizdata) => {
+    setDataLoadin(true)
     setSelectedYear(year)
     setSelectedTeacher(email)
     setDataSelectedYear(yearData)
+    console.log(`dataSelectedYear`, yearData)
+
+    const filterUserByTeacher = data?.filter(quiz => quiz?.email_address == email );
+    const userName = filterUserByTeacher?.map(quiz => quiz?.user_name);
+    const uniqueuserName = [...new Set(userName)]?.sort()
+    setallUniqueUsers(uniqueuserName);
 
     const yearSelected = yearData;
     let filterHeader = headers.filter(({ year_name }) => year_name == year)
     let sortedHeader = filterHeader.sort((a, b) =>  b.week - a.week)
     // sortedHeader = [new Set(sortedHeader)]
-    const ids = sortedHeader.map(o => o.quiz_name)
-    const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
-    console.log(`filtered`, filtered)
+    const ids = sortedHeader?.map(o => o.quiz_name)
+    const filtered = filterHeader?.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
     const finalHeader = sortedHeader.filter(record => {
       if (yearSelected === record.year) {
         if ( record.month >= 9) {
@@ -685,10 +698,10 @@ const School = () => {
       }
     })
     // Calculate Cohort average Avg
-    const QuizName = finalHeader?.map(item => item?.quiz_name)    
-    const filteredQuizes = quizesAverages?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
+    const QuizName = finalHeader?.map(item => item?.quiz_name) 
+    const allQuizeData = quizesAverages ? quizesAverages : quizdata;
+    const filteredQuizes = allQuizeData?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
     const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj?.average_score, 0);
-    console.log(`SUMIS`, filteredQuizes)
     const AVGCohort = (sumCohort / (filteredQuizes?.length *100)) * 100;
     setCohortAverageAVG(AVGCohort ? `${AVGCohort?.toFixed(1)} %` : '-')
     
@@ -696,7 +709,6 @@ const School = () => {
     const sum = filteredRecords?.reduce((accumulator, currentObj) => accumulator + currentObj?.percentage_score, 0);
     const AVG = (sum / (filteredRecords?.length *100)) * 100;
     setClassAverageAVG( AVG ? `${AVG?.toFixed(1)} %`: "-") 
-    console.log(`Filtered Data`,filteredRecords)
     const ordered = Object.keys(usersObject).sort().reduce(
       (obj, key) => {
         obj[key] = usersObject[key];
@@ -706,6 +718,7 @@ const School = () => {
     );
 
     setUsers(ordered)
+    setDataLoadin(false)
     // console.log('therer------>2', usersObject)
     // console.log('therer------>2', usersObject)
     return
@@ -797,7 +810,6 @@ const School = () => {
   // Revised Charts
   const handleReChartYearSelect = (childName) => {
     setReChartSelectedYear(childName)
-    console.log( childName, selectedReChartTeacher, rechartSelectedStudent, )
   }
   const handleReChartTeacherSelect = (childName) => {
     setSelectedReChartTeacher(childName)
@@ -805,12 +817,9 @@ const School = () => {
     const students = teacherFilters.map(x => x.user_name).sort();
     const uniqueStudents =  [...new Set(students)]
     setReChartStudentList(uniqueStudents);
-    console.log(uniqueStudents)
-    console.log( rechartSelectedYear, childName, rechartSelectedStudent)
   }
   const handleReChartStudentSelect = (childName) => {
     setReChartSelectedStudent(childName)
-    console.log( rechartSelectedYear, selectedReChartTeacher, childName)
   }
   
   useEffect(() => {
@@ -987,7 +996,6 @@ const School = () => {
 
   const getClassAverage = (quiz) => {
     // Filter Data on base of Teacher, Quiz Year and Quiz name
-    console.log(`Headerssssss `, tableHeaders)
     const filterQuizeTeacherYear = quizesData.filter((record) => record.email_address == selectedTeacher  && record.year_name == selectedYear && record.quiz_name === quiz);
     // Filter Data on base of Quize Submitted date
     const finalData = filterQuizeTeacherYear?.filter(record => {
@@ -1035,17 +1043,15 @@ const School = () => {
     return filteredData?.length === 0 ? '-' : `${(sumOfAllQuizes / filteredData.length).toFixed(1)} %`;
   }
 
-  const getMarks = (key, name) => {
-    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
-    console.log(`student obje`,users[key],name)
-    // if(name == 'Year 6 - SP 2023 Summer Term Week 02') console.log(`Why Not Display`, obj)
-    return obj ? obj?.percentage_score > 0 ? obj?.percentage_score.toFixed(1) : '' : ''
+  const getMarks = (user_name, quiz_name) => {
+    let obj = quizesData?.filter((item) => item?.user_name === user_name && item?.quiz_name === quiz_name && item?.email_address == selectedTeacher)
+    if(obj?.length === 0) return ''
+    return obj != undefined ? `${obj[0]?.percentage_score?.toFixed(1)} %` : ''
   }
-  const getMarkColor = (key, name) => {
-    console.log(`users[key]`, users[key])
-    let obj = users[key]?.find(({ quiz_name }) => quiz_name == name)
-    if(!obj) return ''
-    return obj.percentage_score.toFixed(1)
+  const getMarkColor = (user_name, quiz_name) => {
+    let obj = quizesData?.filter((item) => item?.user_name === user_name && item?.quiz_name === quiz_name && item?.email_address == selectedTeacher)
+    if(obj?.length === 0) return ''
+    return obj[0]?.percentage_score?.toFixed(1)
   }
 
   const getStudentaverage = (student) =>{
@@ -1124,7 +1130,6 @@ const School = () => {
         return record;
       }
     });
-    console.log(`Result Set`,finalData)
     if(finalData?.length === 0) return '-';
     // Calculate the effort score for the student user_name
     // Filter Object with unique user_name and quiz_name
@@ -1136,7 +1141,6 @@ const School = () => {
       return acc;
     }, {});
     let filteredData = Object.values(uniqueObjectsById);
-    console.log("My Effort ", filteredData)
     filteredData = filteredData?.filter(item => item?.percentage_score > 0)
     const totalQuizzes = filteredData?.length;
     let completedQuizzes = filteredData?.filter(item => item?.status === 'submitted')?.length;
@@ -1147,44 +1151,23 @@ const School = () => {
 
   const UpdateFullName = (e, username ) =>{
     const full_name = e.target.value;
-    const found = allUniqueUsers.filter(item => item.user_name === username);
-    const id = found[0].id;
-    const email = localStorage.getItem('userEmail')
-    
-    // for (let i = 0; i < allUniqueUsers.length; i++) {
-    //   if (array[i].id === id) {
-    //     array[i].full_name = full_name;
-    //     break;  // Assuming you only want to update the first occurrence with id
-    //   }
-    // }
-    
-    // let temp = [...allUniqueUsers];
-    // for (let user of temp) {
-    //   if (user.id === id) {
-    //     console.log(user)
-    //     user.full_name = full_name;
-    //     console.log(user)
-    //     break;
-    //   }
-    // }
-
-    const updatedData = allUniqueUsers.map(user => {
-      if (user.id === id) {
+    const updatedData = quizesData.map(user => {
+      if (user.user_name === username) {
         const modified =  { ...user, full_name: full_name }
         return modified;
       }
       return user;
     });
-    setallUniqueUsers(updatedData);
+    setQuizesData(updatedData);
   }
 
   const UpdateFullNameDB = (e, username ) =>{
     const full_name = e.target.value;
-    const email = localStorage.getItem('userEmail')
-    const found = allUniqueUsers.filter(item => item.user_name === username);
-    if(found[0]?.id)
-    {
-      const id = found[0]?.id;
+    // const email = localStorage.getItem('userEmail')
+    const isUserExists = quizesData.filter(user => user.user_name == username);
+    const user_id = isUserExists[0]?.user_id;
+    if(user_id){
+      const email = selectedTeacher
       try {
         const token = localStorage.getItem('token')
         fetch(testURL + '/updateuser', {
@@ -1196,55 +1179,30 @@ const School = () => {
           },
           body: JSON.stringify({
             full_name,
-            id,
+            user_id,
+            user_name:username,
+            email
           })
         })
           .then(response => {
             // window.location.reload();
-            const updatedData = allUniqueUsers.map(user => {
-              if (user.id === id) {
+            const updatedData = quizesData.map(user => {
+              if (user.user_name === username) {
                 const modified =  { ...user, full_name: full_name }
                 return modified;
               }
               return user;
             });
-            setallUniqueUsers(updatedData);
+            setQuizesData(updatedData);
+            toast.success("User name updated successful.");
           })
       } catch (e) {
-        // setDataLoadin(false)
+        toast.error("Unable to update username, please try later.");
+        toast.error("Unable to updated username, please try later.");
       }
     }
     else{
-      try {
-        const token = localStorage.getItem('token')
-        fetch(testURL + '/addmissinguser', {
-          method: 'POST',
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Content-Type": "application/json",
-            "Authorization": token ? `${token}` : null
-          },
-          body: JSON.stringify({
-            full_name,
-            email,
-            user_name : username
-          })
-        })
-          .then(response => {
-            // window.location.reload();
-            const updatedData = allUniqueUsers.map(user => {
-              if (user.id === id) {
-                const modified =  { ...user, full_name: full_name }
-                return modified;
-              }
-              return user;
-            });
-            setallUniqueUsers(updatedData);
-          })
-      } catch (e) {
-        // setDataLoadin(false)
-      }
-
+      toast.error("Unable to updated username, please try later.");
     }
   }
 
@@ -1385,8 +1343,10 @@ const School = () => {
   }
 
   const getFullName = (username) => {
-    const found = allUniqueUsers.filter(item => item.user_name == username)
-    return found[0]?.full_name == username ? "" :  found[0]?.full_name
+    const found = quizesData?.filter(item => item?.user_name == username)
+    const studentName = found[0]?.full_name ? found[0]?.full_name : ""
+    const fullName = studentName.trim() == username.trim() ? "" : studentName
+    return fullName
   }
   const getStudentName = (username) =>{
     const found = allUniqueUsers.filter(item => item.user_name == username)
@@ -1395,14 +1355,9 @@ const School = () => {
   }
 
   const getStudentNameForChart = (username) =>{
-    const found = allUniqueChartUsers.filter(item => item.user_name == username)
+    const found = quizesData?.filter(item => item.user_name == username)
     if(!found) return `${username} - Enter Name`;
-    return found[0]?.full_name == username ? `${username} - Enter Name` :  `${username} - ${found[0]?.full_name}`
-  }
-
-  const GetAllQuizAVG = () =>{
-    console.log(`My Dataaaaa:    `, tableHeaders)
-    // const sum = tableHeaders
+    return found[0]?.full_name == username || found[0]?.full_name == "" ? `${username} - Enter Name` :  `${username} - ${found[0]?.full_name}`
   }
  
   return (
@@ -1497,9 +1452,12 @@ const School = () => {
         {/* main bar ends */}
         {/* ----------------------------------------------------------- */}
         {/* filter bar starts here */}
-        <div className="flex flex-col items-center justify-center ml-36">
+        <div className="flex flex-col items-center justify-center ml-48">
           <h4 className="text-[#17026b] font-bold text-xl">ANALYTICS Console - Free Schools Package</h4>
           <p className="text-[#17026b] text-xl">To upgrade to Premium Schools Package, please <a href="https://www.smashmaths.org/smash-maths-for-schools-premium-spiral-maths-package/" target="_blank" className="text-xl underline">click here</a></p>
+        </div>
+        <div className="flex items-center justify-center ml-36">
+          <h4 className="text-[#17026b] items-center">Need help? Email us at <b>hello@smashmaths.org</b></h4>
         </div>
         {/* <h4 className="ml-[380px] text-[#17026b] items-center font-bold text-xl">ANALYTICS Console - Free Schools Package</h4> */}
         <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
@@ -1565,12 +1523,12 @@ const School = () => {
             {/* choose teacher dropdown */}
             <div className="grid gap-1">
               <label htmlFor="">Teacher</label>
-              <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20 h-16">
+              <ul className="list-reset flex justify-between flex-1 md:flex-none items-center font-[400] z-20">
                 <li className="mr-3">
                   <div className="inline-block relative" ref={dropdownRef1}>
                     <button
                       onClick={() => setIsChildOpen(!isChildOpen)}
-                      className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
+                      className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg"
                     >
                       {selectedTeacher ? selectedTeacher : "Choose Teacher"}
                       <svg
@@ -1587,37 +1545,32 @@ const School = () => {
                       </svg>
                     </button>
                     {isChildOpen && (
-                      <ul className="absolute right--0 mt-2 py-2 w-74 bg-white rounded-lg shadow-slate-800 shadow-md">
-                        {teacherFilter?.map((childName, index) => {
-                          return (
-                            <>
-                              <li
-                                className={
-                                  index !== childName.length - 1
-                                    ? "border-b border-slate-400 cursor-pointer"
-                                    : "cursor-pointer"
-
-                                }
-                                key={index}
-                                onClick={() => {
-                                  setIsChildOpen(!isChildOpen)
-                                  handleTeacherSelect(childName)
-                                }}
-                              >
-                                <span
-                                  className="block px-4 py-1 text-gray-800 hover:bg-indigo-500 hover:text-white">
-                                  {childName}
-                                </span>
-                              </li>
-                            </>
-                          );
-                        })}
+                      <ul className="absolute right-0 mt-2 py-2 w-74 max-h-[400px] overflow-y-auto bg-white rounded-lg shadow-slate-800 shadow-md ml-4">
+                        {teacherFilter?.map((childName, index) => (
+                          <li
+                            className={
+                              index !== teacherFilter.length - 1
+                                ? "border-b border-slate-400 cursor-pointer"
+                                : "cursor-pointer"
+                            }
+                            key={index}
+                            onClick={() => {
+                              setIsChildOpen(!isChildOpen);
+                              handleTeacherSelect(childName);
+                            }}
+                          >
+                            <span className="block px-4 py-1 text-gray-800 hover:bg-indigo-500 hover:text-white">
+                              {childName}
+                            </span>
+                          </li>
+                        ))}
                       </ul>
                     )}
                   </div>
                 </li>
               </ul>
             </div>
+
 
             {/* choose Year dropdown */}
             <div className="grid gap-1">
@@ -1629,7 +1582,7 @@ const School = () => {
                       onClick={() => setIsDataYearOpen(!isDataYearOpen)}
                       className="text-white focus:outline-none bg-[#17026b] px-4 py-2 rounded-lg "
                     >
-                      {dataSelectedYear ? `September ${dataSelectedYear} - August ${dataSelectedYear+1}` : 'Select Year'}
+                      {dataSelectedYear ? `September ${dataSelectedYear} - August ${dataSelectedYear + 1}` : `September ${dataYearList[dataYearList.length - 1]} - August ${dataYearList[dataYearList.length - 1]+1}`}
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 20 20"
@@ -1650,7 +1603,7 @@ const School = () => {
                             <>
                               <li
                                 className={
-                                  index !== childName.length - 1
+                                  index !== childName?.length - 1
                                     ? "border-b border-slate-400 cursor-pointer"
                                     : "cursor-pointer"
 
@@ -1708,7 +1661,7 @@ const School = () => {
                               <>
                                 <li
                                   className={
-                                    index !== childName.length - 1
+                                    index !== childName?.length - 1
                                       ? "border-b border-slate-400 cursor-pointer"
                                       : "cursor-pointer"
 
@@ -1791,9 +1744,9 @@ const School = () => {
   }</td> shadow-md sm:rounded-sm  lg:mx-auto sm:w-full mt-5">
 
           {
-            Boolean(tableHeaders?.length) && true && <div className="overflow-scroll " style={{ minHeight: '100px', maxHeight: 'calc(100vh - 250px)' }}>
+            Boolean(tableHeaders?.length) && true && <div className="overflow-scroll " style={{ minHeight: '120px', maxHeight: 'calc(100vh - 270px)' }}>
               <table className="w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
-                <thead className="text-xs text-white uppercase bg-[#17026b] h-32">
+                <thead className="text-xs text-white uppercase bg-[#17026b] h-36">
                   <tr className="items-center">
                     <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
                     <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Name</th>
@@ -1806,7 +1759,7 @@ const School = () => {
                 <tbody>
                   {/* SMASH Maths Cohort  */}
                   <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-                    <td className="sticky left-40 z-10 px-3 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
+                    <td className="sticky left-40 z-10 px-3 py-3 w-40 font-bold h-8">SMASH Maths Cohort Average</td>
                     <td className="sticky left-0 z-10 px-3 py-3 w-40 font-bold text-center"></td>
                     {/* <td className="sticky left-0 z-10 px-1 py-1 w-40 font-bold"></td> */}
                     <td className="sticky left-0 z-10 p-3 font-bold text-center">{cohortAverageAVG}</td>
@@ -1829,11 +1782,11 @@ const School = () => {
                       </>
                     ) : (
                       <>
-                        {averages.map(
+                        {averages?.map(
                           (average, index) =>
-                            data.some((student) => student[`quiz${index + 1}`]) && (
+                            data?.some((student) => student[`quiz${index + 1}`]) && (
                               <td className="p-3 text-center">
-                                {average.toFixed(2)}
+                                {average?.toFixed(2)}
                               </td>
                             )
                         )}
@@ -1843,7 +1796,7 @@ const School = () => {
 
                   {/* Class Avarage  */}
                   <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
-                    <td className="sticky left-40 z-10 px-3 py-3 w-40 font-bold">Class Average</td>
+                    <td className="sticky left-40 z-10 px-3 py-3 w-40 font-bold h-8">Class Average</td>
                     <td className="sticky left-0 z-10 px-3 py-3 w-40 font-bold"></td>
                     {/* <td className="sticky left-0 z-10 px-1 py-1 w-40 font-bold"></td> */}
                     <td className="sticky left-0 z-10 p-3 font-bold text-center">{classAverageAVG}</td>
@@ -1877,48 +1830,70 @@ const School = () => {
                       </>
                     )}
                   </tr>
-                  {Object.keys(users)?.length === 0 && 
+                  {/* {Object?.keys(users)?.length === 0 && 
                   <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
-                    {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
+                    <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> *0/}
                     <td className="p-5 text-center w-98s" rowSpan='3'></td> 
                     <td className="p-5 text-center w-98s" rowSpan='3'>No Data Avaiable.</td> 
                     <td className="p-5 text-center w-98s" rowSpan='3'></td>                  
                   </tr> }
-                  {Object.keys(users).map((student) => (
+                  {Object?.keys(users)?.map((student) => (
                     <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
                       <td className="p-3">{users[student][0]?.user_name}</td>
                       <td className="p-3"><input value={getFullName(users[student][0]?.user_name)} className="h-8 placeholder-red-600" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, users[student][0]?.user_name)} onBlur={(e) => UpdateFullNameDB(e, users[student][0]?.user_name)}/></td>
-                      {/* <td className="p-3">{users[student][0]?.full_name}</td> */}
+                      {/* <td className="p-3">{users[student][0]?.full_name}</td> *9/}
                       <td className="p-3 text-center">{getStudentaverage(users[student][0]?.user_name)}</td>
                       <td className="p-3 text-center">{getStudentEffort(users[student][0]?.user_name)}</td>
                       {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{`${getMarks(student, quiz_name)} %`}</td>))}
-                    </tr>
-                  ))}
+                      {allUniqueUsers?.map((student) => (
+                  <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
+                    <td className="p-3">{student?.user_name}</td>
+                    <td className="p-3"><input value={getFullName(student.user_name)} className="h-8 placeholder-red-600" placeholder="Enter first name" onChange={(e) => UpdateFullName(e, student?.user_name)} onBlur={(e) => UpdateFullNameDB(e, student?.user_name)}/></td>
+                    {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
+                    {allUniqueUsers?.map((student) => (
+                      <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
+                        <td className="p-3">{student}</td>
+                        <td className="p-3"><input placeholder="Enter name" value={getFullName(student)} className="h-8 text-[#ED1C24] px-3 placeholder-[#ED1C24] bold-placeholder"  onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
+                        {/* <td className="p-3 w-40 font-bold">{getFullName(users[student][0]?.user_name)}</td> */}
+                        <td className="p-3 text-center w-40 font-bold">{getStudentaverage(student)}</td>
+                        <td className="p-3 text-center w-40 font-bold">{getStudentEffort(student)}</td>
+                        {tableHeaders?.map(({ quiz_name }) => (<td className="p-3 text-white w-40 text-center" style={{ backgroundColor: checkMarksColor(getMarkColor(student, quiz_name)) }}>{getMarks(student, quiz_name)}</td>))}
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>}
-            {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ minHeight: '100px',  maxHeight: 'calc(100vh - 250px)' }}>
+            {tableHeaders?.length === 0 && true && <div className="overflow-scroll" style={{ minHeight: '100px', maxHeight: 'calc(100vh - 250px)' }}>
             <table className="min-h-74 w-full text-sm text-left table-fixed rounded-lg shadow-sm shadow-slate-400 column-2-sticky">
-              <thead className="text-xs text-white uppercase bg-[#17026b] h-32">
+              <thead className="text-xs text-white uppercase bg-[#17026b] h-40">
                 <tr className="items-center">
                   <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
-                  {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th> */}
-                  <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Avg</th>
+                  <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th>
                   <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Effort Score</th>
                 </tr>
               </thead>
               <tbody>
-                {/* SMASH Maths Cohort  */}
                 <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
                   {/* <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td> */}
-                  <td className="sticky left-40 z-10 px-6 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
-                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
-                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold"></td>
+                  <td className="sticky left-40 z-10 px-6 h-16 py-3 w-40 font-bold">SMASH Maths Cohort Average</td>
+                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold">-</td>
+                  <td className="sticky left-0 z-10 px-6 py-3 w-40 font-bold">-</td>
                 </tr>
-                <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
-                  {/* <td className="p-3"><input defaultValue={users[student][0]?.full_name} className="h-8" placeholder="Enter name here" onBlur={(e) => UpdateFullName(e, users[student][0]?.user_name ,users[student][0]?.email_address)}/></td> */}
-                  <td className="p-3 text-center" rowSpan='3'>No Data Avaiable.</td>    
+                {/* SMASH Maths Cohort  */}
+                {allUniqueUsers?.length > 0 && allUniqueUsers?.map((student) => (
+                  <tr className="bg-white text-blue-800 border border-[#17026b] dark:border-gray-700  rounded-lg overflow-hidden">
+                    <td className="p-3">{student}</td>
+                    <td className="p-3"><input value={getFullName(student)} className="h-8  text-[#ED1C24] placeholder-[#ED1C24] bold-placeholder px-3" placeholder="Enter name" onChange={(e) => UpdateFullName(e, student)} onBlur={(e) => UpdateFullNameDB(e, student)}/></td>
+                    <td className="p-3 w-40 font-bold">-</td>
+                  </tr>
+                ))}
+                {allUniqueUsers?.length == 0 &&  (
+                  <tr className="bg-white text-blue-800 border border-[#17026b]  dark:border-gray-700  rounded-lg overflow-hidden">
+                  <td className="p-3 text-center h-5" rowSpan='3'  style={{ height: '5rem' }}></td> 
+                  <td className=" h-28">No Data Avaiable.</td> 
+                  <td className="text-center h-5" rowSpan='3'  style={{ height: '5rem' }}></td>   
                 </tr>
+                )}
               </tbody>
             </table>
           </div>}  
@@ -2015,7 +1990,7 @@ const School = () => {
                           <>
                             <li
                               className={
-                                index !== childName.length - 1
+                                index !== childName?.length - 1
                                   ? "border-b border-slate-400 cursor-pointer"
                                   : "cursor-pointer"
                               }
@@ -2070,7 +2045,7 @@ const School = () => {
                           <>
                             <li
                               className={
-                                index !== childName.length - 1
+                                index !== childName?.length - 1
                                   ? "border-b border-slate-400 cursor-pointer"
                                   : "cursor-pointer"
                               }

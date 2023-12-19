@@ -283,27 +283,27 @@ const Parent = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  useEffect(() => {
-    const email = localStorage.getItem('userEmail')
-    try {
-      const token = localStorage.getItem('token')
-      fetch(testURL + '/all_quiz_averages', {
-        method: 'POST',
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Content-Type": "application/json",
-          "Authorization": token ? `${token}` : null
-        }
-      })
-        .then(response => response.json())
-        .then(response => {
-          setQuizesAverages(response.quizes.averages)
-        })
-    } catch (e) {
-      setDataLoadin(false)
-    }
+  // useEffect(() => {
+  //   const email = localStorage.getItem('userEmail')
+  //   try {
+  //     const token = localStorage.getItem('token')
+  //     fetch(testURL + '/all_quiz_averages', {
+  //       method: 'POST',
+  //       headers: {
+  //         "Access-Control-Allow-Origin": "*",
+  //         "Content-Type": "application/json",
+  //         "Authorization": token ? `${token}` : null
+  //       }
+  //     })
+  //       .then(response => response.json())
+  //       .then(response => {
+  //         setQuizesAverages(response.quizes.averages)
+  //       })
+  //   } catch (e) {
+  //     setDataLoadin(false)
+  //   }
 
-  }, [])
+  // }, [])
   useEffect(() => {
     // Get the current year
     const currentYear = new Date().getFullYear();
@@ -392,89 +392,85 @@ const Parent = () => {
 
   useEffect(() => {
     const email = localStorage.getItem('userEmail')
+    let quizdata = [];
     try {
       const token = localStorage.getItem('token')
-      fetch(testURL + '/getparentdashboard', {
+      fetch(testURL + '/all_quiz_averages', {
         method: 'POST',
         headers: {
           "Access-Control-Allow-Origin": "*",
           "Content-Type": "application/json",
           "Authorization": token ? `${token}` : null
-        },
-        body: JSON.stringify({
-          email
-        })
+        }
       })
         .then(response => response.json())
         .then(response => {
-          const quizes = response?.quizes || [[]]
-          setQuizesData(quizes)
-          quizes.map(x => {
-            if (x.year_name === 'Multip') {
-              // console.log('therer====>', x)
-            }
-          })
-          let yearsFilters = quizes.map(x => x.year_name)
-          const teacherFilters = quizes?.map(x => x.user_name)
-          yearsFilters = yearsFilters.filter(item => item.includes('Year'))
-          const uniqueYearsFilters = [...new Set(yearsFilters)].sort()
-          const uniqueTeacherFilters = [...new Set(teacherFilters)]
-          setYearFilter(uniqueYearsFilters)
-          setChartTeacherList(uniqueTeacherFilters)
-          setReChartTeacherList(uniqueTeacherFilters)
-
-          // Filter Unique Year for chart
-          const uniqueYears = new Set();
-          quizes.forEach(item => {
-            const year = new Date(item.date_submitted).getFullYear();
-            uniqueYears.add(year);
-          });
-          const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
-          setChartYearList(sortedUniqueYears);
-
-
-          let filterData = quizes?.map(({ quiz_name, year_name, date_submitted }, index) => {
-            return {
-              year_name,
-              quiz_name,
-              index,
-              year : new Date(date_submitted).getFullYear(),
-              month : new Date(date_submitted).getMonth() + 1,
-              day : new Date(date_submitted).getDate(),
-              week: getWeekNumber(quiz_name)
-            }
-          })
-          setTableHeadersAll(filterData)
-          applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, sortedUniqueYears[sortedUniqueYears.length-1])  
-          setDataLoadin(false)
-
-          return
-
-          // let { headers, users } = response?.quizes || [[], {}]
-
-          // setTableHeadersAll(headers)
-          // setTableData(users)
-          // let avgArray = Array(headers.length).fill(0)
-
-          // setUsers(users)
-          // setFilter(users, headers)
-          // setAverage(avgArray, users)
-
-          //////////////////////////////////////////
-
-          // setTableHeaders(response?.quizes?.headers)
-          // setTableData(response?.quizes?.users)
-          // let avgArray = Array(response?.quizes?.headers.length).fill(0)
-
-          // setUsers(response?.quizes?.users)
-          // setFilter(response?.quizes?.users)
-          // setAverage(avgArray, response?.quizes?.users)
-
-          // setTableHeaders(Object.keys(response.quizes[0]))
-          // let avgArray = Array(Object.keys(response.quizes[0]).length).fill(0)
-          // setTableData(response.quizes)
-          // setSchools(response.quizes)
-          // setAverage(avgArray, Object.values(response.quizes))
+          quizdata = response?.quizes?.averages;
+          setQuizesAverages(response.quizes.averages)
+        })
+        .then(()=> {
+          try {
+            const user_name = localStorage.getItem('userEmail')
+            const token = localStorage.getItem('token')
+            fetch(testURL + '/getparentdashboard', {
+              method: 'POST',
+              headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "application/json",
+                "Authorization": token ? `${token}` : null
+              },
+              body: JSON.stringify({
+                user_name
+              })
+            })
+              .then(response => response.json())
+              .then(response => {
+                const quizes = response?.quizes || [[]]
+                setQuizesData(quizes)
+                quizes.map(x => {
+                  if (x.year_name === 'Multip') {
+                    // console.log('therer====>', x)
+                  }
+                })
+                let yearsFilters = quizes.map(x => x.year_name)
+                const teacherFilters = quizes?.map(x => x.user_name)
+                yearsFilters = yearsFilters?.filter(item => item?.includes('Year'))
+                const uniqueYearsFilters = [...new Set(yearsFilters)]?.sort()
+                const uniqueTeacherFilters = [...new Set(teacherFilters)]
+                setYearFilter(uniqueYearsFilters)
+                setChartTeacherList(uniqueTeacherFilters)
+                setReChartTeacherList(uniqueTeacherFilters)
+      
+                // Filter Unique Year for chart
+                const uniqueYears = new Set();
+                quizes.forEach(item => {
+                  const year = new Date(item.date_submitted).getFullYear();
+                  uniqueYears.add(year);
+                });
+                const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
+                setChartYearList(sortedUniqueYears);
+      
+      
+                let filterData = quizes?.map(({ quiz_name, year_name, date_submitted }, index) => {
+                  return {
+                    year_name,
+                    quiz_name,
+                    index,
+                    year : new Date(date_submitted)?.getFullYear(),
+                    month : new Date(date_submitted)?.getMonth() + 1,
+                    day : new Date(date_submitted)?.getDate(),
+                    week: getWeekNumber(quiz_name)
+                  }
+                })
+                setTableHeadersAll(filterData)
+                applyFilter(selectedDuraation, uniqueYearsFilters[0], filterData, quizes, sortedUniqueYears[sortedUniqueYears.length-1], quizdata)  
+                setDataLoadin(false)
+      
+                return
+              })
+          } catch (e) {
+            setDataLoadin(false)
+          }
         })
     } catch (e) {
       setDataLoadin(false)
@@ -538,24 +534,24 @@ const Parent = () => {
 
   const getWeekNumber = (quiz_name, i) => {
     let _inc = 0
-    if (quiz_name.includes('Spring')) {
+    if (quiz_name?.includes('Spring')) {
       _inc = 200
-    } else if (quiz_name.includes('Autumn')) {
+    } else if (quiz_name?.includes('Autumn')) {
       _inc = 100
-    } else if (quiz_name.includes('Summer')) {
+    } else if (quiz_name?.includes('Summer')) {
       _inc = 300
     }
     
-    let arr = quiz_name.split(' ')
-    return arr.length ? parseInt(arr[arr?.findIndex((item) => item.toLowerCase() == 'Week'.toLowerCase()) + 1]) + _inc : []
+    let arr = quiz_name?.split(' ')
+    return arr?.length ? parseInt(arr[arr?.findIndex((item) => item?.toLowerCase() == 'Week'.toLowerCase()) + 1]) + _inc : []
     // return quiz_name?.match(/WEEK (\d+)\./i) ? parseInt(quiz_name?.match(/WEEK (\d+)\./i)[1]) + _inc : []
   }
 
   const setFilter = (dataSet, headers) => {
     let _yesrFilter = []
 
-    Object.values(dataSet).map(item => {
-      _yesrFilter.push(item.year_name)
+    Object?.values(dataSet)?.map(item => {
+      _yesrFilter?.push(item?.year_name)
     })
 
     let _year = [...new Set(_yesrFilter)][0]
@@ -572,28 +568,28 @@ const Parent = () => {
     // applyFilter ( childName, selectedChartTeacher, chartSelectedStudent)
   }
 
-  const applyFilter = (selectedDuraationParm, year, headers, data, yearData) => {
+  const applyFilter = (selectedDuraationParm, year, headers, data, yearData, quizdata) => {
 
     setSelectedYear(year)
     setSelectedDuraation(selectedDuraationParm)
     const yearSelected = yearData;
-    let filterHeader = headers.filter(({ year_name }) => year_name === year)
-    let sortedHeader = filterHeader.sort((a, b) => b.week - a.week)
-    const ids = sortedHeader.map(o => o.quiz_name)
-    const filtered = filterHeader.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
-    const finalHeader = filtered.filter(record => {
-      if (yearSelected === record.year) {
-        if ( record.month >= 9) {
-          if(record.month == 9){
-            const firstDayOfMonth = new Date(yearSelected, record.month - 1, 1); // Month is zero-based
-            // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
+    let filterHeader = headers?.filter(({ year_name }) => year_name === year)
+    let sortedHeader = filterHeader?.sort((a, b) => b.week - a.week)
+    const ids = sortedHeader?.map(o => o.quiz_name)
+    const filtered = filterHeader?.filter(({ quiz_name }, index) => !ids.includes(quiz_name, index + 1))
+    const finalHeader = filtered?.filter(record => {
+      if (yearSelected === record?.year) {
+        if ( record?.month >= 9) {
+          if(record?.month == 9){
+            const firstDayOfMonth = new Date(yearSelected, record?.month - 1, 1);
+            // First day of week is sunday
             const firstDayOfWeek = firstDayOfMonth.getDay();
             // Calculate the number of days to add to reach the first Monday (if it's not already Monday)
             const daysToAdd = (8 - firstDayOfWeek) % 7;
             // Create a new date by adding the days to the first day of the month
-            const firstMondayOfMonth = new Date(yearSelected, record.month - 1, 1 + daysToAdd);
+            const firstMondayOfMonth = new Date(yearSelected, record?.month - 1, 1 + daysToAdd);
             const FirstMondayDate = new Date(firstMondayOfMonth).getDate();
-            if(record.day >= FirstMondayDate) {
+            if(record?.day >= FirstMondayDate) {
               return record
             }
           }
@@ -606,8 +602,6 @@ const Parent = () => {
       }
     })
     setTableHeaders(finalHeader)
-    console.log(`Filter table Header`, yearData, filtered)
-    console.log(`Filter table Header2`, yearData, finalHeader)
 
     let filterDurationlData = data
     // Commented Previous Data Since last 52 Weeks
@@ -622,15 +616,15 @@ const Parent = () => {
     // console.log('therer------>1', filterFinalData)
     const filteredRecords = filterFinalData?.filter(record => {
       const submissionDate = new Date(record?.date_submitted);
-      const year = submissionDate.getFullYear();
-      const month = submissionDate.getMonth() + 1; // Adding 1 because months are 0-indexed
-      const day = submissionDate.getDate();
+      const year = submissionDate?.getFullYear();
+      const month = submissionDate?.getMonth() + 1; // Adding 1 because months are 0-indexed
+      const day = submissionDate?.getDate();
       if (yearSelected === year) {
         if ( month >= 9) {
           if(month == 9){
             const firstDayOfMonth = new Date(yearSelected, month - 1, 1); // Month is zero-based
             // Calculate the day of the week for the first day (0 = Sunday, 1 = Monday)
-            const firstDayOfWeek = firstDayOfMonth.getDay();
+            const firstDayOfWeek = firstDayOfMonth?.getDay();
             // Calculate the number of days to add to reach the first Monday (if it's not already Monday)
             const daysToAdd = (8 - firstDayOfWeek) % 7;
             // Create a new date by adding the days to the first day of the month
@@ -650,7 +644,7 @@ const Parent = () => {
     });
     console.log(`filteredRecords`,filteredRecords)
     let usersObject = {}
-    filteredRecords.map((item) => {
+    filteredRecords?.map((item) => {
       if (usersObject[item?.user_name]) {
         usersObject[item?.user_name] = [...usersObject[item?.user_name], item]
       }
@@ -659,13 +653,14 @@ const Parent = () => {
       }
     })
     // Calculate Cohort average Avg
-    const QuizName = finalHeader?.map(item => item.quiz_name)    
-    const filteredQuizes = quizesAverages?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
+    const QuizName = finalHeader?.map(item => item.quiz_name)  
+    const allQuizeData = quizesAverages ? quizesAverages : quizdata;  
+    const filteredQuizes = allQuizeData?.filter(quiz => QuizName?.includes(quiz?.quiz_name));
     const sumCohort = filteredQuizes?.reduce((accumulator, currentObj) => accumulator + currentObj?.average_score, 0);
     const AVGCohort = (sumCohort / (filteredQuizes?.length *100)) * 100;
     setCohortAverageAVG(AVGCohort ? `${AVGCohort?.toFixed(1)} %` : '-')
 
-    const ordered = Object.keys(usersObject).sort().reduce(
+    const ordered = Object?.keys(usersObject)?.sort()?.reduce(
       (obj, key) => {
         obj[key] = usersObject[key];
         return obj;
@@ -710,11 +705,11 @@ const Parent = () => {
   const setAverage = (avgArr, dataSet) => {
     if (dataSet != null) {
       let _totalQuizCount = 0
-      Object.values(dataSet).map(item => {
+      Object?.values(dataSet)?.map(item => {
 
         _totalQuizCount++
-        for (let i = 0; i < item.quizes.length; i++) {
-          avgArr[i] = avgArr[i] + (item.quizes[i] === "" ? 0 : item.quizes[i])
+        for (let i = 0; i < item?.quizes?.length; i++) {
+          avgArr[i] = avgArr[i] + (item?.quizes[i] === "" ? 0 : item?.quizes[i])
         }
       })
       setTableAverage(avgArr)
@@ -994,8 +989,8 @@ const Parent = () => {
 
   const handleChartTeacherSelect = (childName) => {
     setSelectedChartTeacher(childName)
-    const teacherFilters = quizesData.filter(x => x.email_address === childName)
-    const students = teacherFilters.map(x => x.user_name).sort();
+    const teacherFilters = quizesData?.filter(x => x?.email_address === childName)
+    const students = teacherFilters?.map(x => x?.user_name).sort();
     const uniqueStudents =  [...new Set(students)]
     setChartStudentList(uniqueStudents);
     filterChartaData ( chartSelectedYear, childName, chartSelectedStudent)
@@ -1011,17 +1006,6 @@ const Parent = () => {
     filterChartaData ( childName, selectedChartTeacher, chartSelectedStudent)
   }
   const filterChartaData = ( year, teacher, student = "NotSelected") => {
-    console.log(`Selected Student for Chart`, student)
-    // const filteredByYear = chartsData.filter(item => item.name[1] === year);
-    // const CohortAvg = DataToArrayOfMonths(filteredByYear);
-    // const filteredByClass = [];    
-    // const ClassAvg = DataToArrayOfMonths(filteredByClass);
-    // const filteredByStudent = filteredByYear.filter(item => item.username == teacher);    
-    // const studentAvg = DataToArrayOfMonths(filteredByStudent);
-    // const ToSingleObj = ConvertTosingleObj(CohortAvg, ClassAvg, studentAvg);
-    // // console.log(filteredByClass)
-    // console.log(`Final Data`, filteredByClass, ToSingleObj);
-    // setFilteredChartData(ToSingleObj);
 
    // Test
 
@@ -1058,22 +1042,22 @@ const Parent = () => {
   //  Student Graph data
    const data = [...quizesData];
    const modifiedArray = data?.map(item => {
-     const [year, month] = item?.date_submitted.split('-');
+     const [year, month] = item?.date_submitted?.split('-');
      return {
        ...item,
        date_submitted: [parseInt(year), months[parseInt(month) - 1]]
      };
    });
    let filteredByYear = modifiedArray?.filter(item => item?.date_submitted[0] == year);
-   const filteredByClass = filteredByYear.filter(item => item?.email_address === teacher);  
-   const filteredClassDataByOneQuiz = Object.values(filteredByClass);
-   const filteredClassData = filteredClassDataByOneQuiz.filter(item => item.percentage_score > 0)
+   const filteredByClass = filteredByYear?.filter(item => item?.email_address === teacher);  
+   const filteredClassDataByOneQuiz = Object?.values(filteredByClass);
+   const filteredClassData = filteredClassDataByOneQuiz?.filter(item => item.percentage_score > 0)
    const ClassAvg = DataToArrayOfMonths(filteredClassData);
 
-   const filteredByStudent = filteredByYear.filter(item => item.user_name == student);
+   const filteredByStudent = filteredByYear?.filter(item => item?.user_name == student);
    // Get Only First Quiz from Same Quiz by User
-   const uniqueObjectsById = filteredByStudent.reduce((acc, obj) => {
-     const key = `${obj.user_name}-${obj.quiz_name}`;
+   const uniqueObjectsById = filteredByStudent?.reduce((acc, obj) => {
+     const key = `${obj?.user_name}-${obj?.quiz_name}`;
      if (!acc[key]) {
        acc[key] = obj;
      }
@@ -1092,9 +1076,9 @@ const Parent = () => {
     const monthOccurrences = {};
 
     // Loop through the given data and store average scores for each month
-    data.forEach(item => {
+    data?.forEach(item => {
       const monthName = item?.date_submitted[1];
-      const cohort = item.percentage_score;
+      const cohort = item?.percentage_score;
 
       if (!monthsData[monthName]) {
         monthsData[monthName] = cohort;
@@ -1107,7 +1091,7 @@ const Parent = () => {
 
     // Loop through all the 12 months to calculate the average score for each month
     const allMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    const newArray = allMonths.map(month => {
+    const newArray = allMonths?.map(month => {
       const averageScore = monthsData[month] || 0;
       const occurrenceCount = monthOccurrences[month] || 0;
       return {
@@ -1122,12 +1106,12 @@ const Parent = () => {
   // Function to convert Different average to a single average
   const ConvertTosingleObj = (CohortAvg, ClassAvg, studentAvg) =>{
     const allMonths = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-    const result = allMonths.map((month, index) => {
+    const result = allMonths?.map((month, index) => {
       return {
         month: month,
-        CohortAvg: CohortAvg[index].cohort,
-        ClassAvg: ClassAvg[index].cohort,
-        studentAvg: studentAvg[index].cohort,
+        CohortAvg: CohortAvg[index]?.cohort,
+        ClassAvg: ClassAvg[index]?.cohort,
+        studentAvg: studentAvg[index]?.cohort,
       }
     });
     return result;
@@ -1135,20 +1119,16 @@ const Parent = () => {
   // Revised Charts
   const handleReChartYearSelect = (childName) => {
     setReChartSelectedYear(childName)
-    console.log( childName, selectedReChartTeacher, rechartSelectedStudent, )
   }
   const handleReChartTeacherSelect = (childName) => {
     setSelectedReChartTeacher(childName)
-    const teacherFilters = quizesData.filter(x => x.email_address === childName)
-    const students = teacherFilters.map(x => x.user_name).sort();
+    const teacherFilters = quizesData?.filter(x => x.email_address === childName)
+    const students = teacherFilters?.map(x => x.user_name).sort();
     const uniqueStudents =  [...new Set(students)]
     setReChartStudentList(uniqueStudents);
-    console.log(uniqueStudents)
-    console.log( rechartSelectedYear, childName, rechartSelectedStudent)
   }
   const handleReChartStudentSelect = (childName) => {
     setReChartSelectedStudent(childName)
-    console.log( rechartSelectedYear, selectedReChartTeacher, childName)
   }  
 
   return (
@@ -1245,7 +1225,10 @@ const Parent = () => {
 
       {/* ----------------------------------------------------------- */}
       {/* filter bar starts here */}
-
+      
+      <div className="flex items-center justify-center ml-36">
+        <h4 className="text-[#17026b] items-center">Need help? Email us at <b>hello@smashmaths.org</b></h4>
+      </div>
       <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
       <div className="w-full flex justify-start items-center">
         <div className="w-full flex justify-start items-center gap-4 flex-row mt-2">
@@ -1337,7 +1320,7 @@ const Parent = () => {
                           <>
                             <li
                               className={
-                                index !== childName.length - 1
+                                index !== childName?.length - 1
                                   ? "border-b border-slate-400 cursor-pointer"
                                   : "cursor-pointer"
 
@@ -1395,7 +1378,7 @@ const Parent = () => {
                             <>
                               <li
                                 className={
-                                  index !== childName.length - 1
+                                  index !== childName?.length - 1
                                     ? "border-b border-slate-400 cursor-pointer"
                                     : "cursor-pointer"
 
@@ -1503,9 +1486,9 @@ quiz5: 35,
                     </>
                   ) : (
                     <>
-                      {averages.map(
+                      {averages?.map(
                         (average, index) =>
-                          data.some((student) => student[`quiz${index + 1}`]) && (
+                          data?.some((student) => student[`quiz${index + 1}`]) && (
                             <td class="px-6 py-4 text-center">
                               {average.toFixed(2)}
                             </td>
@@ -1521,7 +1504,7 @@ quiz5: 35,
                   <td className="p-5 text-center w-98s" rowSpan='3'>No Data Avaiable.</td> 
                   <td className="p-5 text-center w-98s" rowSpan='3'></td>                  
                 </tr> }
-              {Object.keys(users).map((student) => (
+              {Object?.keys(users)?.map((student) => (
                 <tr className="bg-white border border-[#17026b]  dark:border-gray-700 rounded-lg overflow-hidden">
                   <td class="p-3">{users[student][0]?.user_name}</td>
                   <td className="p-3 text-center">{getStudentaverage(users[student][0]?.user_name)}</td>
@@ -1764,7 +1747,7 @@ quiz5: 35,
                         <>
                           <li
                             className={
-                              index !== childName.length - 1
+                              index !== childName?.length - 1
                                 ? "border-b border-slate-400 cursor-pointer"
                                 : "cursor-pointer"
                             }
@@ -1821,7 +1804,7 @@ quiz5: 35,
                             <>
                               <li
                                 className={
-                                  index !== childName.length - 1
+                                  index !== childName?.length - 1
                                     ? "border-b border-slate-400 cursor-pointer"
                                     : "cursor-pointer"
 
@@ -1924,7 +1907,7 @@ quiz5: 35,
         </div>         */}
       </div>
       <div className="mb-24">
-        {chart.length > 0 && <LineCharts chart={chart}/>}
+        {chart?.length > 0 && <LineCharts chart={chart}/>}
       </div>
     </div>
         <Modal
