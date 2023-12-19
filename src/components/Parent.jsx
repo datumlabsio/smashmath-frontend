@@ -1225,7 +1225,10 @@ const Parent = () => {
 
       {/* ----------------------------------------------------------- */}
       {/* filter bar starts here */}
-
+      
+      <div className="flex items-center justify-center ml-36">
+        <h4 className="text-[#17026b] items-center">Need help? Email us at <b>hello@smashmaths.org</b></h4>
+      </div>
       <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
       <div className="w-full flex justify-start items-center">
         <div className="w-full flex justify-start items-center gap-4 flex-row mt-2">

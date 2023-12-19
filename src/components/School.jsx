@@ -1456,6 +1456,9 @@ const School = () => {
           <h4 className="text-[#17026b] font-bold text-xl">ANALYTICS Console - Free Schools Package</h4>
           <p className="text-[#17026b] text-xl">To upgrade to Premium Schools Package, please <a href="https://www.smashmaths.org/smash-maths-for-schools-premium-spiral-maths-package/" target="_blank" className="text-xl underline">click here</a></p>
         </div>
+        <div className="flex items-center justify-center ml-36">
+          <h4 className="text-[#17026b] items-center">Need help? Email us at <b>hello@smashmaths.org</b></h4>
+        </div>
         {/* <h4 className="ml-[380px] text-[#17026b] items-center font-bold text-xl">ANALYTICS Console - Free Schools Package</h4> */}
         <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
         <div className="w-full flex justify-start items-center mb-10">

@@ -1460,6 +1460,9 @@ const SchoolParent = () => {
       <div className="flex items-center justify-center ml-36">
         <h4 className="text-[#17026b] items-center font-bold text-xl">ANALYTICS Console - Premium Schools Package</h4>
       </div>
+      <div className="flex items-center justify-center ml-36">
+        <h4 className="text-[#17026b] items-center">Need help? Email us at <b>hello@smashmaths.org</b></h4>
+      </div>
       <h2 className="mt-6 text-[#17026b] font-bold text-xl">DATA ANALYSIS</h2>
       <div className="w-full flex justify-start items-center">
         <div className="w-full flex justify-start items-center gap-4 flex-row mt-1">
@@ -1887,8 +1890,7 @@ quiz5: 35,
             <thead className="text-xs text-white uppercase bg-[#17026b] h-32">
               <tr className="items-center">
                 <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">User Name</th>
-                {/* <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th> */}
-                <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Student Avg</th>
+                <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-96">Student Name</th>
                 <th scope="col" className="z-10 p-3 bg-[#17026b] text-white w-40">Effort Score</th>
               </tr>
             </thead>
