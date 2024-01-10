@@ -289,72 +289,104 @@ const SchoolParent = () => {
     const handleClose = () => setOpen(false);
 
   //  SELECT Year (Like 2022) 
-  useEffect(() => {
-    let years = [];
-    const startYear = 2022;
-    const currentYear = new Date().getFullYear();
+  // useEffect(() => {
+  //   let years = [];
+  //   const startYear = 2022;
+  //   const currentYear = new Date().getFullYear();
   
-    for (let year = startYear; year <= currentYear; year++) {
-      years.push(year);
+  //   for (let year = startYear; year <= currentYear; year++) {
+  //     years.push(year);
   
-      if (year < currentYear) {
-        years.push(year + 1);
-      } else if (new Date(year + 1, 8, 1) <= new Date()) {
-        years.push(year + 1);
-      }
-    }
-    years = years.map(item => item-1)
-    
-    setDataYearList([...new Set(years)]);
-  },[])
+  //     if (year < currentYear) {
+  //       years.push(year + 1);
+  //     } else if (new Date(year + 1, 8, 1) <= new Date()) {
+  //       years.push(year + 1);
+  //     }
+  //   }
+  //   years = years.map(item => item-1)
+  //   console.log(`years2`, years)
+  //   setDataYearList([...new Set(years)]);
+  // },[])
   const handleDataYearSelect = (childName) =>{
     setDataSelectedYear(childName)
     applyFilter(selectedTeacher, selectedYear, tableHeadersAll, quizesData ,childName)
     // applyFilter ( childName, selectedChartTeacher, chartSelectedStudent)
   }
   useEffect(() => {
-    // Get the current yearallUniqueChartUsers
-    const currentYear = new Date().getFullYear();
-    // Set the start year
-    let year = 2021;
-    // Create an array to store the years
-    const yearList = [];
-    while (year <= currentYear) {
-      yearList.push(year);
-      // Increment the year by 1
-      year++;
-      // Check if it's September 1st of the next year
-      if (year <= currentYear && new Date().getMonth() >= 8) {
-        yearList.push(year);
-        year++;
-      }
-    }
-    setDataSelectedYear(yearList[yearList.length-1])
-    // years = years.map(item => item-1)
+    const yearList = getYearList()
+    // setDataSelectedYear(yearList[yearList.length-1])
     setDataYearList(yearList);
     setReChartYearList(yearList)
   },[])
+  function getYearList () {
+    const currentTimeStamp = new Date();
+    // const currentTimeStamp = new Date(2026, 8, 6); 
+    const currentYear = currentTimeStamp.getFullYear()
+    const currentMonth = currentTimeStamp.getMonth()
+    const currentDate = currentTimeStamp.getDate()
+    let year = 2021;
+    const yearList = [];
+    while (year <= currentYear) {
+      if(year < currentYear){
+        yearList.push(year);
+        year++;
+      }
+      else{
+        if(currentMonth >= 8){
+          const firstMonday = getFirstMondayOfMonth(year, 8)
+          if(currentMonth == 8){
+            if(currentDate >= firstMonday){
+              yearList.push(year);
+              year++;
+            }
+            else{
+              year++
+            }
+          }
+          else{
+            yearList.push(year);
+            year++;
+          }
+        }
+        else{
+          year++
+        }
 
-  // useEffect(() => {
-  //   const email = localStorage.getItem('userEmail')
-  //   try {
-  //     const token = localStorage.getItem('token')
-  //     fetch(testURL + '/all_quiz_averages', {
-  //       method: 'POST',
-  //       headers: {
-  //         "Access-Control-Allow-Origin": "*",
-  //         "Content-Type": "application/json",
-  //         "Authorization": token ? `${token}` : null
-  //       }
-  //     })
-  //       .then(response => response.json())
-  //       .then(response => {
-  //         setQuizesAverages(response?.quizes?.averages)
-  //       })
-  //   } catch (e) {
-  //   }
+      }
+    }
+    return yearList
+  }
 
-  // }, [])
+
+  function getFirstMondayOfMonth(year, month) {
+    const firstDayOfMonth = new Date(year, month, 1); // Month is zero-indexed
+    const dayOfWeek = firstDayOfMonth.getDay(); // 0 is Sunday, 1 is Monday, ..., 6 is Saturday
+    const daysToAdd = (8 - dayOfWeek) % 7; // Days to add to reach the first Monday
+  
+    const firstMonday = new Date(year, month, 1 + daysToAdd);
+    return firstMonday.getDate();;
+  }
+
+  useEffect(() => {
+    const email = localStorage.getItem('userEmail')
+    try {
+      const token = localStorage.getItem('token')
+      fetch(testURL + '/all_quiz_averages', {
+        method: 'POST',
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+          "Authorization": token ? `${token}` : null
+        }
+      })
+        .then(response => response.json())
+        .then(response => {
+          setQuizesAverages(response?.quizes?.averages)
+        })
+    } catch (e) {
+    }
+
+  }, [])
 
 
   useEffect(() => {
@@ -429,6 +461,8 @@ const SchoolParent = () => {
                   const year = new Date(item.date_submitted).getFullYear();
                   uniqueYears.add(year);
                 });
+                const yearList = getYearList()
+                console.log(`Api`, yearList)
                 const sortedUniqueYears = Array.from(uniqueYears).sort((a, b) => a - b);
                 setChartYearList(sortedUniqueYears);
       
@@ -450,7 +484,7 @@ const SchoolParent = () => {
                 })
       
                 setTableHeadersAll(filterData)
-                applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,sortedUniqueYears[sortedUniqueYears.length-1], quizdata)
+                applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes, yearList[yearList.length-1], quizdata)
                 if (quizes != null) { setSchoolNama(Object?.values(quizes)[0]?.school_name_small) }
                 
                 // setDataLoadin(false)
@@ -617,8 +651,7 @@ const SchoolParent = () => {
       }
       return accumulator;
     }, []);
-    // console.log('therer------>2', filtered)
-    
+    console.log('therer------>2', uniqueQuizNames)
     setTableHeaders(uniqueQuizNames)
 
 
@@ -658,7 +691,7 @@ const SchoolParent = () => {
         return record;
       }
     });
-    // console.log('therer------>1', filterFinalData)
+    console.log('therer------>1', filterFinalData)
     let usersObject = {}
     filteredRecords?.map((item) => {
       // console.log('therer------>2', usersObject)
