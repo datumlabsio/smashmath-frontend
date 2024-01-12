@@ -301,27 +301,48 @@ const School = () => {
 
 
   useEffect(() => {
-    // Get the current year
-    const currentYear = new Date().getFullYear();
-    // Set the start year
-    let year = 2021;
-    // Create an array to store the years
-    const yearList = [];
-    while (year <= currentYear) {
-      yearList.push(year);
-      // Increment the year by 1
-      year++;
-      // Check if it's September 1st of the next year
-      if (year <= currentYear && new Date().getMonth() >= 8) {
-        yearList.push(year);
-        year++;
-      }
-    }
-    console.log(`yearList`, yearList[yearList.length-1],yearList)
-    // setDataSelectedYear(yearList[yearList.length-1])
+    const yearList = getYearList()
     setDataYearList(yearList);
     setReChartYearList(yearList)
   },[])
+  function getYearList () {
+    const currentTimeStamp = new Date();
+    // const currentTimeStamp = new Date(2026, 8, 6); 
+    const currentYear = currentTimeStamp.getFullYear()
+    const currentMonth = currentTimeStamp.getMonth()
+    const currentDate = currentTimeStamp.getDate()
+    let year = 2021;
+    const yearList = [];
+    while (year <= currentYear) {
+      if(year < currentYear){
+        yearList.push(year);
+        year++;
+      }
+      else{
+        if(currentMonth >= 8){
+          const firstMonday = getFirstMondayOfMonth(year, 8)
+          if(currentMonth == 8){
+            if(currentDate >= firstMonday){
+              yearList.push(year);
+              year++;
+            }
+            else{
+              year++
+            }
+          }
+          else{
+            yearList.push(year);
+            year++;
+          }
+        }
+        else{
+          year++
+        }
+
+      }
+    }
+    return yearList
+  }
   // Rolling Averages API
   useEffect(() => {
     setChartDataLoading(true)
@@ -435,6 +456,8 @@ const School = () => {
                 filteredYears = filteredYears.length == 0 ? [currentYear] : filteredYears
                 console.log(`filteredYears`, filteredYears);
                 setChartYearList(sortedUniqueYears);
+                const yearList = getYearList()
+                console.log(`Api`, yearList)
                 // setReChartYearList(sortedUniqueYears);
       
                 // console.log('bilal--->',"Year 4 - SP Autumn Term Week 14 - Christmas Practice 01"?.match(/WEEK (\d+)$/i)[1])
@@ -453,7 +476,7 @@ const School = () => {
                   }
                 })
                 setTableHeadersAll(filterData)
-                applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,filteredYears[filteredYears.length - 1], quizdata)
+                applyFilter(uniqueTeacherFilters[0], uniqueYearsFilters[0], filterData, quizes,yearList[yearList.length - 1], quizdata)
                 if (quizes != null) { setSchoolNama(Object.values(quizes)[0]?.school_name_small) }
                 // setDataLoadin(false)
                 return

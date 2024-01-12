@@ -305,31 +305,48 @@ const Parent = () => {
 
   // }, [])
   useEffect(() => {
-    // Get the current year
-    const currentYear = new Date().getFullYear();
-
-    // Set the start year
+    const yearList = getYearList()
+    setDataSelectedYear(yearList[yearList.length-1])
+    setDataYearList(yearList);
+  },[])
+  function getYearList () {
+    const currentTimeStamp = new Date();
+    // const currentTimeStamp = new Date(2026, 8, 6); 
+    const currentYear = currentTimeStamp.getFullYear()
+    const currentMonth = currentTimeStamp.getMonth()
+    const currentDate = currentTimeStamp.getDate()
     let year = 2021;
-
-    // Create an array to store the years
     const yearList = [];
-
     while (year <= currentYear) {
-      yearList.push(year);
-
-      // Increment the year by 1
-      year++;
-
-      // Check if it's September 1st of the next year
-      if (year <= currentYear && new Date().getMonth() >= 8) {
+      if(year < currentYear){
         yearList.push(year);
         year++;
       }
+      else{
+        if(currentMonth >= 8){
+          const firstMonday = getFirstMondayOfMonth(year, 8)
+          if(currentMonth == 8){
+            if(currentDate >= firstMonday){
+              yearList.push(year);
+              year++;
+            }
+            else{
+              year++
+            }
+          }
+          else{
+            yearList.push(year);
+            year++;
+          }
+        }
+        else{
+          year++
+        }
+
+      }
     }
-    setDataSelectedYear(yearList[yearList.length-1])
-    // years = years.map(item => item-1)
-    setDataYearList(yearList);
-  },[])
+    return yearList
+  }
 
   useEffect(() => {
     try {
